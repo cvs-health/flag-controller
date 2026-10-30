@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
+// SPDX-License-Identifier: Apache-2.0
+
+import { describe, expect, it } from 'vitest';
+
+import build from 'test/app.js';
+import { ColumnSortingDirection } from '../../../types/common.js';
+
+describe('get/teams', () => {
+  it('returns the teams', async () => {
+    const app = build();
+    const response = await app.inject({
+      method: 'GET',
+      url: '/teams?page=1&rows=10',
+      headers: {
+        authorization: 'Bearer 1',
+      },
+    });
+
+    await app.close();
+
+    expect(app.services.teamsService.listTeams).toHaveBeenCalledExactlyOnceWith({
+      pagination: {
+        page: 1,
+        rows: 10,
+      },
+      with: {
+        applications: true,
+      },
+      sort: {
+        direction: ColumnSortingDirection.ASC,
+        field: 'name',
+      },
+    });
+    expect(response.statusCode).toEqual(200);
+  });
+});

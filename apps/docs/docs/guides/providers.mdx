@@ -1,0 +1,75 @@
+---
+title: Providers
+sidebar_position: 1
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+Flag Controller's feature flag evaluation is powered by [flagd](https://flagd.dev/), an OpenFeature-compliant evaluation engine. To evaluate flags in your application, choose the [OpenFeature Provider](https://openfeature.dev/docs/reference/concepts/provider) that matches your programming language or framework.
+
+## Finding a Provider
+
+Browse the [OpenFeature ecosystem](https://openfeature.dev/ecosystem) to find the Provider for your language or framework. OpenFeature Providers are available for many platforms including JavaScript/TypeScript, Java, Go, Python, .NET, and more.
+
+## Configuring Your Provider
+
+When configuring your chosen Provider, you will need two things:
+
+1. **Base URL or host**: The URL of your Flag Controller flagd instance
+2. **Flag Set ID**: A value that scopes flag evaluation to your application and environment
+
+### Flag Set ID
+
+The Flag Set ID follows the convention **`applicationName-environment`**, where:
+
+- `applicationName` is your application's name
+- `environment` is either `production` or `development`
+
+**Example**: An application named `my-app` targeting `production` uses the Flag Set ID `my-app-production`.
+
+When using the [OFREP](https://openfeature.dev/specification/appendix-c) endpoint, pass the Flag Set ID as an HTTP header. When using the flagd gRPC protocol, pass it as metadata.
+
+<Tabs
+  defaultValue="ofrep"
+  values={[
+    { label: "OFREP", value: "ofrep" },
+    { label: "flagd", value: "flagd" },
+  ]}
+>
+  <TabItem value="ofrep">
+
+  ```typescript
+  import { OFREPProvider } from '@openfeature/ofrep-provider';
+  import { OpenFeature } from '@openfeature/server-sdk';
+
+  await OpenFeature.setProviderAndWait(
+    new OFREPProvider({
+      baseUrl: 'http://your-flagd-instance:8016',
+      headers: [['flagSetId', 'my-app-production']],
+    })
+  );
+  ```
+
+  </TabItem>
+  <TabItem value="flagd">
+
+  ```typescript
+  import { FlagdProvider } from '@openfeature/flagd-provider';
+  import { OpenFeature } from '@openfeature/server-sdk';
+
+  await OpenFeature.setProviderAndWait(
+    new FlagdProvider({
+      host: 'your-flagd-instance',
+      port: 8013,
+      metadata: {
+        flagSetId: 'my-app-production',
+      },
+    })
+  );
+  ```
+
+  </TabItem>
+</Tabs>
+
+For more information on OpenFeature Providers and their configuration options, see the [OpenFeature documentation](https://openfeature.dev/docs/reference/concepts/provider).

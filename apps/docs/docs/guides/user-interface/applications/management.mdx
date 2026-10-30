@@ -1,0 +1,84 @@
+---
+title: Management
+sidebar_position: 2
+---
+
+An application is the container that owns your feature flags and segments. Every feature flag and segment belongs to exactly one application, and every application is owned by a single team.
+
+While on the 'Applications' page and the application details page, you can:
+- Create a new application
+- View the team that owns the application
+- Create feature flags and segments for the application
+- Browse the application's feature flags and segments
+- View an activity log
+- Remove the application
+
+:::warning
+To perform any action on an application including creating flags and segments or removing the application, you must be associated with the application. Association comes from being a [member of the team](../teams/management#adding-team-members) that owns the application.
+:::
+
+## Creation
+
+Use the 'Create application' button on the 'Applications' page to open the creation modal. It asks for two things:
+
+- **Application name** - the name is permanent and cannot be changed after the application is created.
+- **Team** - the team that will own the application. The list only contains teams you belong to.
+
+:::info
+You must [create or join a team](../teams/management#creating-a-team) before you can create an application. If you have no teams, the team selection will be empty and you will not be able to submit the form.
+:::
+
+Once the application is created, you are taken straight to its details page so you can start adding feature flags and segments.
+
+## Application details
+
+The application details include:
+
+- The application name
+- The team which owns the application, along with a link to the [team details](../teams/discovery#team-details)
+
+If the application is not associated with you, a notification is shown at the top of the page and the creation actions are hidden.
+
+## Creating flags and segments
+
+The 'Create' menu on the application details page lets you add a feature flag or a segment that is scoped to this application. Choosing either option opens the same modal used elsewhere in the UI with the application preselected for you. After creation you are taken directly to the new feature flag or segment.
+
+The 'Flags', 'Segments', and 'Log' tabs sit below the details.
+
+## Flags
+
+The 'Flags' tab lists the active feature flags owned by the application. Each of the feature flags in the list includes:
+
+- The feature flag key which directs you to the feature flag details
+- The date in which the flag was created
+- The date in which the flag was last modified
+- The [type](../../../glossary#feature-flag-type) of flag
+- The enabled or disabled state of the flag across the available [environments](../../../glossary#environment)
+
+You can search the list by flag name and sort by flag, created date, last modified date, or type.
+
+:::info
+Archived feature flags are not listed here.
+:::
+
+## Segments
+
+The 'Segments' tab lists the segments owned by the application. Each of the segments in the list includes:
+
+- The segment key which directs you to the segment details
+- The date in which the segment was last modified
+- The number of feature flags currently targeting the segment
+
+You can search the list by segment name and sort by segment or last modified date.
+
+## Log
+
+Every action taken against anything the application owns is captured as a log entry, so the application log is a single view of all of the flag, rule, variation, and segment activity for that application. For more on what the log includes, reference the [logs guide](../logs).
+
+## Removal
+
+Removing an application is permanent and is done from the action menu on the 'Applications' page. A team cannot be removed while it still has applications associated with it, so removing a team's applications is a prerequisite to [removing the team](../teams/management#removing-a-team).
+
+:::danger
+Removing an application also removes every feature flag and segment connected to that application. This cannot be undone. If you only want to stop a feature flag from being evaluated, [archive the flag](../feature-flags/management#archival) instead.
+:::

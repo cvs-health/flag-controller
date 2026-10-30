@@ -1,0 +1,31 @@
+---
+title: Segments
+sidebar_position: 1
+---
+
+## What is a Segment?
+
+A **Segment** is a re-usable rule that defines a specific subset of your audience. It allows you to group users based on their attributes and share that definition across multiple feature flags.
+
+Instead of recreating the same targeting rules for every feature flag, you can create a Segment once and reference it whenever needed.
+
+In technical terms, a Segment is a collection of conditions that evaluate to true or false for a given context. (See [Glossary](../glossary#segment))
+
+## Benefits
+
+- **Reusability**: Define a rule once and use it in multiple feature flags.
+- **Consistency**: Ensure that audience definitions (e.g., "Beta Users") are identical across all features.
+- **Efficiency**: Apply complex targeting rules quickly without manual repetition.
+- **Maintainability**: Update the Segment definition in one place, and the change automatically applies to all feature flags using it.
+
+## Example
+
+Suppose you want to target all internal employees for an internal beta feature. You can create a Segment named **Internal Employees**.
+
+**Rule Definition:**
+- **Context**: `user`
+- **Attribute**: `email`
+- **Operator**: `ends with`
+- **Value**: `@yourcompany.com`
+
+Once this Segment is created, you can simply add the **Internal Employees** segment to any feature flag rule. This avoids the need to manually check the email domain for every single flag targeting this group.

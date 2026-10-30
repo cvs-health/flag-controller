@@ -1,0 +1,224 @@
+---
+title: FAQ
+sidebar_position: 5
+---
+
+import DocCardList from "@theme/DocCardList";
+
+export const collapseStyle = {
+
+border: "1px solid var(--ifm-color-emphasis-300)",
+
+background: "1px solid var(--previews-section-background)",
+
+};
+
+# FAQ
+
+## General
+
+<details style={collapseStyle}>
+  
+  <summary>Can I use feature flags from another application that I don't own?</summary>
+
+  Yes! Flag Controller supports cross-application flag consumption. When configuring your Provider, you use the `flagSetId` to scope flag evaluation to a specific application and environment. To evaluate flags from another team's application, set the `flagSetId` to that application's identifier.
+
+  **Using flags from a single external application:**
+  ```typescript
+  // Configure your provider with the other team's flag set ID
+  // flagSetId format: application-name-environment
+  // flagSetId: 'another-teams-application-production'
+  ```
+
+  **Using flags from multiple applications:**
+  If you need to consume flags from multiple applications in the same codebase, you can configure multiple providers using [OpenFeature domains](https://openfeature.dev/docs/reference/concepts/provider/#domain-scoped-providers):
+
+  ```typescript
+  import { OpenFeature } from '@openfeature/server-sdk';
+
+  // Set up providers for different applications using domains
+  OpenFeature.setProvider("team-a", /* provider configured with flagSetId: 'team-a-application-production' */);
+  OpenFeature.setProvider("team-b", /* provider configured with flagSetId: 'team-b-application-production' */);
+
+  // Get clients for each domain
+  const teamAClient = OpenFeature.getClient("team-a");
+  const teamBClient = OpenFeature.getClient("team-b");
+
+  // Evaluate flags from different applications
+  const featureFromTeamA = teamAClient.getBooleanValue("feature-a", false);
+  const featureFromTeamB = teamBClient.getBooleanValue("feature-b", false);
+  ```
+
+  See the [Providers](/docs/guides/providers) page for details on configuring your provider with the correct Flag Set ID. Learn more about multi-provider setup in the [OpenFeature domains](https://openfeature.dev/docs/reference/concepts/provider/#domain-scoped-providers) documentation.
+
+</details>
+
+<details style={collapseStyle}>
+  <summary>Which browsers does Flag Controller support?</summary>
+
+  The Flag Controller UI and documentation are tested against and supported only in Google Chrome. We do not officially support other browsers at this time.
+</details>
+
+
+## Targeting
+
+<details style={collapseStyle}>
+  <summary>
+  Does OpenFeature support contexts or any form of segmentation targeting?
+  </summary>
+  OpenFeature + Flag Controller does support contexts and segmentation and we do support targeting.
+  You can provide the input data using the evaluation context. OpenFeature has a
+  [great breakdown](https://openfeature.dev/docs/reference/technologies/client/web#targeting-and-context)
+  of how this works.
+</details>
+
+## Framework Integration
+
+<details style={collapseStyle}>
+  <summary>
+  I'm looking to use feature flags in a Next.js app. Should I use the Node SDK on the server and the React SDK on the client?
+  </summary>
+  Yes. The React SDK is designed for client-side usage and relies on React context, which isn't available on the server side. For Next.js applications that use both server and client side components, you have two main approaches:
+
+  **Option 1: Use both SDKs**
+  - Use the Node SDK for server-side components
+  - Use the React SDK for client-side components
+
+  Be mindful of the context used on the server versus the client if you decide to use both SDKs.
+
+  **Option 2: Server-side evaluation with props**
+  - Evaluate all feature flags on the server side using the Node SDK
+  - Pass the evaluated flag values down to client components as props
+  - This approach can simplify your setup if you don't want to manage both SDKs
+
+  Both approaches are valid, and the choice depends on your specific use case and architecture preferences.
+
+  You can find the OpenFeature SDKs here:
+  - [Node SDK](https://openfeature.dev/docs/reference/technologies/server/javascript)
+  - [React SDK](https://openfeature.dev/docs/reference/technologies/client/web/react)
+
+  You can find information on configuring your Provider here:
+  - [Providers](/docs/guides/providers)
+</details>
+
+<details style={collapseStyle}>
+  <summary>
+  I'm evaluating a feature flag server side in Next.js, but even after the value changes my page is not reflecting the changes.
+  </summary>
+  You might be statically rendering your page which causes the evaluated value to have existed at build time instead of evaluating at run time.
+  
+  To ensure your feature flag's evaluated value is accurate on page refresh when using static pages in Next.js, you should consider using a dynamic route instead or leaning on the client-side OpenFeature evaluation hooks. Because static pages are generated at build and will not re-evaluate flags per user or per request, you'll want to opt for a dynamic route when evaluating flags server side.
+
+  **Why static pages don't work well with feature flags:**
+  - Static pages are pre-rendered during the build process, meaning flag values are "baked in" at build time
+  - The same static HTML is served to all users, so personalized targeting won't work
+  - Flag changes won't be reflected until you rebuild and redeploy your application
+  - User-specific context (like user ID, location, or custom attributes) cannot influence flag evaluation
+
+  **Recommended approaches:**
+  - Use the App Router's dynamic rendering to evaluate flags per request
+  - Implement client-side evaluation with React hooks for real-time flag updates
+  - Consider using [Incremental Static Regeneration (ISR)](https://nextjs.org/docs/app/guides/incremental-static-regeneration) if you need some static benefits but want periodic updates
+  - For pages that must be static, evaluate flags client-side after hydration
+
+  If you'd like to learn more about how static and dynamic rendering differ and how it impacts your ability to evaluate flags properly, reference the [Next.js static and dynamic rendering guide](https://nextjs.org/learn/dashboard-app/static-and-dynamic-rendering#what-is-static-rendering).
+</details>
+
+## Feature Flag Types
+
+<details style={collapseStyle}>
+
+<summary>What kinds of feature flag values does Flag Controller support?</summary>
+
+Flag Controller supports boolean, number, text, and object type feature flags.
+
+More on [feature flag types](/docs/glossary#feature-flag-type).
+
+</details>
+
+## Environments
+
+<details style={collapseStyle}>
+  <summary>
+  Does Flag Controller support multiple environments?
+  </summary>
+  Flag Controller only supports two environments: <strong>production</strong> and <strong>development</strong>. You should use <strong>development</strong> for all non-prod environments.
+
+  This two-environment design is intentional for a few reasons:
+  - The underlying infrastructure is split into just two real environments: nonprod and prod. An infrastructure problem in nonprod can impact all nonprod sub-environments.
+  - Many organizations have semi-official nonprod subenvironments (like dev, QA, UAT, SIT, PT, Staging, and even SIT1, SIT2, QA1, QA2, etc.), which creates complexity and makes it difficult for teams to keep all environments in sync and stable.
+  - By not explicitly offering multiple subenvironments, Flag Controller encourages teams to consider what environments they truly need and to simplify where possible.
+
+  This approach helps clarify the dividing lines for stability and connectivity, and reduces the overhead of managing many subenvironments.
+
+ Learn more [here](/docs/guides/handling-multiple-environments).
+</details>
+
+## Governance
+
+<details style={collapseStyle}>
+  <summary>
+  What governance controls exist for feature flag rule creation and editing?
+  </summary>
+  Flag Controller provides role-based access controls for managing feature flag rules. Users with appropriate permissions can create and edit targeting rules, while read-only users can view configurations but not make changes. All rule modifications are tracked in audit logs for compliance and oversight.
+
+  For production environments, additional approval workflows may be required depending on your organization's governance policies. The Flag Controller UI does not currently have mechanisms in place to aid the governance of creation and editing. However, we are looking to provide such mechanisms in the future.
+
+  Learn more about creating and managing rules [here](/docs/guides/user-interface/feature-flags/rules).
+</details>
+
+<details style={collapseStyle}>
+  <summary>
+  Are there governance controls for enabling/disabling feature flags in production?
+  </summary>
+  Currently, Flag Controller relies on team membership for governance of feature flag operations. Only members of the team that owns a feature flag have the ability to modify it. We are actively developing more granular governance controls to provide teams with greater control over the lifecycle of their feature flags.
+  
+  Production flag state changes are subject to audit logging and currently do not require an approval process within the UI.
+
+  Learn more about feature flag management [here](/docs/guides/user-interface/feature-flags/management).
+</details>
+
+## Rollouts and Bucketing
+
+<details style={collapseStyle}>
+  <summary>
+  How reliable are weighted rollouts and how does bucketing work across sessions?
+  </summary>
+  Flag Controller uses flagd's fractional operation for weighted rollouts, which provides consistent and reliable bucketing. The bucketing algorithm ensures that users are consistently assigned to the same bucket across sessions based on their context attributes (typically user ID).
+
+  The fractional operation uses a deterministic hash function that takes the flag key and context attributes to assign users to buckets. This means a user will always receive the same flag value unless the weights or their context change.
+
+  Learn more about the bucketing implementation in the [flagd fractional operation documentation](https://flagd.dev/reference/custom-operations/fractional-operation/) and [specification](https://flagd.dev/reference/specifications/custom-operations/fractional-operation-spec/?h=bucketing).
+</details>
+
+## Privacy and Security
+
+<details style={collapseStyle}>
+  <summary>
+  Does Flag Controller use cookies for feature flag evaluation?
+  </summary>
+  No, Flag Controller does not use cookies for feature flag evaluation. All targeting and bucketing decisions are made based on the evaluation context provided by your application, without relying on browser cookies or client-side storage.
+</details>
+
+<details style={collapseStyle}>
+  <summary>
+  Can I use PII (Personally Identifiable Information) in feature flag evaluation context?
+  </summary>
+  Using PII in feature flag evaluation context is strongly discouraged for privacy and security reasons. While technically possible, you should avoid including sensitive personal information like email addresses, phone numbers, or other identifying data in your evaluation context.
+
+  Instead, use non-sensitive identifiers or hashed values. For more guidance on proper context usage and PII considerations, see our documentation on [feature flag rules](/docs/guides/user-interface/feature-flags/rules) and [segment management](/docs/guides/user-interface/segments/management).
+</details>
+
+
+## Configuration Management
+
+<details style={collapseStyle}>
+  <summary>
+  Can I change feature flag, segment, or rule keys after creation?
+  </summary>
+  No, feature flag keys, segment keys, and rule keys are immutable and cannot be changed once created. This ensures consistency and prevents breaking changes in your application code that references these keys.
+
+  If you need to change a key, you must create a new flag/segment/rule with the desired key and update your application code to reference the new key, then remove the old one once the migration is complete.
+
+  Learn more about [feature flag management](/docs/guides/user-interface/feature-flags/management) and [segment management](/docs/guides/user-interface/segments/management).
+</details>

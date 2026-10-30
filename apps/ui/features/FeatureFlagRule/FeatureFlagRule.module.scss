@@ -1,0 +1,41 @@
+/* SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@carbon/colors';
+@include type.type-classes();
+
+.root {
+  border: 1px solid colors.$gray-30;
+}
+
+.rollout {
+  padding-bottom: layout.$spacing-07;
+}
+
+.label {
+  margin-bottom: 0;
+}
+
+.orderPosition {
+  position: absolute;
+  bottom: layout.$spacing-04;
+}
+
+.conditions {
+  margin-bottom: layout.$spacing-05;
+}
+
+.above {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: layout.$spacing-08;
+  width: 100%;
+}
+
+.cancelButton {
+  flex-shrink: 0;
+}

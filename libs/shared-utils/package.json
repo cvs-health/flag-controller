@@ -1,0 +1,27 @@
+{
+  "name": "shared-utils",
+  "version": "1.0.0",
+  "description": "Shared utils for the project",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:ci": "vitest run --coverage --silent"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^5.0.0",
+    "typescript": "^7.0.0",
+    "vitest": "^5.0.0"
+  },
+  "dependencies": {
+    "date-fns-tz": "^3.2.0",
+    "shared-constants": "workspace:*",
+    "shared-types": "workspace:*"
+  }
+}

@@ -1,0 +1,40 @@
+/* SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@use '@carbon/colors';
+@use '@carbon/layout';
+
+.root {
+  /* Allows the editor to shrink within horizontal layouts rather than overflowing them */
+  min-width: 0;
+  width: 100%;
+}
+
+.field {
+  position: relative;
+  width: 100%;
+}
+
+.editor {
+  border: 1px solid colors.$gray-30;
+  width: 100%;
+}
+
+.invalid {
+  border: 2px solid colors.$red-60;
+}
+
+.invalidIcon {
+  bottom: layout.$spacing-03;
+  fill: colors.$red-60;
+  /* Keeps the icon from swallowing clicks meant for the editor beneath it */
+  pointer-events: none;
+  position: absolute;
+  right: layout.$spacing-03;
+}
+
+.invalidText {
+  color: colors.$red-60;
+  margin-top: layout.$spacing-02;
+}

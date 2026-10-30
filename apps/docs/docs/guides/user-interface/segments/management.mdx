@@ -1,0 +1,63 @@
+---
+title: Management
+---
+
+:::warning
+To perform any action on an existing segment you must be associated with the application that the segment is for.
+:::
+
+## Segment details
+
+The segment details include:
+
+- Segment key
+- The application that is associated with the segment
+- The team which owns the application associated with the segment
+
+The 'Rules' and 'Log' tabs sit below the details.
+
+## Rule
+
+A segment has only one rule which only specifies conditional logic since it does not need to serve any variation. The variation to serve is handled by the feature flag's rule that is using the segment.
+
+Use the 'Development' or 'Production' buttons to switch between environments.
+
+A segment's conditions are unique per environment, so changes made in one environment do not carry over to the other.
+
+### Context
+
+The context of a rule aligns with the context set when setting the provider in your application using `OpenFeature.setProvider` or when updating the context via `OpenFeature.setContext`. You can either select a predefined context or enter your own.
+
+:::danger
+Personally Identifiable Information (PII) should not be used in Context. Using PII can pose a security risk, as it could potentially be exposed or misused during feature flag evaluation. This is because the evaluation context, including the PII, might be logged or transmitted for debugging and analysis purposes.
+:::
+
+### Attribute
+
+The attribute is any property which exists within the context. For example, you may have `user.country` in your context where `country` is the attribute. You can either select a predefined attribute or enter your own.
+
+:::info
+If you need to access deeply nested attributes, you can use dot notation for your attribute.
+
+**Example:**
+You need to access `user.country.address.line1` from your context. In order to access `line1` as your evaluation, set your attribute to `country.address.line1`.
+:::
+
+### Operator
+
+The operator is the logical comparator used to evaluae the segment. It takes your context attribute and compares it against the values. [This](../../../glossary#operator) is a list of the available operators.
+
+### Values
+
+Values align with the value of your context's attribute.
+
+:::info
+If you need to evaluate against a list of values, set your values as a comma delimited string.
+
+**Example:**
+If you need to evaluate against `['US', 'UK']`, set your values to `US, UK`.
+:::
+
+## Log
+
+Every action starting from the creation of the segment is logged as a log entry. For more on what the log includes, reference the [logs guide](../logs).

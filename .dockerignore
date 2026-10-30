@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+**/node_modules
+.pnp
+.pnp.js
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.example
+
+# Exclude internal registry config so OSS Docker builds use public defaults.
+# TODO: Remove the .npmrc file once the internal registry is no longer needed.
+.npmrc
+
+# Testing
+coverage
+**/coverage
+
+# Build outputs and caches
+.turbo
+**/.turbo
+**/.next
+**/dist
+
+# Misc
+.DS_Store
+helm-charts/
+.github/
+.changeset
+README.md
+docker-compose.yml
+renovate.json

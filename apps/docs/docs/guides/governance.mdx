@@ -1,0 +1,16 @@
+---
+title: Governance
+sidebar_position: 1
+---
+
+# Governance
+
+Flag Controller provides role-based access controls for managing feature flags.
+
+Users are only able to create and edit feature flags, rules, and segments associated to the teams they are members of. Users who are not members of the associated team can still view all of the details and rules of any feature flag, but they cannot make any changes to them.
+
+All changes are tracked in [audit logs](../guides/user-interface/logs) for compliance and oversight.
+
+:::info
+If you need to restrict Feature Flag management to only certain team members (like a release manager), you can easily create a team whose only members are those entrusted to managing your application's feature flags.
+:::

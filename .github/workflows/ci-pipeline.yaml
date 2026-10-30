@@ -1,0 +1,78 @@
+name: CI pipeline
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    types: [opened, synchronize]
+
+env:
+  NODE_VERSION: 24.13.0
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Enable pnpm via Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: 🛠 Install dependencies
+        shell: bash
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch main branch
+        if: github.ref_name != 'main'
+        run: git fetch origin main:main
+
+      - name: 👷 Build
+        run: pnpm turbo build --affected
+
+  format-and-fix:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/biome.yml
+    secrets: inherit
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Enable pnpm via Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: 🛠 Install dependencies
+        shell: bash
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch main branch
+        if: github.ref_name != 'main'
+        run: git fetch origin main:main
+
+      - name: 🛠 Test Affected Projects (with coverage)
+        run: pnpm turbo run test:ci --affected

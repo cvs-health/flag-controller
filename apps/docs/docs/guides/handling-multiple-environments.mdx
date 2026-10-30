@@ -1,0 +1,59 @@
+---
+title: Handling Multiple Environments
+sidebar_position: 10
+---
+
+# Handling Multiple Environments
+
+Flag Controller only supports two environments: **production** and **development**. You should use **development** for all non-prod environments.
+
+## How to Manage Multiple Lower Environments
+
+If your team uses multiple lower environments (such as QA, SIT, UAT, etc.), you can still manage them within the platform by using **namespacing** and **targeted rules**. Here are some recommended approaches:
+
+### 1. Namespace Feature Flag Keys
+
+Include the environment name in your feature flag key to distinguish flags for different environments.
+
+**Example:**
+- `qa-users`
+- `stage-users`
+- `uat-users`
+
+### 2. Use Context-Aware Rules
+
+Define rules that target a specific property in your evaluation context, such as an environment identifier.
+
+**Example Rule:**
+- **Context:** `application`
+- **Attribute:** `id`
+- **Operator:** `equals`
+- **Value:** `qa`
+
+### 3. Create Segments for Sub-Environments
+
+You can create Segments that represent each of your sub-environments and use them in your flag rules.
+
+**Example Segment:**
+- **Segment Key:** `qa-users`
+
+Then, in your feature flag rule, target the `qa-users` segment.
+
+### 4. Rule Targeting a Sub-Environment
+
+Suppose you want a feature flag to be enabled only in the `QA` environment for certain users:
+
+- **Segment Rule Key:** `qa-users-env`
+- **Operator:** `is in`
+- **Segment:** `qa-users`
+
+## Key Points
+
+- All non-production environments should use the **development** environment in the platform.
+- Use flag key namespacing, context-aware rules, and segments to manage multiple lower environments.
+- Define and pass an environment property (e.g., `env`) in your evaluation context from your application.
+- Rules for sub-environments should be defined in the **development** environment, not production.
+
+---
+
+For more on segments and rules, see the [Glossary](../glossary#segment) and [Feature Flags Management](../guides/user-interface/feature-flags/management).

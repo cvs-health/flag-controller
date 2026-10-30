@@ -1,0 +1,8 @@
+// SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
+// SPDX-License-Identifier: Apache-2.0
+
+'use client';
+
+export default function Page() {
+  return <main>Flag Controller UI goes here</main>;
+}

@@ -1,0 +1,47 @@
+---
+title: Troubleshooting
+---
+
+# Troubleshooting
+
+This section covers common issues and solutions when setting up the SDK, evaluating feature flags, and managing flags in the UI.
+
+## SDK & Provider Setup
+
+- **Provider not ready:**
+  - Ensure you wait for the provider to be fully initialized before evaluating flags. For example, with OpenFeature, use `await OpenFeature.setProviderAndWait(...)` before calling any evaluation methods. Some OpenFeature SDKs may not require this so be sure to reference the particular SDK's documentation.
+  - If you attempt to evaluate a flag before the provider is ready, you may get default or unexpected results.
+
+## Feature Flag Evaluation Issues
+
+- **Flag not evaluating as expected:**
+  - **Rule Configuration:** Double-check that your rules are set up correctly. Rule order matters: rules are evaluated top-to-bottom, and the first matching rule is used.
+  - **Flag Enabled:** Confirm that the flag is enabled for the environment you are testing. Disabled or archived rules are not evaluated.
+  - **Context Values:** Ensure the context and attribute values you are passing to the evaluation match the expected types and values in your rules and segments. Make sure your context is being set in your SDK as needed.
+
+- **Testing your flag in the UI:**
+  - Use the Evaluations tab in the feature flag details page to test your flag with different contexts. This tool simulates how your application would evaluate the flag and shows the reason for the result, helping you debug rule logic and targeting.
+
+## Common Scenarios
+
+- **Cannot create feature flag:**
+  - You must be associated with an application. Contact your team admin if you do not see any applications assigned to you.
+
+- **Flag not updating after changes:**
+  - If you update rules or variations, ensure you save your changes.
+  - If you want to take advantage of real-time flag changes in your application, reference the [SDK documentation](https://openfeature.dev/docs/reference/technologies/).
+
+- **Archived flags:**
+  - Archived flags cannot be edited or evaluated. Restore (unarchive) the flag if you need to make changes.
+
+- **Cannot add a Segment to my flag rules:**
+  - Only Segments that have their rules defined can be added to a flag rule.
+
+## Additional Tips
+
+- **Check console and/or logs:**
+  - Review your application's form of a console and logs for errors or failed requests when integrating the SDK or evaluating flags.
+- **Documentation:**
+  - Refer to the [OpenFeature documentation](https://openfeature.dev/docs/) and our [getting started guide](/docs/getting-started) for more details.
+
+If you continue to experience issues, please open an issue in the project repository.

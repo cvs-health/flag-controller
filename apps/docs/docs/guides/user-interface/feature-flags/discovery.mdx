@@ -1,0 +1,26 @@
+---
+title: Discovery
+sidebar_position: 1
+---
+
+The default route of the feature flag UI is a list of feature flags. The list displays all feature flags which are related to you by default.
+
+Each of the feature flags in the list includes:
+
+- The feature flag key which directs you to the feature flag details
+- The application that owns the feature flag which directs you to the application details
+- The date in which the flag was created
+- The date in which the flag was last modified
+- The [type](/docs/glossary#feature-flag-type) of flag
+- The enabled or disabled state of the flag across the available [environments](/docs/glossary#environment)
+
+## Finding a feature flag
+
+While the flags shown to you by default have a relation to you, you can use the search field or available filters to search for any feature flags which are or are not related to you, even if they are archived or completely toggled off.
+
+The search field matches on flag name and/or application. The available filters are:
+
+- **Creation date** - a start and end date range
+- **Last modified date** - a start and end date range
+- **Type** - `Boolean`, `Number`, `Text`, and/or `Object`
+- **Enabled in** - `Development` and/or `Production`

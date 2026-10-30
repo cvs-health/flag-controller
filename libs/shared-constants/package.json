@@ -1,0 +1,21 @@
+{
+  "name": "shared-constants",
+  "version": "1.0.0",
+  "description": "Shared constants for the project",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.0"
+  }
+}

@@ -1,0 +1,33 @@
+---
+title: Authentication
+sidebar_position: 3
+---
+
+# Authentication
+
+Flag Controller ships with **GitHub OAuth** as its configured sign-in method, built on [Better Auth](https://www.better-auth.com/).
+
+GitHub is the provider that comes set up out of the box, not a restriction. Because you host Flag Controller yourself, you can use any of the [providers Better Auth supports](https://www.better-auth.com/docs/concepts/oauth) instead of, or in addition to, GitHub. That means configuring the provider on the API's Better Auth instance and updating the login screen to sign in with it.
+
+## How it works
+
+The steps below describe the default GitHub flow.
+
+The API acts as the auth server. It exposes Better Auth's handler, which is configured with GitHub as its social provider. The UI uses the Better Auth client to start the sign-in flow and to read the current session.
+
+1. From the login screen, a user selects **Login**.
+2. The browser is redirected to the API, which redirects to GitHub's OAuth authorization page.
+3. After the user approves the OAuth App, GitHub redirects back to the API.
+4. Better Auth exchanges the authorization code for an access token, creates or reuses the user record, and issues a session cookie.
+5. Every subsequent request to a protected API route is validated against that session. Requests without a valid session are rejected.
+6. Signing out clears the session and returns the user to the login screen.
+
+Sessions are cookie based and stored in the database, so they can be revoked server side.
+
+:::info
+New users are automatically added to a default organization so they can start using teams, applications, and feature flags right away. See [Governance](../guides/governance) for how team membership controls what a user is able to change.
+:::
+
+:::note
+Setting up the GitHub OAuth App and its credentials is a deployment concern, so it is documented alongside the code rather than here. If you are running Flag Controller yourself, see the **Authentication** section of the API README (`apps/api/README.md`) for the required environment variables, the callback URL, and links to GitHub's OAuth documentation.
+:::

@@ -1,0 +1,159 @@
+---
+title: Glossary
+sidebar_position: 4
+---
+
+## Feature Flags
+
+### Feature flag
+
+A feature flag (also known as feature toggle or feature switch) is a software development technique that turns certain functionality on and off during runtime, without deploying new code.
+
+Each feature flag is:
+
+- uniquely named per application
+- owned by only one application
+
+### Feature flag type
+
+The type of the feature flag determines what kind of value is evaluated.
+
+Feature flags can be one of the following types:
+
+- Boolean
+- Number
+- Text
+- Object
+
+### Environment
+
+An environment refers to a specific deployment environment in which the feature flag is being used.
+
+The platform currently supports two environments: development and production.
+
+### Feature flag key
+
+A feature flag key is the identifier for the feature flag. It is a lowercase, kebab-case name and is unique per application.
+
+The key is used when evaluating flags in your application.
+
+## Logs
+
+### Log entry
+
+A log entry occurs when an action occurs in the user interface related to a feature flag or segment.
+
+The entry includes:
+- Action type
+    - Archive
+    - Create
+    - Delete
+    - Disable
+    - Edit
+    - Enable
+- Subject key
+- Application name
+- Environment
+- Date
+- Actor
+
+## Rules
+
+### Attribute
+
+A context's property.
+
+### Context
+
+Contextual data used for feature flag evaluations which often include things like user-specific or session-specific data.
+
+Context can be set through the use of [OpenFeature's SDKs](https://openfeature.dev/docs/reference/technologies/) and can change during application events such as a user logging in or out. [More on the evaluation context](https://openfeature.dev/docs/reference/concepts/evaluation-context) from OpenFeature.
+
+### Custom rule
+
+A custom rule can be defined for a feature flag. Custom rules allow for chaining of conditions via the addition of 'AND' conditions and require a rollout.
+
+### Operator
+
+An operator is a logical comparison or condition used to evaluate a rule.
+
+The platform currently supports:
+
+    - contains
+    - does not contain
+    - starts with
+    - does not start with
+    - ends with
+    - does not end with
+    - greater than
+    - greater than or equal
+    - less than
+    - less than or equal
+    - equals
+    - does not equal
+    - matches minor version
+    - matches major version
+
+### Rollout
+
+A rollout is the variation to serve for the rule. Rollouts can be any defined variation for the feature flag or a weighted rollout.
+
+### Rule
+
+A rule is:
+
+- a set of conditions which may or may not define a rollout (a variation to serve) based on some context
+- uniquely named per feature flag
+- evaluated based on the order in which they are defined for the feature flag
+
+A rule is primarily composed of:
+
+- Context
+- Attribute
+- Operator
+- Values
+
+### Rule key
+
+A rule key is the indentifier for the rule. It is a lowercase, kebab-case name and is unique per feature flag rule.
+
+The key is used to identify each of the feature flag's rules. It cannot be changed once the rule has been created.
+
+### Segment rule
+
+A segment rule can be defined for a feature flag.
+
+Segment rules allow for chaining of conditions via the addition of 'AND' or 'AND CONTEXT' conditions and require a rollout.
+
+Segment rules can help you save time by declaring a rule that can be shared across feature flags.
+
+Segment conditions require:
+
+- an [Operator](#operator)
+- a [Segment](#segment)
+
+### Values
+
+The values of a rule determine what the operator should compare against based on the context's attribute.
+
+Defining a list of values (an array) is done by using a comma delimited string.
+
+### Variation
+
+A variation or variant is a semantic identifier for a value.
+
+You can think of a variation as the value served or provided to you when a feature flag is evaluated. The variation served for a feature flag is dependent on the feature flag's rules and the variation or variations they serve.
+
+### Weighted rollout
+
+Pseudorandomly resolve flag values using a defined context.
+
+Each of the feature flag's variations is given a weight, and the rule serves variations in proportion to those weights. The best case for using a weighted rollout is when you wish to serve users different variations based on some context. For example, you might want to split users evenly between `true` and `false` based on their country.
+
+## Segments
+
+### Segment
+
+A reusable, single, or group of, conditions which can be shared across feature flags.
+
+A Segment has a single rule with any number of conditions.

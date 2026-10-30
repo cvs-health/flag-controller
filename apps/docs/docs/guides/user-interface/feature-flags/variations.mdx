@@ -1,0 +1,37 @@
+---
+title: Variations
+sidebar_position: 4
+---
+
+A feature flag's variations are first created at the creation of a feature flag - the feature flag creation form allows you to define two variations with their value being tied to the type of feature flag:
+
+- A boolean type feature flag only allows for a variation's value to be true or false, allows exactly two variations
+- A number type feature flag only allows for a variation's value to be any number
+- A text type feature flag only allows for a variation's value to be text
+- A object type feature flag only allows for a variation's value to be an object
+
+Variations can be used across environments, but cannot be used across feature flags.
+
+### Create
+
+Aside from the initial variations created at the creation of a feature flag, every feature flag type, other than a boolean type, allows you to create however many variations you would like.
+
+To add a new variation, simply use the 'Add variation' button, provide a key and value for the variation, and save your changes.
+
+A variation's key must follow a lowercase, kebab-case convention (for example, `my-variation`), and its value must match the flag's type.
+
+### Update
+
+To update a variation, whether it be the key or value, provide a new key or value for the variation and save your changes.
+
+:::note
+A boolean type feature flag's variation values are fixed to `true` and `false`, so only their keys can be updated.
+:::
+
+### Remove
+
+To remove variation, simply use the 'Remove variation' button and save your changes.
+
+:::note
+The 'Remove variation' button will be disabled if you only have two variations as that is the minimum number of variations allowed.
+:::

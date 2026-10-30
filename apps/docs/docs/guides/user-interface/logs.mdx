@@ -1,0 +1,85 @@
+---
+title: Logs
+---
+
+Every action a user takes across the application is logged as a log entry. Logs can be viewed through the general logs page or on any feature flag or segment details page.
+
+Each entry is a row in a table with the following columns:
+
+- **Subject** - the kind of object that changed, such as a feature flag, rule, or segment
+- **Key** - the key of the object that changed
+- **Action** - what happened to it
+- **Application** - the application the object belongs to
+- **Environment** - the environment the change applies to, or `-` when the change is not environment specific
+- **Actor** - the email address of the person who made the change
+- **Date** - when the change was made
+- **Details** - a 'View change details' button that shows you a diff of changes
+
+## Log entries
+
+A log entry occurs whenever anyone does something against a flag or segment. For more on what kinds of actions are captured as entries, reference the [Log entry documentation](../../glossary#log-entry).
+
+### Viewing changes
+
+When viewing log entries, you can see exactly what changed by clicking the "View change details" button on any log entry. This will open a modal showing a list of modifications.
+
+
+Modifications are broken down into three categories:
+
+- **Added** (green) - New values or properties that were introduced
+- **Removed** (red) - Values or properties that were deleted
+- **Changed** (yellow) - Existing values that were modified
+
+
+The "View change details" button may be disabled in some cases:
+- For certain types of actions where tracking specific changes isn't applicable
+
+This audit trail helps you understand exactly what changed, when it changed, and who made the change - providing full transparency into how your feature flag data evolves over time.
+
+:::info
+We are actively working on being able to link you to a change's parent. For example you may see that a rule has changed, but we aren't currently able to take you to the feature flag for that rule. More on this exciting feature soon!
+:::
+
+## Search & filter
+
+### Filtering
+
+Log entries can be filtered by several criteria to help you find specific activities:
+
+#### Action Date
+- **Time range**: Filter logs by predefined time periods:
+  - Last 60 minutes
+  - Last 24 hours
+  - Last 7 days
+  - Last 14 days
+  - Last 30 days
+  - Last 60 days
+  - Custom date range (with start and end date picker)
+
+#### Action Type
+Filter by the type of action that was performed:
+- **Archived** - Items that were archived
+- **Created** - New items that were created
+- **Deleted** - Items that were deleted
+- **Disabled** - Items that were disabled
+- **Edited** - Items that were modified
+- **Enabled** - Items that were enabled
+- **Restored** - Items that were restored from archive
+
+#### Environment
+Filter logs by the environment where the action occurred:
+- **Development** - Actions in Development environment
+- **Production** - Actions in Production environment
+
+#### Subject
+Filter by the type of subject that was affected:
+- **Feature Flag** - Actions performed on Feature Flags
+- **Rule** - Actions performed on Feature Flag Rules
+- **Segment** - Actions performed on Segments
+- **Context** - Actions performed on Contexts
+- **Variation** - Actions performed on Feature Flag Variations
+
+### Search
+
+You can use the search field to search across all applications' logs. Enter keys, application names, or actor names to quickly find relevant log entries.
+

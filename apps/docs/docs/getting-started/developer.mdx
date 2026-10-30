@@ -1,0 +1,73 @@
+---
+title: Developer
+---
+
+This section covers setting up and running Flag Controller locally, plus deployment starting points.
+
+### Prerequisites
+
+To run Flag Controller locally, install:
+
+- [Node.js](https://nodejs.org/) 22 or newer
+- [pnpm](https://pnpm.io/), using the version declared in the repository's `package.json`
+- [Docker](https://www.docker.com/) if you want to run the complete platform together
+- PostgreSQL if you want to run the API outside Docker
+
+### Install dependencies
+
+From the repository root, install the workspace dependencies:
+
+```bash
+pnpm install
+```
+
+Create environment files from the provided examples and fill in the required values:
+
+```bash
+cp apps/api/.env.example apps/api/.env
+cp apps/ui/.env.example apps/ui/.env
+```
+
+The API requires a PostgreSQL `DATABASE_URL`. GitHub (the default authentication provider) sign-in also requires `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `BETTER_AUTH_SECRET`. Generate a secret with:
+
+```bash
+openssl rand -base64 32
+```
+
+### Run locally
+
+To run the full platform with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+The local services are available at:
+
+- UI: [http://localhost:3000](http://localhost:3000)
+- API: [http://localhost:8080](http://localhost:8080)
+- API documentation: [http://localhost:8080/documentation](http://localhost:8080/documentation)
+- Documentation site: [http://localhost:3001](http://localhost:3001)
+
+To run the UI and API separately, start PostgreSQL, apply the API migrations, and use the development scripts:
+
+```bash
+cd apps/api
+pnpm migrate
+pnpm dev
+```
+
+In another terminal:
+
+```bash
+cd apps/ui
+pnpm dev
+```
+
+For application-specific environment variables and setup details, refer to the `apps/api/README.md` and `apps/ui/README.md` files in the repository.
+
+### Deployment suggestions
+
+For a simple self-hosted deployment, run the provided Docker Compose stack on a host with persistent storage for PostgreSQL. Set production environment variables and OAuth callback URLs, and do not use the example database credentials.
+
+For a platform deployment, deploy the API and UI containers separately, use a managed PostgreSQL database, and configure the UI to use the public API URL. The API container listens on port `8080`; the UI container listens on port `3000`. The provided [Docker Compose file](https://github.com/cvs-health-source-code/flip-oss/blob/main/docker-compose.yml) and app Dockerfiles can be used as deployment references.

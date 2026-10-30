@@ -1,0 +1,43 @@
+name: Flagd Schema Drift
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - apps/api/**
+      - apps/ui/**
+      - libs/shared-types/**
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NODE_VERSION: 24.13.0
+
+jobs:
+  flagd-schema-drift:
+    name: Verify flagd schema sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Enable pnpm via Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: 🛠 Install dependencies
+        shell: bash
+        run: pnpm install
+
+      - name: Verify flagd schemas and typings are in sync
+        run: pnpm schema:check

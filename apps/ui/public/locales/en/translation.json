@@ -1,0 +1,12 @@
+{
+  "login": {
+    "documentationLabel": "Documentation",
+    "documentationUrl": "",
+    "supportLabel": "Support",
+    "supportUrl": ""
+  },
+  "ui": {
+    "documentationLabel": "Documentation",
+    "documentationUrl": ""
+  }
+}

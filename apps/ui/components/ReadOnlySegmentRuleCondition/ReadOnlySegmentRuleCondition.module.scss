@@ -1,0 +1,16 @@
+/* SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@use '@carbon/layout';
+@use '@carbon/type';
+@include type.type-classes();
+
+.conditional {
+  @extend .cds--type-heading-01;
+  margin-right: layout.$spacing-03;
+}
+
+.operator {
+  margin-right: layout.$spacing-02;
+}

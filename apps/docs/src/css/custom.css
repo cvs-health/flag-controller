@@ -1,0 +1,203 @@
+/* SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@font-face {
+  font-family: "Outfit";
+  src: url("/font/Outfit.ttf");
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/font/Inter.ttf");
+}
+
+@theme {
+  --color-blue-dark: #1447e6;
+  --color-blue-light: #2b7fff;
+  --color-blue: #155dfc;
+  --color-cyan-dark: #0092b8;
+  --color-cyan-gradient: linear-gradient(180deg, #00b8db 0%, #2b7fff 100%);
+  --color-cyan: #00b8db;
+  --color-emerald: #00bc7d;
+  --color-green-dark: #006045;
+  --color-green-light: #d0fae5;
+  --color-green: #009966;
+  --color-magenta-light: #f3e8ff;
+  --color-magenta: #6e11b0;
+  --color-orange-dark: #f54900;
+  --color-orange: #ff6900;
+  --color-pink-dark: #e60076;
+  --color-pink: #f6339a;
+  --color-primary-emphasized-text: #000000;
+  --color-primary-gradient: linear-gradient(90deg, #00b8db 0%, #155dfc 100%);
+  --color-primary-text: #45556c;
+  --color-secondary-text: #45556c;
+  --color-purple: #9810fa;
+  --color-purple-400: #c084fc;
+  --color-purple-800: #5b21b6;
+  --color-purple-900: #4c1d95;
+  --color-violet: #ad46ff;
+  --color-sky-blue: #eff6ff;
+  --color-white-barely: #ecfeff66;
+  --color-white-barely-used: #eff6ff4d;
+  --color-white-off: #e2e8f0;
+  --color-white-subtle: #f8fafc;
+  --color-toggle-active: #22c55e;
+  --color-toggle-inactive: #737373;
+
+  /* Gray scale */
+  --color-gray-100: #f1f5f9;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5dc;
+  --color-gray-500: #969696;
+  --color-gray-600: #6e7681;
+  --color-gray-950: #0a0a0a;
+
+  /* Blue scale */
+  --color-blue-200: #bedbff;
+  --color-blue-400: #60a5fa;
+  --color-blue-800: #1c398e;
+
+  /* Slate scale (dark theme colors) */
+  --color-slate-200: #e8ecf0;
+  --color-slate-700: #314158;
+  --color-slate-800: #1d293d;
+  --color-slate-800-alpha: rgba(29, 41, 61, 0.5);
+  --color-slate-950: #0f172a;
+
+  /* Dark theme surfaces */
+  --color-dark-bg: #080d1a;
+  --color-dark-card: #111d32;
+  --color-dark-card-border: #1e3a5f;
+
+  /* Dark theme callout (ToggleDemo) */
+  --color-dark-callout-bg: #0f1e3a;
+  --color-dark-callout-border: #3b82f6;
+  --color-dark-callout-text: #93c5fd;
+
+  /* Links */
+  --color-blue-link: #0b87ed;
+
+  /* Emerald scale (success/green) */
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-green-900: #165a38;
+
+  /* Sky scale (info/connectors) */
+  --color-sky-400: #0ea5e9;
+  --color-sky-500: #0bb4e9;
+
+  /* Code/Syntax highlighting */
+  --color-code-bg: #1e1e1e;
+  --color-code-border: #2d2d2d;
+  --color-code-tab-bg: #252526;
+  --color-syntax-keyword: #c586c0;
+  --color-syntax-text: #d4d4d4;
+  --color-syntax-type: #4ec9b0;
+  --color-syntax-string: #ce9178;
+  --color-syntax-variable: #9cdcfe;
+  --color-syntax-function: #dcdcaa;
+}
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #155dfc;
+  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary-darker: #277148;
+  --ifm-color-primary-darkest: #205d3b;
+  --ifm-color-primary-light: #33925d;
+  --ifm-color-primary-lighter: #359962;
+  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-link-color: #155dfc;
+  --ifm-navbar-link-hover-color: #155dfc;
+  --ifm-breadcrumb-color-active: #155dfc;
+  --ifm-menu-color-active: #155dfc;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-color-info-dark: #155dfc;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme="dark"] {
+  --ifm-color-primary: #155dfc;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-link-color: #155dfc;
+  --ifm-navbar-link-hover-color: #155dfc;
+  --ifm-breadcrumb-color-active: #155dfc;
+  --ifm-menu-color-active: #155dfc;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --docusaurus-details-decoration-color: #155dfc;
+
+  --color-primary-text: var(--ifm-font-color-base);
+  --color-secondary-text: var(--ifm-font-color-base);
+  --color-primary-emphasized-text: #ffffff;
+
+  --ifm-navbar-background-color: #080d1acc;
+  --ifm-background-color: #080d1a;
+  --ifm-background-surface-color: #080d1a;
+}
+
+@layer base {
+  body {
+    color: var(--color-primary-text);
+    font-family: "Inter", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--color-primary-emphasized-text);
+    font-family: "Outfit", sans-serif;
+    font-weight: 700;
+    line-height: 80px;
+    letter-spacing: 0.1px;
+  }
+
+  h1 {
+    font-size: 72px;
+  }
+
+  h2 {
+    font-size: 60px;
+    line-height: 60px;
+  }
+
+  h3 {
+    font-size: 48px;
+    line-height: 48px;
+  }
+
+  h4 {
+    font-size: 20px;
+  }
+}
+
+.markdown h2 {
+  font-size: 32px;
+  line-height: 40px;
+}
+
+.markdown h3 {
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.gradient-text {
+  background: var(--color-primary-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

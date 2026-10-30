@@ -1,0 +1,117 @@
+---
+title: Rules
+sidebar_position: 3
+---
+
+A feature flag's rules determine the variation to serve if all of the conditions of a rule are met. The rules are evaluated in the order in which they are listed and are unique across environments (creating a rule in one environment does not transfer to another one).
+
+Use the 'Development' or 'Production' buttons to switch between environments.
+
+## Adding a rule
+
+Adding a rule to a feature flag can be done from within the Rules tab of the feature flag details page. Use the 'Add rule' dropdown to select the kind of rule to add: a [Custom Rule](../../../glossary#custom-rule) or a [Segment Rule](../../../glossary#segment-rule).
+
+New rules are added to the top of the list, so they are evaluated first.
+
+**Custom rule**
+
+A [Custom Rule](../../../glossary#custom-rule) allows you to define any combination of context-attribute-operator-values you desire.
+
+A rule key must be unique and follow a lowercase, kebab-case convention (for example, `my-feature-flag-rule`). The first condition of a rule is prefixed with `IF` and each additional condition with `AND`, meaning all conditions must be met for the rule to serve its variation.
+
+**Segment rule**
+
+A [Segment Rule](../../../glossary#segment-rule) allows you to define any combination of context-attribute-operator-values you desire along with segment-specific conditions.
+
+The available segments are managed within the [segment's details page](../segments/management).
+
+A segment condition pairs an operator of `is in` or `is not in` with the segment you select. Only segments belonging to the flag's application are available for selection.
+
+### Context
+
+The context of a rule aligns with the context set when setting the provider in your application using `OpenFeature.setProvider` or when updating the context via `OpenFeature.setContext`. You can either select a predefined context or enter your own.
+
+More about the evaluation context and how OpenFeature defines it can be found [here](https://openfeature.dev/specification/sections/evaluation-context/).
+
+:::danger
+Personally Identifiable Information (PII) should not be used in Context. Using PII can pose a security risk, as it could potentially be exposed or misused during feature flag evaluation. This is because the evaluation context, including the PII, might be logged or transmitted for debugging and analysis purposes.
+:::
+
+### Attribute
+
+The attribute is any property which exists within the context. For example, you may have `user.country` in your context where `country` is the attribute. You can either select a predefined attribute or enter your own.
+
+:::info
+If you need to access deeply nested attributes, you can use dot notation for your attribute.
+
+**Example:**
+You need to access `user.country.address.line1` from your context. In order to access `line1` as your evaluation, set your attribute to `country.address.line1`.
+:::
+
+### Operator
+
+The operator is the logical comparator used to evaluate the feature flag. It takes your context attribute and compares it against the values. The following table shows all available operators and their common use cases:
+
+| Operator | Use Case | Example |
+|----------|----------|---------|
+| **contains** | Check if a string value contains a substring OR if a value exists in a list of values. Also use this for **boolean values** (e.g., `true`, `false`). | Check if user email contains `@company.com` or if some context is `true` |
+| **does not contain** | Check if a string value does not contain a substring OR if a value does not exist in a list of values | Exclude users with emails containing `@competitor.com` |
+| **starts with** | Check if a string value begins with specific characters | Show specific features for specific routes where a route might start with `/settings/notifications` |
+| **does not start with** | Check if a string value does not begin with specific characters | Exclude users with usernames that don't start with `admin` |
+| **ends with** | Check if a string value ends with specific characters | Target users with emails ending in `@example.com` |
+| **does not end with** | Check if a string value does not end with specific characters | Exclude beta testers with emails not ending in `@beta.com` |
+| **greater than** | Compare numeric values for values above a threshold | Target users with loyalty points greater than `1000` |
+| **greater than or equal** | Compare numeric values for values at or above a threshold | Target users with loyalty points at `1000` or more |
+| **less than** | Compare numeric values for values below a threshold | Target users with less than `5` login attempts |
+| **less than or equal** | Compare numeric values for values at or below a threshold | Target users with account age `30` days or less |
+| **equals** | Match value | Target users in specific country (`US`) |
+| **does not equal** | Exclude specific value | Exclude users in specific country (`US`) |
+| **matches minor version** | Compare semantic versions at minor level | Target applications running version `1.2.x` |
+| **matches major version** | Compare semantic versions at major level | Target applications running version `2.x.x` |
+
+:::warning Boolean Values
+To use boolean values (`true` or `false`) in your rules, you must use the **contains** operator. We understand this isn't intuitive. We are working on improving the UX around rule creation when it comes to handling different data types.
+
+**Example:** To check if `user` (context) `isNew` (attribute) is set to `true`, set your operator to "contains" and value to `true`.
+:::
+
+[This](../../../glossary#operator) is a complete list of the available operators.
+
+### Values
+
+Values align with the value of your context's attribute.
+
+:::info
+If you need to evaluate against a list of values, set your values as a comma delimited string.
+
+**Example:**
+If you need to evaluate against `['US', 'UK']`, set your values to `US, UK`.
+:::
+
+## Editing a rule
+
+You can edit any existing rule to modify its conditions, variations, or rollout settings. The rule key is the only part of a rule that cannot be changed.
+
+### Canceling edits
+
+If you need to discard changes made while editing a rule, click the 'Cancel edit' button. This will revert any changes made to the rule and return it to its previous state.
+
+## Default rule
+
+Every feature flag requires a default rule. This rule will serve the default variation set during the creation of the feature flag and can be updated to any other one of the feature flag's variations or can be set to a weighted rollout.
+
+The default rule is always the last entry in the rules list.
+
+## Rule sorting
+
+You can sort rules using drag and drop via the sidebar on the right side of the screen. Simply drag a rule to change its order of evaluation. If there is only one rule available, drag and drop sorting is disabled.
+
+:::info
+The Default Rule acts as a catch-all and cannot be reordered.
+:::
+
+## Rollouts
+
+Rollouts allow you to define the variation to serve when all conditions of a rule are met. It also lets you define a [weighted rollout](../../../glossary#weighted-rollout).
+
+A rule can either serve a single variation or serve a weighted rollout, where you assign a weight to each variation. The rollout is distributed using the context and attribute you specify so that the same user consistently receives the same variation.

@@ -1,0 +1,26 @@
+---
+title: Creation
+sidebar_position: 1
+---
+
+To create a feature flag:
+
+1. Log in to the UI.
+
+2. Click the **Create flag** button on the right.
+
+3. Fill out the **Create Flag** form.
+
+   :::info
+   Only applications associated with you, through your team's ownership, are available for selection. If you do not have an associated application, you cannot create a feature flag.
+   :::
+
+   The form contains these required fields:
+
+   - **Flag Key**: The unique identifier used to evaluate the flag in your application. It must use lowercase kebab case, such as `my-feature-flag`.
+   - **Description**: A short explanation of what the flag gates.
+   - **Application**: A dropdown containing the applications your team owns.
+   - **Type**: The type of values the flag's variations can hold: `Boolean`, `Number`, `Text`, or `Object`.
+   - **Variations**: Two variation rows, each with a kebab-case **Key** and a **Value** matching the selected flag type. You can add more variations later from the flag details page for every type except Boolean.
+
+New feature flags are disabled in every environment until you toggle them on. After creation, you are directed to the flag details page, where you can [manage the flag](management), create rules, update or delete variations, toggle the flag, and archive it.

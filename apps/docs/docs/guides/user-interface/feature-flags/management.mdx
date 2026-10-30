@@ -1,0 +1,48 @@
+---
+title: Management
+sidebar_position: 2
+---
+
+While on the feature flag details page, you can:
+- Quickly access the application and/or team that owns the feature flag
+- Archive the feature flag
+- View and edit the feature flag description
+- Enable or disable the flag [across environments](#environment-actions)
+- Create, edit, and delete rules
+- Create, edit, and delete variations
+- Run test evaluations against your flag
+- View an activity log
+
+:::warning
+To perform any action on a feature flag including archival, environment toggling, rule changes, etc. you must be associated with the application that the feature flag is for.
+:::
+
+## Feature flag details
+
+The feature flag details include:
+
+- Feature flag key
+- Feature flag type which is located at the top left above the feature flag key
+- The application that is associated with the feature flag
+- The team which owns the application associated with the feature flag
+- The description
+
+## Archival
+
+If you would like to omit the feature flag from evaluation, you can archive the feature flag. Once the feature flag is archived, the feature flag cannot be edited - this includes rules, variations, and toggling.
+
+When a feature flag is archived, it is also disabled in all environments.
+
+:::info
+You might want to archive a feature flag if you no longer need to use the flag. An example of this might be that you've already launched the feature which was being gated by the feature flag.
+:::
+
+## Environment actions
+
+Toggling a feature flag as enabled or disabled allows the feature flag evaluation to work in your application - it lets your application know whether or not the feature flag is enabled or not in order to serve a variation based on its rules.
+
+In order to toggle a feature flag, use the switches present on the feature flag details page for the particular environment. By default, feature flags upon creation are toggled off for every environment.
+
+:::note
+Toggling a feature flag as enabled or disabled does not require you to save your changes - they are saved automatically.
+:::

@@ -1,0 +1,23 @@
+{
+  "extends": "fastify-tsconfig",
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "dist",
+    "paths": {
+      "db/*": ["./src/db/*"],
+      "repositories/*": ["./src/repositories/*"],
+      "services/*": ["./src/services/*"],
+      "schemas/*": ["./src/schemas/*"],
+      "test/*": ["./src/test/*"],
+      "utils/*": ["./src/utils/*"]
+    },
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext"
+  },
+  "exclude": ["node_modules", "dist"]
+}

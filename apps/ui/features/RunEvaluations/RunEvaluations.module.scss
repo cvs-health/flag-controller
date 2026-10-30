@@ -1,0 +1,84 @@
+/* SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@use '@carbon/layout';
+@use '@carbon/colors';
+@use '@carbon/type';
+@include type.type-classes();
+
+.root {
+  padding: layout.$spacing-05;
+}
+
+.resultLabel {
+  @extend .cds--type-heading-01;
+}
+
+.actions {
+  width: 100%;
+  grid-template-columns: 1.5fr 2fr;
+}
+
+.result {
+  margin-top: layout.$spacing-06;
+}
+
+.toolbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: layout.$spacing-06;
+}
+
+.switcher {
+  width: 416px;
+}
+
+.section {
+  padding: 0;
+}
+
+.error {
+  border: 2px solid colors.$red-60;
+}
+
+.errorMessage {
+  color: colors.$red-60;
+}
+
+.label {
+  margin-bottom: layout.$spacing-03;
+}
+
+.tile {
+  padding-bottom: layout.$spacing-08;
+}
+
+.notification {
+  margin-top: layout.$spacing-06;
+}
+
+.skeleton {
+  width: 100%;
+}
+
+.action {
+  width: 100%;
+}
+
+.descriptor {
+  @extend .cds--type-body-01;
+}
+
+.simulatedTime {
+  @extend .cds--type-code-01;
+  background-color: colors.$yellow-20;
+  padding: layout.$spacing-02 layout.$spacing-04;
+  width: fit-content;
+}
+
+.resultValue {
+  @extend .cds--type-code-01;
+  overflow-wrap: anywhere;
+}
