@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
+import Link from '@docusaurus/Link';
+
 export enum LinkButtonVariant {
   Primary = 'primary',
   Secondary = 'secondary',
@@ -44,25 +46,25 @@ function LinkButton({
 
   if (variant === LinkButtonVariant.Secondary) {
     return (
-      <a
-        href={href}
+      <Link
+        to={href}
         className={`${baseClassNames} text-primary-text hover:text-primary-text border border-solid border-white-off bg-white hover:bg-white-subtle transition-colors ${className}`}
       >
         {label}
-      </a>
+      </Link>
     );
   }
 
   const nonSecondaryClassNames = `${baseClassNames} flex items-center gap-2 text-white hover:text-white hover:opacity-90 transition-opacity`;
 
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       className={`${nonSecondaryClassNames} ${variant === LinkButtonVariant.Primary ? 'bg-(image:--color-primary-gradient)' : 'bg-(image:--color-cyan-gradient)'} ${className}`}
     >
       {icon}
       {label}
-    </a>
+    </Link>
   );
 }
 
