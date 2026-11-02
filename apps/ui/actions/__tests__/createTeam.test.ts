@@ -101,4 +101,50 @@ describe('createTeam', () => {
       status: ActionStatus.Error,
     });
   });
+
+  it('should handle team name already in use', async () => {
+    mocks.team = { error: { code: 'TEAM_ALREADY_EXISTS', status: 409 } };
+    vi.spyOn(global, 'fetch').mockResolvedValue(resolvePromiseWithData(session));
+
+    const formData = new FormData();
+
+    formData.append('teamName', 'team-name');
+
+    const result = await createTeam(initialFormState, formData);
+
+    expect(result).toEqual({
+      ...initialFormState,
+      form: {
+        teamName: 'team-name',
+      },
+      errors: {
+        fieldErrors: {
+          teamName: ['Please choose a unique team name.'],
+        },
+        actionError: {
+          subtitle: 'Team name already in use.',
+          title: 'Failed to create team',
+        },
+      },
+      status: ActionStatus.Error,
+    });
+  });
+
+  it('should handle permission error', async () => {
+    mocks.team = { error: { status: 401 } };
+    vi.spyOn(global, 'fetch').mockResolvedValue(resolvePromiseWithData(session));
+
+    const formData = new FormData();
+
+    formData.append('teamName', 'team-name');
+
+    const result = await createTeam(initialFormState, formData);
+
+    expect(result.errors).toEqual({
+      actionError: {
+        subtitle: 'You do not have permission to create a team.',
+        title: 'Failed to create',
+      },
+    });
+  });
 });

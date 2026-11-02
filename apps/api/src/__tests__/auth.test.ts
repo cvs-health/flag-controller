@@ -153,6 +153,32 @@ describe('auth database hooks', () => {
 
       expect(result).toEqual({ data: { name: team.name, organizationId: organization.id } });
     });
+
+    it('checks for an existing team using the normalized name', async () => {
+      await beforeCreateTeam({
+        team: { name: 'My Team', organizationId: organization.id },
+        organization,
+      });
+
+      expect(mockRepositories.teamsRepository.findByName).toHaveBeenCalledExactlyOnceWith(organization.id, team.name);
+    });
+
+    it('rejects a team name that is already in use', async () => {
+      mockRepositories.teamsRepository.findByName.mockResolvedValueOnce({
+        ...team,
+        createdAt: new Date(),
+        deletedAt: null,
+        memberCount: 0,
+        updatedAt: null,
+      });
+
+      await expect(
+        beforeCreateTeam({ team: { name: team.name, organizationId: organization.id }, organization }),
+      ).rejects.toMatchObject({
+        status: 'CONFLICT',
+        body: { code: 'TEAM_ALREADY_EXISTS', message: 'Team already exists' },
+      });
+    });
   });
 
   describe('afterCreateTeam organization hook', () => {

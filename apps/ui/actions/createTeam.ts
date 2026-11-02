@@ -58,6 +58,18 @@ async function createTeam(
 }
 
 function createTeamErrorToActionError(error: BetterAuthFetchError) {
+  if (error.code === 'TEAM_ALREADY_EXISTS') {
+    return {
+      fieldErrors: {
+        teamName: ['Please choose a unique team name.'],
+      },
+      actionError: {
+        title: 'Failed to create team',
+        subtitle: 'Team name already in use.',
+      },
+    };
+  }
+
   if (error.status === 401) {
     return {
       actionError: {

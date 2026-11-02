@@ -3,6 +3,7 @@
 
 import { ActionType, SubjectType } from 'shared-types';
 import { Pool } from 'pg';
+import { APIError } from 'better-auth/api';
 import { betterAuth } from 'better-auth/minimal';
 import { defaultAc, adminAc, ownerAc } from 'better-auth/plugins/organization/access';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -29,6 +30,9 @@ const pool = new Pool(poolSettings);
 const db = drizzle(pool);
 const withTransaction = createWithTransaction(db);
 
+// Matches better-auth's own code so clients can branch on it.
+const TEAM_ALREADY_EXISTS = { code: 'TEAM_ALREADY_EXISTS', message: 'Team already exists' };
+
 /**
  * Team membership is what grants write access (see `authorizationService.assertCanWrite`), so
  * `member` gets no `member`/`team` mutation statements. better-auth's own membership endpoints
@@ -43,10 +47,18 @@ export const organizationRoles = {
 
 // Exported for direct unit testing since better-auth does not expose plugin hook options on `auth.options`.
 export async function beforeCreateTeam({ team }: HookParameters<'beforeCreateTeam'>) {
+  const name = normalizeTeamName(team.name);
+  const repositories = createRepositories(db);
+  const existingTeam = await repositories.teamsRepository.findByName(team.organizationId, name);
+
+  if (existingTeam) {
+    throw APIError.from('CONFLICT', TEAM_ALREADY_EXISTS);
+  }
+
   return {
     data: {
       ...team,
-      name: normalizeTeamName(team.name),
+      name,
     },
   };
 }
