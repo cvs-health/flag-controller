@@ -2,8 +2,9 @@ name: docs-deploy
 
 on:
   push:
-    branches: ['**']
-  workflow_dispatch:
+    branches: [main]
+    paths:
+      - 'apps/docs/**'
 
 permissions:
   contents: read
