@@ -101,10 +101,10 @@ docker compose up --build api
 
 
 > [!TIP]
-> If your docker build is behaving strangely trying building with the --no-cache-option
+> If your docker build is behaving strangely trying building with the --no-cache option
 >
 >```bash
-> # Build everything with no- ache
+> # Build everything with no cache
 > docker compose build --no-cache
 > # Build a specific service with no cache
 > docker compose build --no-cache docs
