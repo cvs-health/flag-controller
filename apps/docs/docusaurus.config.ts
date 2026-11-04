@@ -92,7 +92,7 @@ const config: Config = {
         },
         {
           className: 'mr-4',
-          href: '/docs/getting-started',
+          href: '/docs/getting-started/',
           label: 'Get started',
           page: '/',
           position: 'right',
