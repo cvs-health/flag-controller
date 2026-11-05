@@ -102,3 +102,21 @@ jobs:
 
       - name: 🛠 Test Affected Projects (with coverage)
         run: pnpm turbo run test:ci --affected
+
+  ui-build-and-scan:
+    uses: ./.github/workflows/image-build.yaml
+    secrets: inherit
+    with:
+      app: ui
+
+  api-build-and-scan:
+    uses: ./.github/workflows/image-build.yaml
+    secrets: inherit
+    with: 
+      app: api
+  
+  docs-build-and-scan:
+    uses: ./.github/workflows/image-build.yaml
+    secrets: inherit
+    with:
+      app: docs

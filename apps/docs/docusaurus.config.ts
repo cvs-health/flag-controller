@@ -73,8 +73,7 @@ const config: Config = {
         hideable: true,
       },
     },
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/social-card.png',
     navbar: {
       title: '',
       logo: {
@@ -97,7 +96,7 @@ const config: Config = {
         },
         {
           className: 'mr-4',
-          href: '/docs/getting-started',
+          href: '/docs/getting-started/',
           label: 'Get started',
           page: '/',
           position: 'right',
