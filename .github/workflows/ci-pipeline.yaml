@@ -105,18 +105,27 @@ jobs:
 
   ui-build-and-scan:
     uses: ./.github/workflows/image-build.yaml
+    permissions:
+      contents: read
+      security-events: write
     secrets: inherit
     with:
       app: ui
 
   api-build-and-scan:
     uses: ./.github/workflows/image-build.yaml
+    permissions:
+      contents: read
+      security-events: write
     secrets: inherit
     with: 
       app: api
   
   docs-build-and-scan:
     uses: ./.github/workflows/image-build.yaml
+    permissions:
+      contents: read
+      security-events: write
     secrets: inherit
     with:
       app: docs
