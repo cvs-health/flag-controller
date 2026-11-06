@@ -6,7 +6,7 @@ import Link from '@docusaurus/Link';
 export enum LinkButtonVariant {
   Primary = 'primary',
   Secondary = 'secondary',
-  Tertiary = 'tartiary',
+  Tertiary = 'tertiary',
 }
 
 export enum LinkButtonSize {

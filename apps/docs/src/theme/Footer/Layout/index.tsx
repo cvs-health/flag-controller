@@ -16,7 +16,7 @@ export default function FooterLayout({ links, logo, copyright }: Props): ReactNo
     >
       <div className="container container-fluid">
         <div className="min-h-52 mb-12">
-          <div className="w-1/4 mb-8">
+          <div className="max-sm:w-2/3 w-1/4 mb-8">
             {logo}
             <p>The open source feature flag platform that scales with your team.</p>
           </div>
