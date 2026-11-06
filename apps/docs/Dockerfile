@@ -29,6 +29,9 @@ COPY turbo.json turbo.json
 RUN pnpm turbo build --filter=flag-controller-docs
 
 FROM nginxinc/nginx-unprivileged:1.31.4-alpine AS runner
+USER root
+RUN apk add --no-cache --upgrade 'brotli-libs>=1.2.1-r0'
+USER nginx
 WORKDIR /app
 
 EXPOSE 3000

@@ -68,7 +68,7 @@
     "@vitejs/plugin-react": "^6.1.0",
     "@vitest/coverage-v8": "^5.0.0",
     "baseline-browser-mapping": "^2.9.19",
-    "happy-dom": "^20.0.0",
+    "happy-dom": "^21.0.4",
     "shared-types": "workspace:*",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
