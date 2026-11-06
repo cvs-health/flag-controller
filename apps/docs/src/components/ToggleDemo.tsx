@@ -21,16 +21,16 @@ function ToggleDemo() {
   }
 
   return (
-    <section className="flex flex-col items-center container container-fluid mb-36 gap-6">
-      <div className="flex items-center gap-6 w-full justify-center">
-        <CodeEditor />
-        <Connector symbol="+" className="bg-linear-135 from-cyan to-sky-500" />
-        <FlagPanel flags={flags} toggle={toggle} />
-        <Connector symbol="=" className="bg-linear-135 from-blue to-sky-400" />
-        <AppPreview flags={flags} />
-      </div>
-      <div className="flex items-center justify-center px-8 h-11.25 rounded-full border border-blue-200 dark:border-dark-callout-border text-[14px] text-blue-800 dark:text-dark-callout-text bg-sky-blue dark:bg-dark-callout-bg">
+    <section className="flex flex-col items-center container container-fluid max-sm:mb-14 mb-36 gap-6 max-sm:px-13">
+      <div className="flex items-center justify-center px-8 py-2 rounded-full border border-blue-200 dark:border-dark-callout-border text-[14px] text-blue-800 dark:text-dark-callout-text bg-sky-blue dark:bg-dark-callout-bg">
         Toggle a flag and see how it changes what users see.
+      </div>
+      <div className="max-sm:flex-col flex items-center gap-6 w-full justify-center">
+        <CodeEditor className="max-xl:hidden" />
+        <Connector symbol="+" className="max-xl:hidden bg-linear-135 from-cyan to-sky-500" />
+        <FlagPanel flags={flags} toggle={toggle} />
+        <Connector symbol="=" className="max-xl:hidden bg-linear-135 from-blue to-sky-400" />
+        <AppPreview flags={flags} />
       </div>
     </section>
   );

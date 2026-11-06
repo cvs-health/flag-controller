@@ -81,9 +81,9 @@ const config: Config = {
         { type: 'search', position: 'right' },
         {
           className:
-            'mr-4 !text-blue-link hover:!text-blue-link dark:!bg-dark-bg dark:hover:!bg-dark-bg dark:!border-blue-link',
+            'max-sm:mr-2 mr-4 !text-blue-link hover:!text-blue-link dark:!bg-dark-bg dark:hover:!bg-dark-bg dark:!border-blue-link',
           href: '/docs/home',
-          label: 'Read the docs',
+          label: 'Docs',
           page: '/',
           position: 'right',
           size: 'small',
@@ -91,7 +91,7 @@ const config: Config = {
           variant: 'secondary',
         },
         {
-          className: 'mr-4',
+          className: 'max-sm:mr-0 mr-4',
           href: '/docs/getting-started/',
           label: 'Get started',
           page: '/',
