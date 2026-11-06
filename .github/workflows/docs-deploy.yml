@@ -1,10 +1,11 @@
 name: docs-deploy
 
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/docs/**'
+on: push
+# on:
+#   push:
+#     branches: [main]
+#     paths:
+#       - 'apps/docs/**'
 
 permissions:
   contents: read
