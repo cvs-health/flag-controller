@@ -8,18 +8,19 @@ export enum ListVariant {
 }
 
 interface ListProps {
+  className?: string;
   variant?: ListVariant;
   items: string[];
 }
 
-function List({ items, variant = ListVariant.Bullet }: ListProps) {
+function List({ items, variant = ListVariant.Bullet, className = '' }: ListProps) {
   const variantClassNames = {
     [ListVariant.Bullet]: 'before:content-["•"]',
     [ListVariant.Completed]: 'before:content-["✓"] before:text-green dark:before:text-emerald',
     [ListVariant.Action]: 'before:content-["→"] before:text-magenta dark:before:text-purple-400',
   };
   return (
-    <ul className="list-none p-0 m-0 space-y-3">
+    <ul className={`list-none p-0 m-0 space-y-3 ${className}`}>
       {items.map((item) => (
         <li key={item} className={`relative pl-6 ${variantClassNames[variant]} before:absolute before:left-0`}>
           {item}

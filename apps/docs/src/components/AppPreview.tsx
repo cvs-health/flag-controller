@@ -16,7 +16,7 @@ function AppPreview({ flags }: AppPreviewProps) {
 
   return (
     <div
-      className={`box-border border rounded-2xl shadow-xl w-85 overflow-hidden flex flex-col shrink-0 self-stretch transition-all duration-300 ${
+      className={`box-border border rounded-2xl shadow-xl max-sm:w-full overflow-hidden flex flex-col shrink-0 self-stretch transition-all duration-300 ${
         dark ? 'bg-slate-950 border-slate-800' : 'bg-white border-white-off'
       }`}
     >

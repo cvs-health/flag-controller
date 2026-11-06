@@ -125,6 +125,10 @@
   --ifm-color-info-dark: #155dfc;
 }
 
+html {
+  font-size: var(--ifm-font-size-base);
+}
+
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme="dark"] {
   --ifm-color-primary: #155dfc;
@@ -150,6 +154,27 @@
   --ifm-background-surface-color: #080d1a;
 }
 
+@media (max-width: 996px) {
+  :root {
+    --ifm-font-size-base: 14px;
+  }
+
+  html:has(.homepage) .navbar__search,
+  html:has(.homepage) .navbar__toggle {
+    display: none;
+  }
+
+  h1 {
+    font-size: 3rem;
+    line-height: 4rem;
+  }
+
+  h3 {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
+}
+
 @layer base {
   body {
     color: var(--color-primary-text);
@@ -162,37 +187,37 @@
     color: var(--color-primary-emphasized-text);
     font-family: "Outfit", sans-serif;
     font-weight: 700;
-    line-height: 80px;
+    line-height: 5rem;
     letter-spacing: 0.1px;
   }
 
   h1 {
-    font-size: 72px;
+    font-size: 4.5rem;
   }
 
   h2 {
-    font-size: 60px;
-    line-height: 60px;
+    font-size: 3.75rem;
+    line-height: 3.75rem;
   }
 
   h3 {
-    font-size: 48px;
-    line-height: 48px;
+    font-size: 3rem;
+    line-height: 3rem;
   }
 
   h4 {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 }
 
 .markdown h2 {
-  font-size: 32px;
-  line-height: 40px;
+  font-size: 2rem;
+  line-height: 2.5rem;
 }
 
 .markdown h3 {
-  font-size: 24px;
-  line-height: 32px;
+  font-size: 1.5rem;
+  line-height: 2rem;
 }
 
 .gradient-text {

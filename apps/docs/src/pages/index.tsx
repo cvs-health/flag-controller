@@ -88,12 +88,12 @@ export default function Home() {
     <Layout
       title={siteConfig.title}
       description="Description will go into a meta tag in <head />"
-      wrapperClassName="bg-linear-to-b from-white-subtle via-white-barely to-white-barely-used dark:from-dark-bg dark:via-dark-bg dark:to-dark-bg"
+      wrapperClassName="bg-linear-to-b from-white-subtle via-white-barely to-white-barely-used dark:from-dark-bg dark:via-dark-bg dark:to-dark-bg homepage"
     >
-      <div className="text-xl flex flex-col py-30">
+      <div className="text-xl flex flex-col max-sm:py-9 py-30">
         <section className="flex flex-col items-center text-center container container-fluid">
           <Callout
-            className="mb-18"
+            className="max-sm:mb-8 mb-18"
             heading={
               <h1>
                 The <GradientTypography>open source</GradientTypography>
@@ -108,7 +108,7 @@ export default function Home() {
               label="Read the docs"
               href="/docs/home"
               variant={LinkButtonVariant.Secondary}
-              className="!text-blue-link hover:!text-blue-link dark:!bg-dark-bg dark:hover:!bg-dark-bg dark:!border-blue-link"
+              className="text-blue-link! hover:text-blue-link! dark:bg-dark-bg! dark:hover:bg-dark-bg! dark:border-blue-link!"
             />
             <LinkButton
               label="View on GitHub"
@@ -118,20 +118,22 @@ export default function Home() {
           </div>
           <ThemedImage
             alt="Screenshot of Flags Table UI"
-            className="w-full max-w-5xl h-auto mx-auto mt-16 mb-8 rounded-lg shadow-xl"
+            className="w-full max-w-5xl h-auto mx-auto max-sm:mt-8 mt-16 mb-8 rounded-lg shadow-xl"
             sources={{
               light: useBaseUrl('/img/flags-table.png'),
               dark: useBaseUrl('/img/flags-table-dark.png'),
             }}
           />
         </section>
-        <section className="bg-linear-to-t from-white dark:from-dark-bg to-transparent mb-36 py-13 flex flex-wrap justify-center gap-8">
+        <section className="bg-linear-to-t from-white dark:from-dark-bg to-transparent max-sm:mb-14 mb-36 py-13 grid grid-cols-2 justify-items-center gap-x-4 gap-y-8 md:flex md:flex-wrap md:justify-center md:gap-8">
           {trustItems.map((item) => (
-            <div key={item.label} className="flex flex-col items-center gap-3 w-73">
+            <div key={item.label} className="flex w-full max-w-73 flex-col items-center gap-3 md:w-73">
               <div className="w-12 h-12 rounded-full flex items-center justify-center bg-sky-blue dark:bg-dark-card">
                 {item.icon}
               </div>
-              <span className="text-sm font-semibold text-primary-emphasized-text text-center">{item.label}</span>
+              <span className="wrap-break-word text-sm font-semibold text-primary-emphasized-text text-center">
+                {item.label}
+              </span>
             </div>
           ))}
         </section>
@@ -147,7 +149,7 @@ export default function Home() {
           />
         </section>
         <ToggleDemo />
-        <section className="flex flex-col items-center container container-fluid mb-36">
+        <section className="flex flex-col items-center container container-fluid max-sm:mb-14 mb-36">
           <Callout
             className="mb-7"
             heading={
@@ -157,33 +159,34 @@ export default function Home() {
             }
             description="A simple but powerful toolkit for deciding exactly what ships, to whom, and when."
           />
-          <div className="mt-12 flex flex-wrap gap-6">
+          <div className="mt-12 flex flex-wrap max-sm:gap-4 gap-6">
             {features.map((feature) => (
-              <Card key={feature.title} className="flex-1/4 border-white-off dark:border-dark-card-border">
+              <Card key={feature.title} className="max-sm:flex-1/3 flex-1/4 border-white-off dark:border-dark-card-border max-sm:p-4">
                 <div
-                  className={`mb-6 w-14 h-14 rounded-2xl flex items-center justify-center bg-linear-125 text-white dark:text-gray-950 ${feature.gradientClassNames}`}
+                  className={`max-sm:mb-4 mb-6 w-14 h-14 rounded-2xl flex items-center justify-center bg-linear-125 text-white dark:text-gray-950 ${feature.gradientClassNames}`}
                 >
                   <Icon name={feature.icon} />
                 </div>
-                <h4 className="mb-3 font-semibold text-primary-emphasized-text font-[Outfit]">{feature.title}</h4>
-                <p className="text-[16px] leading-6.5 mb-0">{feature.description}</p>
+                <h4 className="max-sm:text-base mb-3 font-semibold text-primary-emphasized-text font-[Outfit]">{feature.title}</h4>
+                <p className="max-sm:text-sm text-[16px] max-sm:leading-5 leading-6.5 mb-0">{feature.description}</p>
               </Card>
             ))}
           </div>
         </section>
-        <section className="flex flex-col items-center gap-10 container container-fluid mb-36">
+        <section className="flex flex-col items-center gap-10 container container-fluid max-sm:mb-14 mb-36">
           <Callout
             heading={
-              <h2>
+              <h3>
                 Where we're <GradientTypography>headed</GradientTypography>
-              </h2>
+              </h3>
             }
             description="This is an open source project, which means it evolves with its community. Here's what's live today and what we’re exploring next."
           />
-          <div className="flex gap-10 items-stretch w-full">
+          <div className="flex max-sm:flex-col gap-10 items-stretch w-full">
             <Card className="border-green-light dark:border-green-900 border-2 flex-1">
               <Chip label="Available now" />
               <List
+                className="max-sm:text-sm"
                 variant={ListVariant.Completed}
                 items={[
                   'Rule-based targeting',
@@ -199,6 +202,7 @@ export default function Home() {
             <Card className="border-magenta-light dark:border-purple-800 border-2 flex-1">
               <Chip label="What we're exploring" variant={ChipVariant.Action} />
               <List
+                className="max-sm:text-sm"
                 variant={ListVariant.Action}
                 items={[
                   'Approval workflows',
@@ -211,9 +215,11 @@ export default function Home() {
             </Card>
           </div>
         </section>
-        <section className="bg-linear-160 from-cyan via-blue to-blue-dark rounded-3xl p-16 text-center container container-fluid">
+        <section className="container container-fluid">
+          <div className="max-sm:px-6 max-sm:py-12 p-16 text-center bg-linear-160 from-cyan via-blue to-blue-dark rounded-3xl">
+
           <Callout
-            heading={<h2 className="text-white">Ready to own your feature delivery?</h2>}
+            heading={<h3 className="text-white">Ready to own your feature delivery?</h3>}
             description="Free, open source, and yours forever."
             className="mb-14 text-white"
           />
@@ -222,7 +228,7 @@ export default function Home() {
               variant={LinkButtonVariant.Secondary}
               label="Read the docs"
               href="/docs/home"
-              className="dark:!bg-dark-bg dark:hover:!bg-dark-bg dark:!border-dark-card-border"
+              className="dark:bg-dark-bg! dark:hover:bg-dark-bg! dark:border-dark-card-border!"
             />
             <LinkButton
               label="View on GitHub"
@@ -230,6 +236,7 @@ export default function Home() {
               icon={<Icon name={IconName.Github} />}
               variant={LinkButtonVariant.Tertiary}
             />
+          </div>
           </div>
         </section>
       </div>

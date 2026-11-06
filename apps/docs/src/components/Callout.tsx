@@ -15,7 +15,7 @@ function Callout({ heading, description, label, className = '' }: CalloutProps) 
     <div className={`${className} text-center`}>
       {label && <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-secondary-text">{label}</p>}
       <div className="mb-7">{heading}</div>
-      <p className="leading-7 mb-0 w-[70%] mx-auto">{description}</p>
+      <p className="leading-7 mb-0 max-sm:w-full w-[70%] mx-auto">{description}</p>
     </div>
   );
 }
