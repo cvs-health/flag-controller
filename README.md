@@ -102,7 +102,7 @@ docker compose up --build api
 
 
 > [!TIP]
-> If your docker build is behaving strangely trying building with the --no-cache option
+> If your docker build is behaving strangely, try building with the --no-cache option
 >
 >```bash
 > # Build everything with no cache
