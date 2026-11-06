@@ -226,30 +226,56 @@ return (
 );
 ```
 
+### Server action success side effects
+
+Keep server actions focused on performing the operation and returning its result. Handle client-side effects in the component that owns the action state.
+
+Use an effect that watches `formState.status` when the side effect belongs to the successful action result, should happen immediately, or must happen regardless of which UI path submitted the action. This is the right place for revalidating data, refreshing a route, or coordinating caller state:
+
+```tsx
+const [formState, formAction] = useActionState(updateSomething, initialActionState);
+
+useEffect(() => {
+  if (formState.status === ActionStatus.Success) {
+    startTransition(() => {
+      revalidatePage();
+      formAction(undefined); // Only if the action supports resetting its status this way.
+    });
+  }
+}, [formState.status, formAction]);
+```
+
+Reset the action status when the form can be submitted again; otherwise a later success may not create a new status transition. The action must explicitly support the reset signal (for example, `undefined` or the project's `FormAction.ResetStatus` value).
+
+Use `SubmitButton.onSubmitDone` for a follow-up that belongs specifically to the submit button's completion UI, such as closing a modal after its success indicator. It runs about one second after the button observes `ActionStatus.Success`, has no arguments, and is not called when a submission bypasses that `SubmitButton`:
+
+```tsx
+function handleSubmitDone() {
+  setOpen(false);
+}
+
+<SubmitButton label="Create" status={formState.status} onSubmitDone={handleSubmitDone} />
+```
+
+The callback can close over the latest action state if it needs the returned form values. Do not put required data revalidation or other action-level effects exclusively in `onSubmitDone`; use the success effect when those effects must not depend on the button's display timing or submission path.
+
 ### Modal success handling for server-side form submissions
 
-When a modal submits through a server action and already uses `SubmitButton`, prefer `onSubmitDone` for success side effects. The callback runs after the button observes a successful action and can notify the parent, close the modal, refresh data, or navigate.
-
-Pattern:
-
-- Modal owns form submission state via `useActionState`.
-- Modal exposes an `onSuccess` prop when the parent owns the side effect.
-- Modal passes a callback to `SubmitButton.onSubmitDone`.
-- The callback reads the successful form value from the latest action state when needed.
-
-Use a success `useEffect` when the effect must observe action state independently of a `SubmitButton`, coordinate multiple pieces of state, or run for submissions that can complete through another path. Keep side effects in the parent component where practical.
+When a modal submits through a server action and uses `SubmitButton`, use `onSubmitDone` for modal completion behavior such as closing the modal or notifying its parent. The modal owns form submission state via `useActionState`, and can expose an `onSuccess` prop when the parent owns that UI follow-up. The callback can read successful form values from the latest action state when needed:
 
 ```tsx
 const [formState, formAction] = useActionState(createSomething, initialActionState);
 
-useEffect(() => {
-  if (formState.status === ActionStatus.Success) {
-    onSuccess(formState.form.name);
-  }
-}, [formState.status, onSuccess, formState.form.name]);
+function handleSubmitDone() {
+  onSuccess(formState.form.name);
+}
+
+<SubmitButton label="Create" status={formState.status} onSubmitDone={handleSubmitDone} />
 ```
 
-Use this pattern as the standard for new server-action modals (for example, `CreateTeamModal` and `CreateApplicationModal`).
+Use a success `useEffect` instead when the effect must observe action state independently of `SubmitButton`, coordinate other state, or also run for submissions through another path. In particular, keep required data revalidation and navigation out of `onSubmitDone` if those effects must run regardless of the button's completion timing or whether that button submitted the action.
+
+Use this modal pattern for server-action modals (for example, `CreateTeamModal` and `CreateApplicationModal`).
 
 ### Carbon Tabs and React Activity Component
 

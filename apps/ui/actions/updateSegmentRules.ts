@@ -25,7 +25,17 @@ export interface UpdateSegmentRulesState {
   rules: string;
 }
 
-async function updateSegmentRules(_prevState: UpdateSegmentRulesState | UpdateSegmentRulesReturn, formData: FormData) {
+async function updateSegmentRules(
+  _prevState: UpdateSegmentRulesState | UpdateSegmentRulesReturn,
+  formData: FormData | undefined,
+) {
+  if (!formData) {
+    return {
+      errorMessage: '',
+      status: ActionStatus.Idle,
+    };
+  }
+
   const rawFormData = Object.fromEntries(formData) as unknown as UpdateSegmentRulesState;
   const [existingRule] = JSON.parse(rawFormData.rules) as RulesJoined[];
   const [rule] = segmentRulesFormDataToRules(formData);
