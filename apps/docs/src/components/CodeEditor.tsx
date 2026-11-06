@@ -7,7 +7,9 @@ interface CodeEditorProps {
 
 function CodeEditor({ className = '' }: CodeEditorProps) {
   return (
-    <div className={`bg-code-bg border border-code-border rounded-2xl shadow-xl w-85 overflow-hidden text-left shrink-0 ${className}`}>
+    <div
+      className={`bg-code-bg border border-code-border rounded-2xl shadow-xl w-85 overflow-hidden text-left shrink-0 ${className}`}
+    >
       <div className="bg-code-tab-bg border-b border-code-border h-[37px] flex items-center px-3 pt-2.5 pb-[11px]">
         <span className="text-xs text-gray-500 font-mono">app.tsx</span>
       </div>

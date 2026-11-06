@@ -161,13 +161,18 @@ export default function Home() {
           />
           <div className="mt-12 flex flex-wrap max-sm:gap-4 gap-6">
             {features.map((feature) => (
-              <Card key={feature.title} className="max-sm:flex-1/3 flex-1/4 border-white-off dark:border-dark-card-border max-sm:p-4">
+              <Card
+                key={feature.title}
+                className="max-sm:flex-1/3 flex-1/4 border-white-off dark:border-dark-card-border max-sm:p-4"
+              >
                 <div
                   className={`max-sm:mb-4 mb-6 w-14 h-14 rounded-2xl flex items-center justify-center bg-linear-125 text-white dark:text-gray-950 ${feature.gradientClassNames}`}
                 >
                   <Icon name={feature.icon} />
                 </div>
-                <h4 className="max-sm:text-base mb-3 font-semibold text-primary-emphasized-text font-[Outfit]">{feature.title}</h4>
+                <h4 className="max-sm:text-base mb-3 font-semibold text-primary-emphasized-text font-[Outfit]">
+                  {feature.title}
+                </h4>
                 <p className="max-sm:text-sm text-[16px] max-sm:leading-5 leading-6.5 mb-0">{feature.description}</p>
               </Card>
             ))}
@@ -217,26 +222,25 @@ export default function Home() {
         </section>
         <section className="container container-fluid">
           <div className="max-sm:px-6 max-sm:py-12 p-16 text-center bg-linear-160 from-cyan via-blue to-blue-dark rounded-3xl">
-
-          <Callout
-            heading={<h3 className="text-white">Ready to own your feature delivery?</h3>}
-            description="Free, open source, and yours forever."
-            className="mb-14 text-white"
-          />
-          <div className="flex justify-center gap-4">
-            <LinkButton
-              variant={LinkButtonVariant.Secondary}
-              label="Read the docs"
-              href="/docs/home"
-              className="dark:bg-dark-bg! dark:hover:bg-dark-bg! dark:border-dark-card-border!"
+            <Callout
+              heading={<h3 className="text-white">Ready to own your feature delivery?</h3>}
+              description="Free, open source, and yours forever."
+              className="mb-14 text-white"
             />
-            <LinkButton
-              label="View on GitHub"
-              href="https://github.com/cvs-health/flag-controller"
-              icon={<Icon name={IconName.Github} />}
-              variant={LinkButtonVariant.Tertiary}
-            />
-          </div>
+            <div className="flex justify-center gap-4">
+              <LinkButton
+                variant={LinkButtonVariant.Secondary}
+                label="Read the docs"
+                href="/docs/home"
+                className="dark:bg-dark-bg! dark:hover:bg-dark-bg! dark:border-dark-card-border!"
+              />
+              <LinkButton
+                label="View on GitHub"
+                href="https://github.com/cvs-health/flag-controller"
+                icon={<Icon name={IconName.Github} />}
+                variant={LinkButtonVariant.Tertiary}
+              />
+            </div>
           </div>
         </section>
       </div>

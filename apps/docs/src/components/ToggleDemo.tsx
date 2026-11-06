@@ -26,7 +26,7 @@ function ToggleDemo() {
         Toggle a flag and see how it changes what users see.
       </div>
       <div className="max-sm:flex-col flex items-center gap-6 w-full justify-center">
-        <CodeEditor className="max-xl:hidden"/>
+        <CodeEditor className="max-xl:hidden" />
         <Connector symbol="+" className="max-xl:hidden bg-linear-135 from-cyan to-sky-500" />
         <FlagPanel flags={flags} toggle={toggle} />
         <Connector symbol="=" className="max-xl:hidden bg-linear-135 from-blue to-sky-400" />
