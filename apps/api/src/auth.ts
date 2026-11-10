@@ -14,6 +14,7 @@ import * as schema from './db/schema/auth.js';
 import createOrganizationsService from 'services/organizationsService.js';
 import createRepositories from 'utils/createRepositories.js';
 import createTeamsService from 'services/teamsService.js';
+import { getAuthConfig } from './utils/getAuthConfig.js';
 import getCorsOrigins from './utils/getCorsOrigins.js';
 import normalizeTeamName from 'utils/normalizeTeamName.js';
 import { DEFAULT_ORGANIZATION } from './constants/organizations.js';
@@ -24,6 +25,9 @@ import { poolSettings } from './plugins/drizzle.js';
 type HookParameters<T extends keyof NonNullable<OrganizationOptions['organizationHooks']>> = Parameters<
   NonNullable<NonNullable<OrganizationOptions['organizationHooks']>[T]>
 >[0];
+
+/** Read once at import so a bad `AUTH_PROVIDER` or missing credential stops startup. */
+const authConfig = getAuthConfig();
 
 const pool = new Pool(poolSettings);
 const db = drizzle(pool);
@@ -178,10 +182,5 @@ export const auth = betterAuth({
         },
       }
     : {}),
-  socialProviders: {
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-    },
-  },
+  socialProviders: authConfig.socialProviders,
 });

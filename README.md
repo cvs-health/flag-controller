@@ -43,7 +43,7 @@ This Turborepo includes the following apps:
    cp apps/ui/.env.example apps/ui/.env
    ```
 
-   Review each `.env` and fill in the required values. Every setting is documented inline in the example files. At a minimum the API needs a valid `DATABASE_URL`, and GitHub sign-in requires `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and a `BETTER_AUTH_SECRET` (generate one with `openssl rand -base64 32`).
+   Review each `.env` and fill in the required values. Every setting is documented inline in the example files. At a minimum the API needs a valid `DATABASE_URL`, and GitHub sign-in (`AUTH_PROVIDER`, which defaults to `github`) requires `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and a `BETTER_AUTH_SECRET` (generate one with `openssl rand -base64 32`).
 
 ### Flagd schema sync
 

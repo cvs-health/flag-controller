@@ -5,6 +5,12 @@ import type { BetterAuthOptions } from 'better-auth/types';
 import { vi } from 'vitest';
 
 export const sessionToken = 'sessiontoken';
+
+// auth.ts validates sign-in config on load, so tests need valid defaults.
+delete process.env.AUTH_PROVIDER;
+process.env.GITHUB_CLIENT_ID = 'test-github-client-id';
+process.env.GITHUB_CLIENT_SECRET = 'test-github-client-secret';
+
 export const userTeam = {
   id: '123',
   name: 'Team 1',

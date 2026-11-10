@@ -8,6 +8,7 @@ import closeWithGrace from 'close-with-grace';
 import { shutdownOtel } from './otel.setup.js';
 import build from './app.js';
 import { migrate } from './migrate.js';
+import { initializeAuthConfig } from './utils/getAuthConfig.js';
 
 export async function main() {
   let server: Awaited<ReturnType<typeof build>> | undefined;
@@ -31,6 +32,15 @@ export async function main() {
 
     await shutdownOtel();
   });
+
+  // Before migrations, so a misconfigured deployment stops without touching the database.
+  try {
+    initializeAuthConfig();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    console.error('😵 Invalid auth configuration, shutting down...');
+    process.exit(1);
+  }
 
   if (process.env.RUN_MIGRATIONS_ON_START !== 'false') {
     try {
