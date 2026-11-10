@@ -1,5 +1,5 @@
 FROM node:22-bookworm-slim AS base
-ARG PNPM_VERSION="12.6.0"
+ARG PNPM_VERSION="12.11.0"
 ARG TURBO_VERSION="2.9.16"
 
 ENV PNPM_HOME="/pnpm"
