@@ -26,6 +26,14 @@ export function FeatureFlagsTableActions({
     void queryClient.invalidateQueries({ queryKey: [getFeatureFlagsQueryKey] });
   }
 
+  function renderOverflowMenu(onOpen: () => void) {
+    return (
+      <OverflowMenu iconDescription="Actions" size="md" autoAlign>
+        <OverflowMenuItem itemText="Archive flag" onClick={onOpen} />
+      </OverflowMenu>
+    );
+  }
+
   return (
     <ArchiveFeatureFlagModal
       applicationId={applicationId}
@@ -34,11 +42,7 @@ export function FeatureFlagsTableActions({
       id={`archiveFeatureFlag-${featureFlagId}`}
       onSuccess={handleArchiveSuccess}
     >
-      {(onOpen) => (
-        <OverflowMenu iconDescription="Actions" size="md" autoAlign>
-          <OverflowMenuItem itemText="Archive flag" onClick={onOpen} />
-        </OverflowMenu>
-      )}
+      {renderOverflowMenu}
     </ArchiveFeatureFlagModal>
   );
 }
