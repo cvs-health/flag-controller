@@ -21,6 +21,18 @@ describe('updateSegmentRules', () => {
     vi.restoreAllMocks();
   });
 
+  it('should reset the action status without sending a request', async () => {
+    const fetchSpy = vi.spyOn(global, 'fetch');
+
+    const result = await updateSegmentRules(
+      { environmentId: 'env-id-1', segmentId: 'segment-id-1', rules: '[]' },
+      undefined,
+    );
+
+    expect(result).toEqual({ errorMessage: '', status: 'idle' });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
   it('should create a new segment rule through shared rules endpoint', async () => {
     const data = {
       environmentId: 'env-id-1',

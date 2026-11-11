@@ -16,6 +16,12 @@ import { Header } from '../components/Header/Header';
 export const metadata: Metadata = {
   title: 'Feature Flag UI',
   description: 'Feature flags management UI',
+  icons: {
+    icon: [
+      { url: '/favicon-light.svg', media: '(prefers-color-scheme: light)' },
+      { url: '/favicon-dark.svg', media: '(prefers-color-scheme: dark)' },
+    ],
+  },
 };
 
 interface RootLayoutProps {

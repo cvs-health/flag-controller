@@ -8,7 +8,7 @@ This repository does not currently publish versioned releases. Security reports 
 
 Please do not report security vulnerabilities through public GitHub issues, discussions, or pull requests. Reports are handled privately so maintainers can investigate and coordinate a fix before public disclosure.
 
-To report a vulnerability privately, email [cormick.white@cvshealth.com](mailto:cormick.white@cvshealth.com).
+To report a vulnerability privately, use the **Report a vulnerability** button under the **Security** tab of this repository.
 
 Please include as much of the following information as possible:
 

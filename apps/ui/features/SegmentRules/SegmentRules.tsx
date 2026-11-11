@@ -16,6 +16,7 @@ import {
 import styles from './SegmentRules.module.scss';
 import type { PendingSegmentRule } from '../../typings/rules';
 import updateSegmentRules from '../../actions/updateSegmentRules';
+import revalidatePage from '../../utils/revalidatePage';
 import { ActionStatus } from '../../typings/common';
 import { InlineNotification, Tile } from '../../components/Carbon';
 import { SegmentRule } from '../SegmentRule/SegmentRule';
@@ -47,6 +48,15 @@ export function SegmentRules({
       formAction(new FormData(event.currentTarget));
     });
   }
+
+  useEffect(() => {
+    if (formState.status === ActionStatus.Success) {
+      startTransition(() => {
+        formAction(undefined);
+        revalidatePage();
+      });
+    }
+  }, [formState.status, formAction]);
 
   useEffect(() => {
     if (!existingRules.length) {
