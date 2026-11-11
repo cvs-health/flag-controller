@@ -6,8 +6,7 @@ import { vi } from 'vitest';
 
 export const sessionToken = 'sessiontoken';
 
-// auth.ts validates sign-in config on load, so tests need valid defaults.
-delete process.env.AUTH_PROVIDER;
+process.env.AUTH_PROVIDER = 'github';
 process.env.GITHUB_CLIENT_ID = 'test-github-client-id';
 process.env.GITHUB_CLIENT_SECRET = 'test-github-client-secret';
 
