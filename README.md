@@ -11,7 +11,6 @@ This Turborepo includes the following apps:
 
 - `api`: a [Fastify](https://fastify.dev/) server using TypeScript, and Drizzle ORM for database access to a Postgres database
 - `docs`: comprehensive documentation built with [Docusaurus](https://docusaurus.io/) explaining architecture and usage
-- `flagd`: a [flagd](https://flagd.dev/) instance (feature flag evaluation engine)
 - `ui`: a [Next.js](https://nextjs.org/) app built with React, Tailwind CSS, and Carbon UI for a modern, accessible interface
 
 ### Shared libraries
