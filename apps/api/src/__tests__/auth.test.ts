@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ActionType, SubjectType } from 'shared-types';
+import { ActionType, SubjectType, TeamCreateErrorCode } from 'shared-types';
 
 import { SYSTEM } from '../constants/common.js';
 import { afterCreateTeam, auth, beforeCreateTeam, organizationRoles } from '../auth.js';
@@ -176,7 +176,7 @@ describe('auth database hooks', () => {
         beforeCreateTeam({ team: { name: team.name, organizationId: organization.id }, organization }),
       ).rejects.toMatchObject({
         status: 'CONFLICT',
-        body: { code: 'TEAM_ALREADY_EXISTS', message: 'Team already exists' },
+        body: { code: TeamCreateErrorCode.AlreadyExists, message: 'Team already exists' },
       });
     });
   });

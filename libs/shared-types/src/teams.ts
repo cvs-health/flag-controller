@@ -21,6 +21,11 @@ export interface TeamsTableColumns {
   updatedAt: string;
 }
 
+// Matches better-auth's own code so clients can branch on it.
+export enum TeamCreateErrorCode {
+  AlreadyExists = 'TEAM_ALREADY_EXISTS',
+}
+
 export enum TeamDeleteErrorCode {
   HasApplications = 'team_has_applications',
   LastTeam = 'cannot_delete_last_team',

@@ -7,6 +7,7 @@ import createTeam from '../createTeam';
 import resolvePromiseWithData from '../../test/resolvePromiseWithData';
 import type { authClient } from '../../lib/auth-client';
 import { ActionStatus } from '../../typings/common';
+import { TeamCreateErrorCode } from 'shared-types';
 
 const mocks = vi.hoisted(() => ({
   team: { name: 'team-name' } as ReturnType<(typeof authClient)['organization']['createTeam']>,
@@ -103,7 +104,7 @@ describe('createTeam', () => {
   });
 
   it('should handle team name already in use', async () => {
-    mocks.team = { error: { code: 'TEAM_ALREADY_EXISTS', status: 409 } };
+    mocks.team = { error: { code: TeamCreateErrorCode.AlreadyExists, status: 409 } };
     vi.spyOn(global, 'fetch').mockResolvedValue(resolvePromiseWithData(session));
 
     const formData = new FormData();

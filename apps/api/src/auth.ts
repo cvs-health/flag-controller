@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
-import { ActionType, SubjectType } from 'shared-types';
+import { ActionType, SubjectType, TeamCreateErrorCode } from 'shared-types';
 import { Pool } from 'pg';
 import { APIError } from 'better-auth/api';
 import { betterAuth } from 'better-auth/minimal';
@@ -30,9 +30,6 @@ const pool = new Pool(poolSettings);
 const db = drizzle(pool);
 const withTransaction = createWithTransaction(db);
 
-// Matches better-auth's own code so clients can branch on it.
-const TEAM_ALREADY_EXISTS = { code: 'TEAM_ALREADY_EXISTS', message: 'Team already exists' };
-
 /**
  * Team membership is what grants write access (see `authorizationService.assertCanWrite`), so
  * `member` gets no `member`/`team` mutation statements. better-auth's own membership endpoints
@@ -52,7 +49,7 @@ export async function beforeCreateTeam({ team }: HookParameters<'beforeCreateTea
   const existingTeam = await repositories.teamsRepository.findByName(team.organizationId, name);
 
   if (existingTeam) {
-    throw APIError.from('CONFLICT', TEAM_ALREADY_EXISTS);
+    throw APIError.from('CONFLICT', { code: TeamCreateErrorCode.AlreadyExists, message: 'Team already exists' });
   }
 
   return {

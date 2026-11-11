@@ -4,6 +4,7 @@
 'use server';
 
 import { z } from 'zod';
+import { TeamCreateErrorCode } from 'shared-types';
 
 import getBetterAuthHeaders from './getBetterAuthHeaders';
 import withSessionAction from './withSessionAction';
@@ -58,7 +59,7 @@ async function createTeam(
 }
 
 function createTeamErrorToActionError(error: BetterAuthFetchError) {
-  if (error.code === 'TEAM_ALREADY_EXISTS') {
+  if (error.code === TeamCreateErrorCode.AlreadyExists) {
     return {
       fieldErrors: {
         teamName: ['Please choose a unique team name.'],
