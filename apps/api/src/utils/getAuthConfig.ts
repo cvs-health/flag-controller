@@ -5,7 +5,6 @@ import type { AuthProvider, PublicConfig } from 'shared-types';
 
 const DEFAULT_AUTH_PROVIDER = 'github';
 
-/** Credentials passed straight to Better Auth's `socialProviders[id]`. */
 interface SocialProviderCredentials {
   clientId: string;
   clientSecret: string;

@@ -33,12 +33,11 @@ export async function main() {
     await shutdownOtel();
   });
 
-  // Before migrations, so a misconfigured deployment stops without touching the database.
   try {
     initializeAuthConfig();
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
-    console.error('😵 Invalid auth configuration, shutting down...');
+    console.error('Invalid auth configuration, shutting down...');
     process.exit(1);
   }
 
