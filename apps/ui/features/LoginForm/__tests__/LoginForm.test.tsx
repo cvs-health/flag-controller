@@ -58,6 +58,27 @@ describe('LoginForm', () => {
     );
   });
 
+  it('uses a generic label and still signs in when the API omits the provider label', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce(
+      resolvePromiseWithData({
+        ...githubConfig,
+        authProviders: [{ id: 'github', kind: 'social' }],
+      }),
+    );
+    renderLoginForm();
+
+    // The disabled placeholder button is also named "Login", so wait for it to enable.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Login' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
+
+    await waitFor(() =>
+      expect(authClient.signIn.social).toHaveBeenCalledWith({
+        provider: 'github',
+        callbackURL: 'http://localhost:3000/flags',
+      }),
+    );
+  });
+
   it('keeps the button disabled until the API has answered', () => {
     vi.spyOn(global, 'fetch').mockReturnValueOnce(new Promise(() => {}));
     renderLoginForm();

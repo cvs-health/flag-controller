@@ -20,7 +20,7 @@ const schema = {
               kind: { type: 'string', enum: ['social'] },
               label: { type: 'string' },
             },
-            required: ['id', 'kind', 'label'],
+            required: ['id', 'kind'],
           },
         },
         features: { type: 'object', additionalProperties: true },

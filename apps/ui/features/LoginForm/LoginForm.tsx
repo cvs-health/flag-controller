@@ -66,7 +66,7 @@ export function LoginForm({ className }: LoginFormProps) {
       <ModalFooter>
         <SubmitButton
           disabled={!provider}
-          label={provider ? `Login with ${provider.label}` : 'Login'}
+          label={provider?.label ? `Login with ${provider.label}` : 'Login'}
           status={submitStatus}
         />
       </ModalFooter>

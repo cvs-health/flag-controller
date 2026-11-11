@@ -3,7 +3,7 @@
 
 export interface AuthProvider {
   id: string;
-  label: string;
+  label?: string;
   kind: 'social';
 }
 
