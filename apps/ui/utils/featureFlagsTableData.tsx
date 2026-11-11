@@ -8,9 +8,17 @@ import { ActionTag } from '../components/ActionTag/ActionTag';
 import { EnvironmentStatus } from '../components/EnvironmentStatus/EnvironmentStatus';
 import { FeatureFlagTypeTag } from '../components/FeatureFlagTypeTag/FeatureFlagTypeTag';
 import type { FeatureFlagListItem } from '../typings/flags';
+import { FeatureFlagsTableActions } from '../features/FeatureFlagsTableActions/FeatureFlagsTableActions';
 import formatDateTime from './formatDateTime';
 
-function featureFlagsTableData(featureFlags: FeatureFlagListItem[] = []) {
+interface FeatureFlagsTableDataOptions {
+  includeActions?: boolean;
+}
+
+function featureFlagsTableData(
+  featureFlags: FeatureFlagListItem[] = [],
+  { includeActions = false }: FeatureFlagsTableDataOptions = {},
+) {
   return featureFlags.map((flag) => {
     const id = `${flag.applicationName}/${flag.key}`;
     const enabledByEnvironment = Object.entries(flag.enabled)
@@ -18,6 +26,13 @@ function featureFlagsTableData(featureFlags: FeatureFlagListItem[] = []) {
       .map(([environmentKey, enabled]) => ({ environmentKey, enabled }));
 
     return {
+      action: includeActions ? (
+        <FeatureFlagsTableActions
+          applicationId={flag.applicationId}
+          featureFlagId={flag.id}
+          featureFlagKey={flag.key}
+        />
+      ) : null,
       applicationName: <Link href={`/applications/${flag.applicationName}`}>{flag.applicationName}</Link>,
       createdAt: formatDateTime(flag.createdAt),
       enabled: (
