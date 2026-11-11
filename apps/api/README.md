@@ -52,12 +52,6 @@ Available scripts in package.json:
 ### `pnpm build`
 Builds the application for production deployment
 
-### `pnpm codegen:compile`
-Compiles the GraphQL schema and generates TypeScript types
-
-### `pnpm codegen:watch`
-Watches for GraphQL schema changes and automatically regenerates TypeScript types
-
 ### `pnpm generate:migration`
 Generates a new database migration file based on schema changes
 
