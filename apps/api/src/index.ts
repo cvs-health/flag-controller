@@ -34,7 +34,7 @@ export async function main() {
   });
 
   try {
-    initializeAuthConfig();
+    await initializeAuthConfig();
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     console.error('Shutting down...');

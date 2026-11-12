@@ -4,7 +4,7 @@
 export interface AuthProvider {
   id: string;
   label?: string;
-  kind: 'social';
+  kind: 'social' | 'oidc';
 }
 
 export interface PublicConfig {

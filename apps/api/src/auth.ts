@@ -4,8 +4,10 @@
 import { ActionType, SubjectType, TeamCreateErrorCode } from 'shared-types';
 import { Pool } from 'pg';
 import { APIError } from 'better-auth/api';
+import { sso } from '@better-auth/sso';
 import { betterAuth } from 'better-auth/minimal';
 import { defaultAc, adminAc, ownerAc } from 'better-auth/plugins/organization/access';
+import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { organization, type OrganizationOptions } from 'better-auth/plugins';
@@ -21,6 +23,7 @@ import normalizeTeamName from 'utils/normalizeTeamName.js';
 import { DEFAULT_ORGANIZATION } from './constants/organizations.js';
 import { SYSTEM } from './constants/common.js';
 import { createWithTransaction } from 'utils/withTransaction.js';
+import { createProvisionSsoUser, createResolveSsoUser } from 'utils/ssoUser.js';
 import { poolSettings } from './plugins/drizzle.js';
 
 type HookParameters<T extends keyof NonNullable<OrganizationOptions['organizationHooks']>> = Parameters<
@@ -33,6 +36,33 @@ const authConfig = getAuthConfig();
 const pool = new Pool(poolSettings);
 const db = drizzle(pool);
 const withTransaction = createWithTransaction(db);
+
+function createSsoPlugins() {
+  if (!('sso' in authConfig)) {
+    return [];
+  }
+
+  const ssoConfig = authConfig.sso;
+
+  return [
+    sso({
+      defaultSSO: [
+        {
+          providerId: ssoConfig.providerId,
+          domain: new URL(ssoConfig.issuerOrigin).hostname,
+          oidcConfig: ssoConfig.oidcConfig,
+        },
+      ],
+      // Providers come from the environment only, so nobody can register one through the API.
+      providersLimit: 0,
+      resolveUser: createResolveSsoUser(ssoConfig),
+      provisionUser: createProvisionSsoUser(ssoConfig, (userId, externalId) =>
+        db.update(schema.users).set({ externalId }).where(eq(schema.users.id, userId)),
+      ),
+      provisionUserOnEveryLogin: true,
+    }),
+  ];
+}
 
 /**
  * Team membership is what grants write access (see `authorizationService.assertCanWrite`), so
@@ -104,7 +134,13 @@ async function addUserToDefaultTeam(userId: string, repositories: ReturnType<typ
 }
 
 export const auth = betterAuth({
-  database: drizzleAdapter(db, { provider: 'pg', usePlural: true, schema }),
+  // The SSO plugin's resolveUser requires native transactions. After-hooks still run post-commit.
+  database: drizzleAdapter(db, { provider: 'pg', usePlural: true, schema, transaction: true }),
+  user: {
+    additionalFields: {
+      externalId: { type: 'string', required: false, input: false },
+    },
+  },
   databaseHooks: {
     session: {
       create: {
@@ -179,8 +215,10 @@ export const auth = betterAuth({
         afterCreateTeam,
       },
     }),
+    ...createSsoPlugins(),
   ],
-  trustedOrigins: getCorsOrigins(),
+  // The IdP origin must be trusted so the plugin can reach IdPs on private networks.
+  trustedOrigins: [...getCorsOrigins(), ...('sso' in authConfig ? [authConfig.sso.issuerOrigin] : [])],
   ...(process.env.AUTH_COOKIE_DOMAIN
     ? {
         advanced: {
@@ -191,5 +229,5 @@ export const auth = betterAuth({
         },
       }
     : {}),
-  socialProviders: authConfig.socialProviders,
+  socialProviders: 'socialProviders' in authConfig ? authConfig.socialProviders : {},
 });
