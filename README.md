@@ -11,7 +11,6 @@ This Turborepo includes the following apps:
 
 - `api`: a [Fastify](https://fastify.dev/) server using TypeScript, and Drizzle ORM for database access to a Postgres database
 - `docs`: comprehensive documentation built with [Docusaurus](https://docusaurus.io/) explaining architecture and usage
-- `flagd`: a [flagd](https://flagd.dev/) instance (feature flag evaluation engine)
 - `ui`: a [Next.js](https://nextjs.org/) app built with React, Tailwind CSS, and Carbon UI for a modern, accessible interface
 
 ### Shared libraries
@@ -25,7 +24,7 @@ This Turborepo includes the following apps:
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) `>= 22`
-- [pnpm](https://pnpm.io/) `11.11.0` (the repo pins its package manager; the easiest way to get the right version is `corepack enable && corepack prepare pnpm@11.11.0 --activate`)
+- [pnpm](https://pnpm.io/) (the repo pins its version in `package.json`; run `corepack enable pnpm` to use it automatically)
 - [Docker](https://www.docker.com/) (optional — used to run the whole stack together, see [Docker](#docker))
 - A local [PostgreSQL](https://www.postgresql.org/) database when running the API outside of Docker (see [Database](#database))
 

@@ -2,7 +2,7 @@
 
 ## Getting started
 
-The API requires Node.js 22 or newer and pnpm 11.11.0. Install workspace dependencies from the repository root, then run API commands from `apps/api`.
+The API requires Node.js 22 or newer and pnpm (version pinned in the root `package.json`). Install workspace dependencies from the repository root, then run API commands from `apps/api`.
 
 1. Install the workspace dependencies:
    ```bash
@@ -51,12 +51,6 @@ Available scripts in package.json:
 
 ### `pnpm build`
 Builds the application for production deployment
-
-### `pnpm codegen:compile`
-Compiles the GraphQL schema and generates TypeScript types
-
-### `pnpm codegen:watch`
-Watches for GraphQL schema changes and automatically regenerates TypeScript types
 
 ### `pnpm generate:migration`
 Generates a new database migration file based on schema changes
