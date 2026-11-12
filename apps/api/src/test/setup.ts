@@ -11,7 +11,7 @@ process.env.AUTH_PROVIDER = 'github';
 process.env.GITHUB_CLIENT_ID = 'test-github-client-id';
 process.env.GITHUB_CLIENT_SECRET = 'test-github-client-secret';
 // Normally done by main(), which tests skip.
-initializeAuthConfig();
+await initializeAuthConfig();
 
 export const sessionToken = 'sessiontoken';
 
@@ -51,6 +51,12 @@ vi.mock('better-auth/minimal', () => ({
     },
     options,
   }),
+}));
+
+// Registered here because this file loads getAuthConfig before any test file's mocks apply.
+vi.mock('@better-auth/sso', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@better-auth/sso')>()),
+  discoverOIDCConfig: vi.fn(),
 }));
 
 vi.mock('better-auth/plugins', () => ({

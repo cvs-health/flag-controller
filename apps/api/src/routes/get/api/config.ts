@@ -17,7 +17,7 @@ const schema = {
             type: 'object',
             properties: {
               id: { type: 'string' },
-              kind: { type: 'string', enum: ['social'] },
+              kind: { type: 'string', enum: ['social', 'oidc'] },
               label: { type: 'string' },
             },
             required: ['id', 'kind'],
