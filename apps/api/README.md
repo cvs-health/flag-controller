@@ -173,7 +173,7 @@ In `src/auth.ts`, a `betterAuth` instance is created using the `better-auth/mini
 }
 ```
 
-`kind` is `social` for GitHub and `oidc` for SSO, where `id` is `SSO_PROVIDER_ID`. The response never includes client ids, secrets or the issuer.
+`kind` is `social` for GitHub and `oidc` for SSO, where `id` is `sso`. The response never includes client ids, secrets or the issuer.
 
 #### Setting up the GitHub OAuth App
 
@@ -196,7 +196,7 @@ SSO_CLIENT_ID=...
 SSO_CLIENT_SECRET=...
 ```
 
-The client's redirect URI is `<BETTER_AUTH_URL>/api/auth/sso/callback/<SSO_PROVIDER_ID>`, for example `http://localhost:8080/api/auth/sso/callback/sso`. The optional variables are described in `.env.example`.
+The client's redirect URI is `<BETTER_AUTH_URL>/api/auth/sso/callback/sso`, for example `http://localhost:8080/api/auth/sso/callback/sso`. The optional variables are described in `.env.example`.
 
 At startup the API fetches `<SSO_ISSUER>/.well-known/openid-configuration`. If that fails, startup stops with the IdP's error.
 
@@ -207,7 +207,7 @@ At startup the API fetches `<SSO_ISSUER>/.well-known/openid-configuration`. If t
 | Google | `https://accounts.google.com` |
 | Keycloak | `https://<host>/realms/<realm>` |
 
-**How users are identified.** A user is matched by the IdP's stable subject, stored in `users.external_id`, and never by email. The subject is the `oid` claim, falling back to `sub` when the IdP sends no `oid`. Set `SSO_CLAIM_EXTERNAL_ID` to use a different claim. If an email address already belongs to another user, sign-in fails instead of merging the two. With `IDENTITY_PROFILE_SYNC=true` (the default), name, email and picture are refreshed from the IdP at every sign-in.
+**How users are identified.** A user is matched by the IdP's stable subject, stored in `users.external_id`, and never by email. The subject is the `oid` claim, falling back to `sub` when the IdP sends no `oid`. Set `SSO_CLAIM_EXTERNAL_ID` to use a different claim. If an email address already belongs to another user, sign-in fails instead of merging the two. Name, email and picture are refreshed from the IdP at every sign-in.
 
 **Restricting sign-in.** `SSO_ALLOWED_EMAIL_DOMAINS` limits sign-in to exact email domains, and rejects an email the IdP marks as unverified. `SSO_ALLOWED_CLAIM` with `SSO_ALLOWED_CLAIM_VALUES` requires an ID token claim to hold one of the values, for example `hd` for a Google Workspace domain or `tid` for an Entra ID tenant. A rejected user is sent back to the login page with an error.
 

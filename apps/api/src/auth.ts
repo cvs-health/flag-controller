@@ -17,7 +17,7 @@ import * as schema from './db/schema/auth.js';
 import createOrganizationsService from 'services/organizationsService.js';
 import createRepositories from 'utils/createRepositories.js';
 import createTeamsService from 'services/teamsService.js';
-import { getAuthConfig } from './utils/getAuthConfig.js';
+import { getAuthConfig, type SsoConfig } from './utils/getAuthConfig.js';
 import getCorsOrigins from './utils/getCorsOrigins.js';
 import normalizeTeamName from 'utils/normalizeTeamName.js';
 import { DEFAULT_ORGANIZATION } from './constants/organizations.js';
@@ -32,36 +32,29 @@ type HookParameters<T extends keyof NonNullable<OrganizationOptions['organizatio
 
 // Initialized by main() before this module loads.
 const authConfig = getAuthConfig();
+const ssoConfig = 'sso' in authConfig ? authConfig.sso : undefined;
 
 const pool = new Pool(poolSettings);
 const db = drizzle(pool);
 const withTransaction = createWithTransaction(db);
 
-function createSsoPlugins() {
-  if (!('sso' in authConfig)) {
-    return [];
-  }
-
-  const ssoConfig = authConfig.sso;
-
-  return [
-    sso({
-      defaultSSO: [
-        {
-          providerId: ssoConfig.providerId,
-          domain: new URL(ssoConfig.issuerOrigin).hostname,
-          oidcConfig: ssoConfig.oidcConfig,
-        },
-      ],
-      // Providers come from the environment only, so nobody can register one through the API.
-      providersLimit: 0,
-      resolveUser: createResolveSsoUser(ssoConfig),
-      provisionUser: createProvisionSsoUser(ssoConfig, (userId, externalId) =>
-        db.update(schema.users).set({ externalId }).where(eq(schema.users.id, userId)),
-      ),
-      provisionUserOnEveryLogin: true,
-    }),
-  ];
+function createSsoPlugin(config: SsoConfig) {
+  return sso({
+    defaultSSO: [
+      {
+        providerId: config.providerId,
+        domain: new URL(config.issuerOrigin).hostname,
+        oidcConfig: config.oidcConfig,
+      },
+    ],
+    // The provider comes from the environment only; registering one through the API is disabled.
+    providersLimit: 0,
+    resolveUser: createResolveSsoUser(config),
+    provisionUser: createProvisionSsoUser(config, (userId, externalId) =>
+      db.update(schema.users).set({ externalId }).where(eq(schema.users.id, userId)),
+    ),
+    provisionUserOnEveryLogin: true,
+  });
 }
 
 /**
@@ -134,7 +127,7 @@ async function addUserToDefaultTeam(userId: string, repositories: ReturnType<typ
 }
 
 export const auth = betterAuth({
-  // The SSO plugin's resolveUser requires native transactions. After-hooks still run post-commit.
+  // The SSO plugin's resolveUser requires native transactions; after-hooks still run post-commit.
   database: drizzleAdapter(db, { provider: 'pg', usePlural: true, schema, transaction: true }),
   user: {
     additionalFields: {
@@ -229,10 +222,10 @@ export const auth = betterAuth({
         afterCreateTeam,
       },
     }),
-    ...createSsoPlugins(),
+    ...(ssoConfig ? [createSsoPlugin(ssoConfig)] : []),
   ],
-  // The IdP origin must be trusted so the plugin can reach IdPs on private networks.
-  trustedOrigins: [...getCorsOrigins(), ...('sso' in authConfig ? [authConfig.sso.issuerOrigin] : [])],
+  // Trusting the issuer lets the plugin reach an IdP on a private network.
+  trustedOrigins: [...getCorsOrigins(), ...(ssoConfig ? [ssoConfig.issuerOrigin] : [])],
   ...(process.env.AUTH_COOKIE_DOMAIN
     ? {
         advanced: {

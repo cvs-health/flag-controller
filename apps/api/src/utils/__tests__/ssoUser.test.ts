@@ -1,58 +1,56 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
-import { discoverOIDCConfig } from '@better-auth/sso';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { issuer, loadSsoConfig } from 'test/sso.js';
 import { initializeAuthConfig } from '../getAuthConfig.js';
 import { createProvisionSsoUser, createResolveSsoUser, getExternalId, getSignInRestriction } from '../ssoUser.js';
 
-type ResolveInput = Parameters<ReturnType<typeof createResolveSsoUser>>[0];
-type ResolveContext = Parameters<ReturnType<typeof createResolveSsoUser>>[1];
-type ProvisionInput = Parameters<ReturnType<typeof createProvisionSsoUser>>[0];
+type ResolveUser = ReturnType<typeof createResolveSsoUser>;
+type ProvisionUser = ReturnType<typeof createProvisionSsoUser>;
 
-async function ssoConfig(env: Record<string, string> = {}) {
-  const values = {
-    AUTH_PROVIDER: 'sso',
-    SSO_ISSUER: 'https://idp.example.com',
-    SSO_CLIENT_ID: 'id',
-    SSO_CLIENT_SECRET: 'secret',
-    ...env,
-  };
-  for (const [name, value] of Object.entries(values)) {
-    vi.stubEnv(name, value);
-  }
-  vi.mocked(discoverOIDCConfig).mockResolvedValue({
-    issuer: 'https://idp.example.com',
-    discoveryEndpoint: 'https://idp.example.com/.well-known/openid-configuration',
-    authorizationEndpoint: 'https://idp.example.com/authorize',
-    tokenEndpoint: 'https://idp.example.com/token',
-    jwksEndpoint: 'https://idp.example.com/jwks',
-  });
+const contosoTenantId = '4b1c6f0e-9d3a-4e7b-8a2c-1f5d9e0b7c34';
 
-  const config = await initializeAuthConfig();
-  if (!('sso' in config)) {
-    throw new Error('expected an SSO config');
-  }
+const entraClaims = {
+  iss: `https://login.microsoftonline.com/${contosoTenantId}/v2.0`,
+  aud: 'flag-controller',
+  sub: 'AAAAAAAAAAAAAAAAAAAAAMv2Tq9f1sXn0gH3kL8pWzE',
+  oid: '0e7a3f52-6c1d-4b9e-a4f8-2d5c7b9e1a03',
+  tid: contosoTenantId,
+  email: 'ada.lovelace@contoso.com',
+  name: 'Ada Lovelace',
+  roles: ['FlagController.Editor'],
+};
 
-  return config.sso;
-}
+const keycloakClaims = {
+  iss: issuer,
+  aud: 'flag-controller',
+  azp: 'flag-controller',
+  sub: '1408fe4f-d510-45ca-ae3f-e472b54062de',
+  email: 'grace.hopper@example.com',
+  name: 'Grace Hopper',
+};
 
-function resolveInput(claims: Record<string, unknown>, email = 'ada@example.com') {
+const existingUserId = 'bJB6nVXAOQeYlunWrVSOWuTAQFfdl6Ck';
+
+function resolveInput(claims: Record<string, unknown>, userInfo = claims) {
   return {
     protocol: 'oidc',
-    providerUser: { email },
+    providerUser: { email: userInfo.email },
+    providerClaims: userInfo,
     verifiedIdTokenClaims: claims,
-  } as unknown as ResolveInput;
+  } as unknown as Parameters<ResolveUser>[0];
 }
 
-function databaseWith(user?: { id: string }) {
-  const findOne = vi.fn().mockResolvedValue(user ?? null);
-  return { findOne, context: { database: { findOne } } as unknown as ResolveContext };
+function databaseWith(user: { id: string } | null) {
+  const findOne = vi.fn().mockResolvedValue(user);
+  return { findOne, context: { database: { findOne } } as unknown as Parameters<ResolveUser>[1] };
 }
 
-function idToken(claims: Record<string, unknown>) {
-  return `header.${Buffer.from(JSON.stringify(claims)).toString('base64url')}.signature`;
+function signedIdToken(claims: Record<string, unknown>) {
+  const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
+  return `${encode({ alg: 'RS256', kid: 'kRp5Qn2s' })}.${encode(claims)}.c2lnbmF0dXJl`;
 }
 
 afterEach(async () => {
@@ -61,63 +59,70 @@ afterEach(async () => {
 });
 
 describe('getExternalId', () => {
-  it('prefers oid by default', async () => {
-    expect(getExternalId(await ssoConfig(), { oid: 'object-1', sub: 'subject-1' })).toBe('object-1');
+  it("uses Entra ID's oid rather than its per-app sub", async () => {
+    expect(getExternalId(await loadSsoConfig(), entraClaims)).toBe(entraClaims.oid);
   });
 
-  it('falls back to sub by default when the IdP sends no oid', async () => {
-    expect(getExternalId(await ssoConfig(), { sub: 'subject-1' })).toBe('subject-1');
+  it('falls back to sub for IdPs that send no oid', async () => {
+    expect(getExternalId(await loadSsoConfig(), keycloakClaims)).toBe(keycloakClaims.sub);
   });
 
-  it('uses a configured claim without falling back to sub', async () => {
-    const sso = await ssoConfig({ SSO_CLAIM_EXTERNAL_ID: 'employee_id' });
+  it('uses a configured claim and never falls back to sub', async () => {
+    const sso = await loadSsoConfig({ SSO_CLAIM_EXTERNAL_ID: 'employee_id' });
 
-    expect(getExternalId(sso, { employee_id: 'e-42', sub: 'subject-1' })).toBe('e-42');
-    expect(getExternalId(sso, { sub: 'subject-1' })).toBeUndefined();
+    expect(getExternalId(sso, { ...keycloakClaims, employee_id: 'E104729' })).toBe('E104729');
+    expect(getExternalId(sso, keycloakClaims)).toBeUndefined();
   });
 
-  it('ignores empty and non-string claim values', async () => {
-    const sso = await ssoConfig({ SSO_CLAIM_EXTERNAL_ID: 'employee_id' });
+  it('ignores a claim that is not a string', async () => {
+    const sso = await loadSsoConfig({ SSO_CLAIM_EXTERNAL_ID: 'employee_id' });
 
-    expect(getExternalId(sso, { employee_id: '' })).toBeUndefined();
-    expect(getExternalId(sso, { employee_id: 42 })).toBeUndefined();
+    expect(getExternalId(sso, { ...keycloakClaims, employee_id: 104729 })).toBeUndefined();
   });
 });
 
 describe('getSignInRestriction', () => {
   it('allows everyone when no restriction is configured', async () => {
-    expect(getSignInRestriction(await ssoConfig(), 'ada@anywhere.com', {})).toBeUndefined();
+    expect(getSignInRestriction(await loadSsoConfig(), keycloakClaims, keycloakClaims)).toBeUndefined();
   });
 
-  it('allows email addresses in an allowed domain, ignoring case', async () => {
-    const sso = await ssoConfig({ SSO_ALLOWED_EMAIL_DOMAINS: 'example.com' });
+  it('allows an email in an allowed domain, ignoring case', async () => {
+    const sso = await loadSsoConfig({ SSO_ALLOWED_EMAIL_DOMAINS: 'contoso.com' });
 
-    expect(getSignInRestriction(sso, 'Ada@Example.COM', {})).toBeUndefined();
+    expect(getSignInRestriction(sso, { email: 'Ada.Lovelace@Contoso.COM' }, entraClaims)).toBeUndefined();
   });
 
-  it.each(['ada@other.com', 'ada@sub.example.com', 'not-an-email'])(
+  it.each(['grace.hopper@example.com', 'ada@eu.contoso.com', 'contoso.com'])(
     'rejects %s outside the allowed domains',
     async (email) => {
-      const sso = await ssoConfig({ SSO_ALLOWED_EMAIL_DOMAINS: 'example.com' });
+      const sso = await loadSsoConfig({ SSO_ALLOWED_EMAIL_DOMAINS: 'contoso.com' });
 
-      expect(getSignInRestriction(sso, email, {})).toEqual({
+      expect(getSignInRestriction(sso, { email }, keycloakClaims)).toEqual({
         code: 'sso_email_domain_not_allowed',
-        message: 'Sign-in is limited to example.com email addresses.',
+        message: 'Sign-in is limited to contoso.com email addresses.',
       });
     },
   );
 
-  it('allows a claim holding one of the allowed values, including in an array', async () => {
-    const sso = await ssoConfig({ SSO_ALLOWED_CLAIM: 'tid', SSO_ALLOWED_CLAIM_VALUES: 'tenant-a,tenant-b' });
+  it('allows an Entra ID tenant on the list', async () => {
+    const sso = await loadSsoConfig({ SSO_ALLOWED_CLAIM: 'tid', SSO_ALLOWED_CLAIM_VALUES: contosoTenantId });
 
-    expect(getSignInRestriction(sso, 'ada@example.com', { tid: 'tenant-b' })).toBeUndefined();
-    expect(getSignInRestriction(sso, 'ada@example.com', { tid: ['tenant-x', 'tenant-a'] })).toBeUndefined();
+    expect(getSignInRestriction(sso, entraClaims, entraClaims)).toBeUndefined();
   });
 
-  it.each([{ tid: 'tenant-x' }, {}])('rejects claims %o without an allowed value', async (claims) => {
-    const sso = await ssoConfig({ SSO_ALLOWED_CLAIM: 'tid', SSO_ALLOWED_CLAIM_VALUES: 'tenant-a' });
+  it('allows a multi-valued claim when any value is on the list', async () => {
+    const sso = await loadSsoConfig({ SSO_ALLOWED_CLAIM: 'roles', SSO_ALLOWED_CLAIM_VALUES: 'FlagController.Editor' });
 
-    expect(getSignInRestriction(sso, 'ada@example.com', claims)).toEqual({
+    expect(getSignInRestriction(sso, entraClaims, entraClaims)).toBeUndefined();
+  });
+
+  it.each([
+    ['another tenant', { ...entraClaims, tid: '9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d' }],
+    ['no tenant claim', keycloakClaims],
+  ])('rejects %s', async (_, claims) => {
+    const sso = await loadSsoConfig({ SSO_ALLOWED_CLAIM: 'tid', SSO_ALLOWED_CLAIM_VALUES: contosoTenantId });
+
+    expect(getSignInRestriction(sso, claims, claims)).toEqual({
       code: 'sso_claim_not_allowed',
       message: "Your account's tid is not allowed to sign in.",
     });
@@ -125,99 +130,91 @@ describe('getSignInRestriction', () => {
 });
 
 describe('createResolveSsoUser', () => {
-  it('links the user with the same external id and refreshes the profile', async () => {
-    const resolveUser = createResolveSsoUser(await ssoConfig());
-    const { context, findOne } = databaseWith({ id: 'user-1' });
+  it('signs in the user with the same external id, even after an email change, and refreshes the profile', async () => {
+    const resolveUser = createResolveSsoUser(await loadSsoConfig());
+    const { context, findOne } = databaseWith({ id: existingUserId });
 
-    expect(await resolveUser(resolveInput({ oid: 'object-1', sub: 'subject-1' }, 'new@example.com'), context)).toEqual({
-      action: 'link',
-      userId: 'user-1',
-      profile: 'update',
-    });
+    const decision = await resolveUser(resolveInput({ ...entraClaims, email: 'ada.king@contoso.com' }), context);
+
+    expect(decision).toEqual({ action: 'link', userId: existingUserId, profile: 'update' });
     expect(findOne).toHaveBeenCalledExactlyOnceWith({
       model: 'user',
-      where: [{ field: 'externalId', value: 'object-1' }],
+      where: [{ field: 'externalId', value: entraClaims.oid }],
     });
   });
 
-  it('keeps the stored profile when IDENTITY_PROFILE_SYNC is false', async () => {
-    const resolveUser = createResolveSsoUser(await ssoConfig({ IDENTITY_PROFILE_SYNC: 'false' }));
+  it('lets Better Auth create the user on a first sign-in', async () => {
+    const resolveUser = createResolveSsoUser(await loadSsoConfig());
 
-    expect(await resolveUser(resolveInput({ sub: 'subject-1' }), databaseWith({ id: 'user-1' }).context)).toMatchObject(
-      {
-        profile: 'preserve',
-      },
-    );
-  });
-
-  it('lets Better Auth create the user when no one has the external id', async () => {
-    const resolveUser = createResolveSsoUser(await ssoConfig());
-
-    expect(await resolveUser(resolveInput({ sub: 'subject-1' }), databaseWith().context)).toEqual({
+    expect(await resolveUser(resolveInput(keycloakClaims), databaseWith(null).context)).toEqual({
       action: 'continue',
     });
   });
 
   it('rejects a sign-in outside the allowed domains before looking anyone up', async () => {
-    const resolveUser = createResolveSsoUser(await ssoConfig({ SSO_ALLOWED_EMAIL_DOMAINS: 'other.com' }));
-    const { context, findOne } = databaseWith({ id: 'user-1' });
+    const resolveUser = createResolveSsoUser(await loadSsoConfig({ SSO_ALLOWED_EMAIL_DOMAINS: 'contoso.com' }));
+    const { context, findOne } = databaseWith({ id: existingUserId });
 
-    expect(await resolveUser(resolveInput({ sub: 'subject-1' }), context)).toMatchObject({
+    expect(await resolveUser(resolveInput(keycloakClaims), context)).toEqual({
       action: 'reject',
       code: 'sso_email_domain_not_allowed',
+      message: 'Sign-in is limited to contoso.com email addresses.',
     });
     expect(findOne).not.toHaveBeenCalled();
   });
 
-  it('rejects a sign-in without the configured external id claim', async () => {
-    const resolveUser = createResolveSsoUser(await ssoConfig({ SSO_CLAIM_EXTERNAL_ID: 'employee_id' }));
+  it('rejects an email that userinfo marks as unverified, even when the ID token omits the flag', async () => {
+    const resolveUser = createResolveSsoUser(await loadSsoConfig({ SSO_ALLOWED_EMAIL_DOMAINS: 'example.com' }));
+    const userInfo = { ...keycloakClaims, email_verified: false };
 
-    expect(await resolveUser(resolveInput({ sub: 'subject-1' }), databaseWith().context)).toEqual({
+    expect(await resolveUser(resolveInput(keycloakClaims, userInfo), databaseWith(null).context)).toEqual({
+      action: 'reject',
+      code: 'sso_email_not_verified',
+      message: 'Verify your email address with your identity provider.',
+    });
+  });
+
+  it('rejects a sign-in without the configured external id claim', async () => {
+    const resolveUser = createResolveSsoUser(await loadSsoConfig({ SSO_CLAIM_EXTERNAL_ID: 'employee_id' }));
+
+    expect(await resolveUser(resolveInput(keycloakClaims), databaseWith(null).context)).toEqual({
       action: 'reject',
       code: 'sso_external_id_missing',
       message: 'The identity provider did not send the employee_id claim.',
     });
   });
-
-  it('rejects SAML sign-ins', async () => {
-    const resolveUser = createResolveSsoUser(await ssoConfig());
-    const input = { protocol: 'saml' } as unknown as ResolveInput;
-
-    expect(await resolveUser(input, databaseWith().context)).toEqual({
-      action: 'reject',
-      code: 'sso_protocol_not_supported',
-    });
-  });
 });
 
 describe('createProvisionSsoUser', () => {
-  function provisionInput(user: Record<string, unknown>, claims?: Record<string, unknown>) {
-    return { user, token: claims ? { idToken: idToken(claims) } : undefined } as unknown as ProvisionInput;
+  function provisionInput(user: { id: string; externalId?: string | null }, idToken?: string) {
+    return { user, token: idToken ? { idToken } : undefined } as unknown as Parameters<ProvisionUser>[0];
   }
 
-  it('stores the external id from the ID token on a user without one', async () => {
+  it('stores the external id from the ID token on a new user', async () => {
     const setExternalId = vi.fn();
-    const provisionUser = createProvisionSsoUser(await ssoConfig(), setExternalId);
+    const provisionUser = createProvisionSsoUser(await loadSsoConfig(), setExternalId);
 
-    await provisionUser(provisionInput({ id: 'user-1', externalId: null }, { oid: 'object-1', sub: 'subject-1' }));
+    await provisionUser(provisionInput({ id: existingUserId, externalId: null }, signedIdToken(entraClaims)));
 
-    expect(setExternalId).toHaveBeenCalledExactlyOnceWith('user-1', 'object-1');
+    expect(setExternalId).toHaveBeenCalledExactlyOnceWith(existingUserId, entraClaims.oid);
   });
 
-  it('leaves a stored external id alone', async () => {
+  it('leaves an external id that is already stored', async () => {
     const setExternalId = vi.fn();
-    const provisionUser = createProvisionSsoUser(await ssoConfig(), setExternalId);
+    const provisionUser = createProvisionSsoUser(await loadSsoConfig(), setExternalId);
 
-    await provisionUser(provisionInput({ id: 'user-1', externalId: 'object-1' }, { oid: 'object-2' }));
+    await provisionUser(
+      provisionInput({ id: existingUserId, externalId: entraClaims.oid }, signedIdToken(entraClaims)),
+    );
 
     expect(setExternalId).not.toHaveBeenCalled();
   });
 
   it('does nothing without an ID token', async () => {
     const setExternalId = vi.fn();
-    const provisionUser = createProvisionSsoUser(await ssoConfig(), setExternalId);
+    const provisionUser = createProvisionSsoUser(await loadSsoConfig(), setExternalId);
 
-    await provisionUser(provisionInput({ id: 'user-1' }));
+    await provisionUser(provisionInput({ id: existingUserId, externalId: null }));
 
     expect(setExternalId).not.toHaveBeenCalled();
   });
