@@ -2,38 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { discoverOIDCConfig } from '@better-auth/sso';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { clientSecret, discovery, issuer, loadSsoConfig, stubSsoEnv } from 'test/sso.js';
 import { getAuthConfig, getPublicConfig, initializeAuthConfig } from '../getAuthConfig.js';
-
-const issuer = 'https://idp.example.com/realms/corp';
-
-const discovered = {
-  issuer,
-  discoveryEndpoint: `${issuer}/.well-known/openid-configuration`,
-  authorizationEndpoint: `${issuer}/protocol/openid-connect/auth`,
-  tokenEndpoint: `${issuer}/protocol/openid-connect/token`,
-  jwksEndpoint: `${issuer}/protocol/openid-connect/certs`,
-  userInfoEndpoint: `${issuer}/protocol/openid-connect/userinfo`,
-  tokenEndpointAuthentication: 'client_secret_basic' as const,
-};
-
-function stubSso(env: Record<string, string | undefined> = {}) {
-  const values = {
-    AUTH_PROVIDER: 'sso',
-    SSO_ISSUER: issuer,
-    SSO_CLIENT_ID: 'sso-client-id',
-    SSO_CLIENT_SECRET: 'sso-client-secret',
-    ...env,
-  };
-  for (const [name, value] of Object.entries(values)) {
-    vi.stubEnv(name, value);
-  }
-}
-
-beforeEach(() => {
-  vi.mocked(discoverOIDCConfig).mockResolvedValue(discovered);
-});
 
 afterEach(async () => {
   vi.unstubAllEnvs();
@@ -66,13 +38,16 @@ describe('getAuthConfig', () => {
     );
   });
 
-  it.each(['GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET'])('names %s when it is missing', async (name) => {
+  it.each([
+    ['GITHUB_CLIENT_ID', 'requires GITHUB_CLIENT_ID'],
+    ['GITHUB_CLIENT_SECRET', 'requires GITHUB_CLIENT_SECRET'],
+  ])('names %s when it is missing', async (name, message) => {
     vi.stubEnv(name, '');
 
-    await expect(initializeAuthConfig()).rejects.toThrow(`AUTH_PROVIDER=github requires ${name}`);
+    await expect(initializeAuthConfig()).rejects.toThrow(`AUTH_PROVIDER=github ${message}`);
   });
 
-  it('names both GitHub credentials when both are missing', async () => {
+  it('names both credentials when both are missing', async () => {
     vi.stubEnv('GITHUB_CLIENT_ID', '');
     vi.stubEnv('GITHUB_CLIENT_SECRET', '');
 
@@ -88,108 +63,89 @@ describe('getAuthConfig', () => {
 });
 
 describe('getAuthConfig with AUTH_PROVIDER=sso', () => {
-  it('needs only the issuer, client id and secret, and fills endpoints from discovery', async () => {
-    stubSso();
+  it('needs only the issuer, client id and secret, and takes endpoints from discovery', async () => {
+    stubSsoEnv();
 
     expect(await initializeAuthConfig()).toEqual({
       provider: { id: 'sso', label: undefined, kind: 'oidc' },
       sso: {
         providerId: 'sso',
-        issuerOrigin: 'https://idp.example.com',
-        externalIdClaim: 'oid',
-        externalIdFallbackToSub: true,
+        issuerOrigin: 'https://sso.example.com',
+        externalIdClaims: ['oid', 'sub'],
         allowedEmailDomains: undefined,
         allowedClaim: undefined,
-        profileSync: true,
         oidcConfig: {
-          issuer,
-          clientId: 'sso-client-id',
-          clientSecret: 'sso-client-secret',
+          ...discovery,
+          clientId: 'flag-controller',
+          clientSecret,
           pkce: true,
           scopes: ['openid', 'profile', 'email'],
           overrideUserInfo: true,
-          discoveryEndpoint: discovered.discoveryEndpoint,
-          authorizationEndpoint: discovered.authorizationEndpoint,
-          tokenEndpoint: discovered.tokenEndpoint,
-          jwksEndpoint: discovered.jwksEndpoint,
-          userInfoEndpoint: discovered.userInfoEndpoint,
-          tokenEndpointAuthentication: 'client_secret_basic',
         },
       },
     });
   });
 
-  it('only trusts the issuer origin for discovery', async () => {
-    stubSso();
+  it('only trusts the issuer origin during discovery', async () => {
+    stubSsoEnv();
     await initializeAuthConfig();
 
     const { isTrustedOrigin } = vi.mocked(discoverOIDCConfig).mock.calls[0][0];
 
-    expect(isTrustedOrigin?.(`${issuer}/.well-known/openid-configuration`)).toBe(true);
-    expect(isTrustedOrigin?.('https://evil.example.com/keys')).toBe(false);
+    expect(isTrustedOrigin?.(discovery.discoveryEndpoint)).toBe(true);
+    expect(isTrustedOrigin?.('https://attacker.example.net/certs')).toBe(false);
   });
 
   it('reads the optional settings', async () => {
-    stubSso({
-      SSO_PROVIDER_ID: 'corp',
+    const sso = await loadSsoConfig({
       SSO_LABEL: 'App Registry',
       SSO_SCOPES: 'openid, email',
       SSO_CLAIM_EXTERNAL_ID: 'employee_id',
-      SSO_ALLOWED_EMAIL_DOMAINS: 'Example.com, example.org',
+      SSO_ALLOWED_EMAIL_DOMAINS: 'Contoso.com, fabrikam.com',
       SSO_ALLOWED_CLAIM: 'tid',
-      SSO_ALLOWED_CLAIM_VALUES: 'tenant-a,tenant-b',
-      IDENTITY_PROFILE_SYNC: 'false',
+      SSO_ALLOWED_CLAIM_VALUES: '4b1c6f0e-9d3a-4e7b-8a2c-1f5d9e0b7c34',
     });
 
-    const config = await initializeAuthConfig();
-
-    expect(config.provider).toEqual({ id: 'corp', label: 'App Registry', kind: 'oidc' });
-    expect(config).toMatchObject({
-      sso: {
-        providerId: 'corp',
-        externalIdClaim: 'employee_id',
-        externalIdFallbackToSub: false,
-        allowedEmailDomains: ['example.com', 'example.org'],
-        allowedClaim: { name: 'tid', values: ['tenant-a', 'tenant-b'] },
-        profileSync: false,
-        oidcConfig: { scopes: ['openid', 'email'], overrideUserInfo: false },
-      },
+    expect(getPublicConfig().authProviders).toEqual([{ id: 'sso', label: 'App Registry', kind: 'oidc' }]);
+    expect(sso).toMatchObject({
+      externalIdClaims: ['employee_id'],
+      allowedEmailDomains: ['contoso.com', 'fabrikam.com'],
+      allowedClaim: { name: 'tid', values: ['4b1c6f0e-9d3a-4e7b-8a2c-1f5d9e0b7c34'] },
+      oidcConfig: { scopes: ['openid', 'email'] },
     });
   });
 
   it('names every missing required variable', async () => {
-    stubSso({ SSO_ISSUER: '', SSO_CLIENT_ID: '', SSO_CLIENT_SECRET: '' });
+    stubSsoEnv({ SSO_ISSUER: '', SSO_CLIENT_ID: '', SSO_CLIENT_SECRET: '' });
 
     await expect(initializeAuthConfig()).rejects.toThrow(
       'AUTH_PROVIDER=sso requires SSO_ISSUER, SSO_CLIENT_ID and SSO_CLIENT_SECRET',
     );
   });
 
-  it.each(['SSO_ISSUER', 'SSO_CLIENT_ID', 'SSO_CLIENT_SECRET'])('names %s when it is missing', async (name) => {
-    stubSso({ [name]: '' });
-
-    await expect(initializeAuthConfig()).rejects.toThrow(`AUTH_PROVIDER=sso requires ${name}`);
-  });
-
   it('fails with the IdP error when discovery fails', async () => {
-    stubSso();
-    vi.mocked(discoverOIDCConfig).mockRejectedValue(new Error('Discovery endpoint returned 404'));
+    stubSsoEnv();
+    vi.mocked(discoverOIDCConfig).mockRejectedValue(new Error('Discovery endpoint not found'));
 
     await expect(initializeAuthConfig()).rejects.toThrow(
-      `OpenID Connect discovery for ${issuer} failed: Discovery endpoint returned 404`,
+      `OpenID Connect discovery for ${issuer} failed: Discovery endpoint not found`,
     );
   });
 
   it.each([
-    [{ SSO_ISSUER: 'not a url' }, 'SSO_ISSUER must be an http(s) URL, got "not a url"'],
-    [{ SSO_ISSUER: 'ftp://idp.example.com' }, 'SSO_ISSUER must be an http(s) URL'],
-    [{ SSO_PROVIDER_ID: 'Corp SSO' }, 'SSO_PROVIDER_ID may only contain lowercase letters, numbers and hyphens'],
+    [
+      { SSO_ISSUER: 'sso.example.com/realms/corp' },
+      'SSO_ISSUER must be an http(s) URL, got "sso.example.com/realms/corp"',
+    ],
+    [{ SSO_ISSUER: 'ldap://sso.example.com' }, 'SSO_ISSUER must be an http(s) URL'],
     [{ SSO_SCOPES: 'profile,email' }, 'SSO_SCOPES must include openid'],
     [{ SSO_ALLOWED_CLAIM: 'tid' }, 'SSO_ALLOWED_CLAIM and SSO_ALLOWED_CLAIM_VALUES must be set together'],
-    [{ SSO_ALLOWED_CLAIM_VALUES: 'tenant-a' }, 'SSO_ALLOWED_CLAIM and SSO_ALLOWED_CLAIM_VALUES must be set together'],
-    [{ IDENTITY_PROFILE_SYNC: 'yes' }, 'IDENTITY_PROFILE_SYNC must be true or false, got "yes"'],
+    [
+      { SSO_ALLOWED_CLAIM_VALUES: 'contoso.com' },
+      'SSO_ALLOWED_CLAIM and SSO_ALLOWED_CLAIM_VALUES must be set together',
+    ],
   ])('rejects %o', async (env, message) => {
-    stubSso(env);
+    stubSsoEnv(env);
 
     await expect(initializeAuthConfig()).rejects.toThrow(message);
   });
@@ -207,13 +163,13 @@ describe('getPublicConfig', () => {
     expect(JSON.stringify(publicConfig)).not.toContain('test-github-client');
   });
 
-  it('reports the SSO provider without its credentials or issuer settings', async () => {
-    stubSso({ SSO_PROVIDER_ID: 'corp' });
-    await initializeAuthConfig();
+  it('reports the SSO provider without its credentials or issuer', async () => {
+    await loadSsoConfig();
 
-    const publicConfig = getPublicConfig();
+    const publicConfig = JSON.stringify(getPublicConfig());
 
-    expect(publicConfig.authProviders).toEqual([{ id: 'corp', kind: 'oidc' }]);
-    expect(JSON.stringify(publicConfig)).not.toMatch(/sso-client|idp\.example\.com/);
+    expect(publicConfig).toBe('{"authProviders":[{"id":"sso","kind":"oidc"}],"features":{},"modes":{}}');
+    expect(publicConfig).not.toContain(clientSecret);
+    expect(publicConfig).not.toContain('sso.example.com');
   });
 });

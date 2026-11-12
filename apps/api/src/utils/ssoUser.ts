@@ -3,21 +3,27 @@
 
 import type { SSOOptions } from '@better-auth/sso';
 
-import type { getAuthConfig } from './getAuthConfig.js';
-
-type SsoConfig = Extract<ReturnType<typeof getAuthConfig>, { sso: unknown }>['sso'];
-type ResolveUser = NonNullable<SSOOptions['resolveUser']>;
-type ProvisionUser = NonNullable<SSOOptions['provisionUser']>;
+import type { SsoConfig } from './getAuthConfig.js';
 
 export function getExternalId(sso: SsoConfig, claims: Record<string, unknown>) {
-  const value = claims[sso.externalIdClaim] ?? (sso.externalIdFallbackToSub ? claims.sub : undefined);
+  const value = sso.externalIdClaims.map((claim) => claims[claim]).find(Boolean);
 
-  return typeof value === 'string' && value ? value : undefined;
+  return typeof value === 'string' ? value : undefined;
 }
 
-export function getSignInRestriction(sso: SsoConfig, email: string, claims: Record<string, unknown>) {
+/** `profile` is where the email came from (userinfo, or the ID token); `claims` is the verified ID token. */
+export function getSignInRestriction(
+  sso: SsoConfig,
+  profile: { email: string; email_verified?: unknown },
+  claims: Record<string, unknown>,
+) {
   if (sso.allowedEmailDomains) {
-    const domain = email.split('@').at(-1)?.toLowerCase();
+    // Entra ID omits email_verified, so only an explicit false is rejected.
+    if (profile.email_verified === false) {
+      return { code: 'sso_email_not_verified', message: 'Verify your email address with your identity provider.' };
+    }
+
+    const domain = /@([^@]+)$/.exec(profile.email)?.[1].toLowerCase();
 
     if (!domain || !sso.allowedEmailDomains.includes(domain)) {
       return {
@@ -37,15 +43,15 @@ export function getSignInRestriction(sso: SsoConfig, email: string, claims: Reco
   }
 }
 
-/** Matches users by the IdP's stable subject only, never by email. */
-export function createResolveSsoUser(sso: SsoConfig): ResolveUser {
-  return async (input, { database }) => {
+/** Finds users by the IdP subject only, never by email. */
+export function createResolveSsoUser(sso: SsoConfig) {
+  return (async (input, { database }) => {
     if (input.protocol !== 'oidc') {
       return { action: 'reject', code: 'sso_protocol_not_supported' };
     }
 
     const claims = input.verifiedIdTokenClaims;
-    const restriction = getSignInRestriction(sso, input.providerUser.email, claims);
+    const restriction = getSignInRestriction(sso, { ...input.providerClaims, email: input.providerUser.email }, claims);
     if (restriction) {
       return { action: 'reject', ...restriction };
     }
@@ -55,7 +61,7 @@ export function createResolveSsoUser(sso: SsoConfig): ResolveUser {
       return {
         action: 'reject',
         code: 'sso_external_id_missing',
-        message: `The identity provider did not send the ${sso.externalIdClaim} claim.`,
+        message: `The identity provider did not send the ${sso.externalIdClaims[0]} claim.`,
       };
     }
 
@@ -64,36 +70,29 @@ export function createResolveSsoUser(sso: SsoConfig): ResolveUser {
       where: [{ field: 'externalId', value: externalId }],
     });
 
-    // A new user is created by Better Auth, and provisionUser then stores its external id.
-    if (!user) {
-      return { action: 'continue' };
-    }
-
-    return { action: 'link', userId: user.id, profile: sso.profileSync ? 'update' : 'preserve' };
-  };
+    // No match: Better Auth creates the user and provisionUser stores the external id.
+    return user ? { action: 'link', userId: user.id, profile: 'update' } : { action: 'continue' };
+  }) satisfies NonNullable<SSOOptions['resolveUser']>;
 }
 
 function decodeJwtPayload(jwt: string): Record<string, unknown> {
   return JSON.parse(Buffer.from(jwt.split('.')[1] ?? '', 'base64url').toString());
 }
 
-/**
- * Stores the external id on users that don't have one yet. resolveUser can't set fields on a user
- * Better Auth is about to create, so this runs after the sign-in commits. The plugin verified the
- * ID token earlier in the same request.
- */
+/** Stores the external id after sign-in, because resolveUser can't set fields on a user Better Auth creates. */
 export function createProvisionSsoUser(
   sso: SsoConfig,
   setExternalId: (userId: string, externalId: string) => Promise<unknown>,
-): ProvisionUser {
-  return async ({ user, token }) => {
+) {
+  return (async ({ user, token }) => {
     if (user.externalId || !token?.idToken) {
       return;
     }
 
+    // The plugin verified this ID token earlier in the same request.
     const externalId = getExternalId(sso, decodeJwtPayload(token.idToken));
     if (externalId) {
       await setExternalId(user.id, externalId);
     }
-  };
+  }) satisfies NonNullable<SSOOptions['provisionUser']>;
 }
