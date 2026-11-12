@@ -88,13 +88,13 @@ We are using docker compose to be able to run the different parts of the system 
 You can run production builds all of the applications together using docker compose:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 You can also use compose to just run a specific service:
 
 ```bash
-docker compose up --build api
+docker compose up -d --build api
 ```
 
 ### Troubleshooting
@@ -105,7 +105,7 @@ docker compose up --build api
 >
 >```bash
 > # Build everything with no cache
-> docker compose build --no-cache
+> docker compose build --no-cache && docker compose up -d
 > # Build a specific service with no cache
-> docker compose build --no-cache docs
+> docker compose build --no-cache docs && docker compose up -d docs
 >```
