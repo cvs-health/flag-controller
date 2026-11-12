@@ -5,20 +5,15 @@ import type { AuthProvider, PublicConfig } from 'shared-types';
 
 const DEFAULT_AUTH_PROVIDER = 'github';
 
-interface SocialProviderCredentials {
-  clientId: string;
-  clientSecret: string;
-}
-
 const AUTH_PROVIDERS = {
   github: { label: 'GitHub', kind: 'social' },
-} as const satisfies Record<string, Omit<AuthProvider, 'id'>>;
+} as const;
 
 type AuthProviderId = keyof typeof AUTH_PROVIDERS;
 
 interface AuthConfig {
   provider: AuthProvider & { id: AuthProviderId };
-  socialProviders: Partial<Record<AuthProviderId, SocialProviderCredentials>>;
+  socialProviders: Partial<Record<AuthProviderId, { clientId: string; clientSecret: string }>>;
 }
 
 let runtimeAuthConfig: AuthConfig | undefined;
@@ -31,22 +26,21 @@ function isAuthProviderId(id: string): id is AuthProviderId {
   return Object.hasOwn(AUTH_PROVIDERS, id);
 }
 
-function buildSocialCredentials(env: NodeJS.ProcessEnv, id: AuthProviderId): SocialProviderCredentials {
+function buildSocialCredentials(id: AuthProviderId) {
   const prefix = id.toUpperCase();
-  const missing = [`${prefix}_CLIENT_ID`, `${prefix}_CLIENT_SECRET`].filter((name) => !env[name]);
+  const clientId = process.env[`${prefix}_CLIENT_ID`];
+  const clientSecret = process.env[`${prefix}_CLIENT_SECRET`];
 
-  if (missing.length) {
+  if (!clientId || !clientSecret) {
+    const missing = [!clientId && `${prefix}_CLIENT_ID`, !clientSecret && `${prefix}_CLIENT_SECRET`].filter(Boolean);
     fail(`AUTH_PROVIDER=${id} requires ${missing.join(' and ')}`);
   }
 
-  return {
-    clientId: env[`${prefix}_CLIENT_ID`] as string,
-    clientSecret: env[`${prefix}_CLIENT_SECRET`] as string,
-  };
+  return { clientId, clientSecret };
 }
 
-export function readAuthConfig(env: NodeJS.ProcessEnv = process.env): AuthConfig {
-  const id = env.AUTH_PROVIDER || DEFAULT_AUTH_PROVIDER;
+function readAuthConfig() {
+  const id = process.env.AUTH_PROVIDER || DEFAULT_AUTH_PROVIDER;
 
   if (!isAuthProviderId(id)) {
     fail(`AUTH_PROVIDER must be one of ${Object.keys(AUTH_PROVIDERS).join(', ')}, got "${id}"`);
@@ -54,12 +48,12 @@ export function readAuthConfig(env: NodeJS.ProcessEnv = process.env): AuthConfig
 
   return {
     provider: { id, ...AUTH_PROVIDERS[id] },
-    socialProviders: { [id]: buildSocialCredentials(env, id) },
+    socialProviders: { [id]: buildSocialCredentials(id) },
   };
 }
 
-export function initializeAuthConfig(env: NodeJS.ProcessEnv = process.env) {
-  runtimeAuthConfig = readAuthConfig(env);
+export function initializeAuthConfig() {
+  runtimeAuthConfig = readAuthConfig();
   return runtimeAuthConfig;
 }
 

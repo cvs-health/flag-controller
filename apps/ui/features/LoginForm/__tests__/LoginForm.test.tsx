@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { PublicConfig } from 'shared-types';
 import { describe, expect, it, vi } from 'vitest';
 
 import { LoginForm } from '../LoginForm';
@@ -14,7 +13,7 @@ const githubConfig = {
   authProviders: [{ id: 'github', label: 'GitHub', kind: 'social' }],
   features: {},
   modes: {},
-} satisfies PublicConfig;
+};
 
 function renderLoginForm() {
   render(
