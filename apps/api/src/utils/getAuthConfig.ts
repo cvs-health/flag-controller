@@ -58,7 +58,11 @@ export function initializeAuthConfig() {
 }
 
 export function getAuthConfig() {
-  return runtimeAuthConfig ?? initializeAuthConfig();
+  if (!runtimeAuthConfig) {
+    throw new Error('Auth configuration read before initializeAuthConfig() ran');
+  }
+
+  return runtimeAuthConfig;
 }
 
 export function getPublicConfig(): PublicConfig {

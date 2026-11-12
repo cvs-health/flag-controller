@@ -20,7 +20,7 @@ interface LoginFormProps {
 export function LoginForm({ className }: LoginFormProps) {
   const [submitStatus, setSubmitStatus] = useState(ActionStatus.Idle);
   const getApiConfigQuery = useGetApiConfigQuery();
-  // The API configures one sign-in method per deployment (AUTH_PROVIDER).
+  // One provider per deployment.
   const [provider] = getApiConfigQuery.data?.authProviders ?? [];
 
   async function handleSubmit(event: SubmitEvent) {
@@ -51,7 +51,7 @@ export function LoginForm({ className }: LoginFormProps) {
             hideCloseButton
             kind="error"
             subtitle="Sign-in options could not be loaded. Please refresh the page."
-            title="Error authenticating"
+            title="Sign-in unavailable"
           />
         )}
         {submitStatus === ActionStatus.Error && (

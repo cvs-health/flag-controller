@@ -66,7 +66,7 @@ describe('LoginForm', () => {
     );
     renderLoginForm();
 
-    // The disabled placeholder button is also named "Login", so wait for it to enable.
+    // The disabled placeholder is also named "Login".
     await waitFor(() => expect(screen.getByRole('button', { name: 'Login' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Login' }));
 

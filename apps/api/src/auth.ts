@@ -26,7 +26,7 @@ type HookParameters<T extends keyof NonNullable<OrganizationOptions['organizatio
   NonNullable<NonNullable<OrganizationOptions['organizationHooks']>[T]>
 >[0];
 
-/** Read once at import so a bad `AUTH_PROVIDER` or missing credential stops startup. */
+// Initialized by main() before this module loads.
 const authConfig = getAuthConfig();
 
 const pool = new Pool(poolSettings);

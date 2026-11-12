@@ -37,7 +37,7 @@ export async function main() {
     initializeAuthConfig();
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
-    console.error('Invalid auth configuration, shutting down...');
+    console.error('Shutting down...');
     process.exit(1);
   }
 

@@ -1,15 +1,13 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { auth } from '../../../../auth.js';
 import build from '../../../../app.js';
 import testBuild from 'test/app.js';
 
 describe('get/api/config', () => {
   it('describes the configured sign-in method without a session', async () => {
-    vi.spyOn(auth.api, 'getSession').mockResolvedValue(null);
     const app = testBuild();
 
     const response = await app.inject({

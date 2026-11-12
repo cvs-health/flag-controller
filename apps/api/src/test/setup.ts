@@ -4,11 +4,16 @@
 import type { BetterAuthOptions } from 'better-auth/types';
 import { vi } from 'vitest';
 
-export const sessionToken = 'sessiontoken';
+import { initializeAuthConfig } from '../utils/getAuthConfig.js';
 
+// Set explicitly so a local .env can't override them.
 process.env.AUTH_PROVIDER = 'github';
 process.env.GITHUB_CLIENT_ID = 'test-github-client-id';
 process.env.GITHUB_CLIENT_SECRET = 'test-github-client-secret';
+// Normally done by main(), which tests skip.
+initializeAuthConfig();
+
+export const sessionToken = 'sessiontoken';
 
 export const userTeam = {
   id: '123',
