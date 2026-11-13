@@ -49,7 +49,7 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
     !getFeatureFlagsQuery.data?.data.length &&
     (tableParams.search || tableParams.filters)
   );
-  const reducedFlagsByIdentifier = featureFlagsTableData(getFeatureFlagsQuery.data?.data);
+  const reducedFlagsByIdentifier = featureFlagsTableData(getFeatureFlagsQuery.data?.data, { includeActions: true });
   const sortableHeaders = ['key', 'applicationName', 'createdAt', 'updatedAt', 'type'];
   const rows = getFeatureFlagsQuery.isError ? [] : Object.values(reducedFlagsByIdentifier);
   const headers = [
@@ -76,6 +76,10 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
     {
       header: 'Enabled',
       key: 'enabled',
+    },
+    {
+      header: 'Action',
+      key: 'action',
     },
   ];
 

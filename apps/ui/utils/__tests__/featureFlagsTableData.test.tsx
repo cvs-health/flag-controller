@@ -18,6 +18,7 @@ describe('featureFlagsTableData', () => {
       production: true,
       development: false,
     },
+    id: 'feature-flag-id',
     key: 'feature-flag-key',
     updatedAt: '2025-04-11 17:00:00.00+00',
     rules: [],
@@ -54,5 +55,10 @@ describe('featureFlagsTableData', () => {
     rerender(archivedResult?.key);
 
     expect(screen.getByText(actionLabels[ActionType.Archive])).toBeInTheDocument();
+  });
+
+  it('only includes the actions cell when requested', () => {
+    expect(featureFlagsTableData([flag])[0]?.action).toBeNull();
+    expect(featureFlagsTableData([flag], { includeActions: true })[0]?.action).not.toBeNull();
   });
 });
