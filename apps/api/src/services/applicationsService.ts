@@ -22,7 +22,12 @@ interface ListApplicationFilters {
   teamIds?: string[];
 }
 
-function createApplicationsService({ repositories, withTransaction, assertCanWrite }: ServiceDependencies) {
+function createApplicationsService({
+  repositories,
+  withTransaction,
+  assertCanWrite,
+  identityPolicy,
+}: ServiceDependencies) {
   return {
     listApplications: async (
       params: ServiceListParams<typeof applications.$inferSelect, ListApplicationFilters, ListApplicationsWith>,
@@ -83,6 +88,7 @@ function createApplicationsService({ repositories, withTransaction, assertCanWri
     },
     createApplication: async (payload: ApplicationInsert, actorId: string) => {
       await assertCanWrite(actorId, 'team', payload.teamId);
+      identityPolicy.assertLocallyManaged('applications');
 
       const existing = await repositories.applicationsRepository.findByName(payload.name);
 
@@ -144,6 +150,7 @@ function createApplicationsService({ repositories, withTransaction, assertCanWri
 
     updateApplication: async (id: string, payload: Partial<ApplicationInsert>, actorId: string) => {
       await assertCanWrite(actorId, 'application', id);
+      identityPolicy.assertLocallyManaged('applications');
 
       const existingApplication = await repositories.applicationsRepository.findById(id);
 
@@ -175,6 +182,7 @@ function createApplicationsService({ repositories, withTransaction, assertCanWri
 
     deleteApplication: async (applicationId: string, actorId: string) => {
       await assertCanWrite(actorId, 'application', applicationId);
+      identityPolicy.assertLocallyManaged('applications');
 
       const existingApplication = await repositories.applicationsRepository.findById(applicationId);
 

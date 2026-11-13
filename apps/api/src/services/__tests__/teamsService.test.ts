@@ -5,9 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TeamDeleteErrorCode } from 'shared-types';
 
 import type { TeamsService } from '../teamsService.js';
-import { ForbiddenError, NotFoundError, UnprocessableError } from '../../errors/AppError.js';
+import { ForbiddenError, IdentityManagedError, NotFoundError, UnprocessableError } from '../../errors/AppError.js';
 import { ColumnSortingDirection } from '../../types/common.js';
-import { createServiceWithMocks, mockAssertCanWrite, mockRepositories, notAMemberError } from 'test/testUtils.js';
+import {
+  createServicesWithModes,
+  createServiceWithMocks,
+  mockAssertCanWrite,
+  mockRepositories,
+  notAMemberError,
+} from 'test/testUtils.js';
 
 describe('createTeamsService', () => {
   let service: TeamsService;
@@ -20,6 +26,14 @@ describe('createTeamsService', () => {
     name: 'my-team',
     organizationId: 'org-1',
     updatedAt: new Date(),
+  };
+
+  const membership = {
+    id: 'tm-1',
+    teamId: 'team-1',
+    userId: 'user-1',
+    membershipKey: null,
+    createdAt: new Date(),
   };
 
   beforeEach(() => {
@@ -248,13 +262,6 @@ describe('createTeamsService', () => {
 
   describe('removeMember', () => {
     it('removes the user from the team', async () => {
-      const membership = {
-        id: 'tm-1',
-        teamId: 'team-1',
-        userId: 'user-1',
-        membershipKey: null,
-        createdAt: new Date(),
-      };
       vi.mocked(mockRepositories.teamsRepository.removeMember).mockResolvedValue(membership);
 
       const result = await service.removeMember('team-1', 'user-1', 'actor-1');
@@ -306,6 +313,60 @@ describe('createTeamsService', () => {
       it('authorizes the caller on the target team before writing', async () => {
         await expect(service.removeMember('team-1', 'user-2', 'user-1')).rejects.toBeInstanceOf(ForbiddenError);
         expect(mockAssertCanWrite).toHaveBeenCalledWith('user-1', 'team', 'team-1');
+        expect(mockRepositories.teamsRepository.removeMember).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('identity modes', () => {
+    describe('deleteTeam', () => {
+      it('refuses before touching the database when IDENTITY_TEAMS_MODE=external', async () => {
+        const { teams } = createServicesWithModes({ teams: 'external' });
+
+        await expect(teams.deleteTeam(team.id, 'user-1')).rejects.toMatchObject({
+          code: 'IDENTITY_MANAGED',
+          status: 403,
+          detail: 'Teams are managed by your identity provider.',
+        });
+        expect(mockRepositories.teamsRepository.findById).not.toHaveBeenCalled();
+        expect(mockRepositories.teamsRepository.softDeleteById).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('addMembers', () => {
+      it('adds members to an IdP-owned team when IDENTITY_MEMBERSHIPS_MODE=local', async () => {
+        const { teams } = createServicesWithModes({ teams: 'external', memberships: 'local' });
+
+        await teams.addMembers(team.id, ['user-2'], 'user-1');
+
+        expect(mockRepositories.teamsRepository.addMember).toHaveBeenCalledWith(team.id, 'user-2');
+      });
+
+      it('refuses when IDENTITY_MEMBERSHIPS_MODE=external', async () => {
+        const { teams } = createServicesWithModes({ teams: 'external', memberships: 'external' });
+
+        await expect(teams.addMembers(team.id, ['user-2'], 'user-1')).rejects.toMatchObject({
+          code: 'IDENTITY_MANAGED',
+          detail: 'Team memberships are managed by your identity provider.',
+        });
+        expect(mockRepositories.teamsRepository.addMember).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('removeMember', () => {
+      it('removes the member when IDENTITY_MEMBERSHIPS_MODE=local', async () => {
+        vi.mocked(mockRepositories.teamsRepository.removeMember).mockResolvedValue(membership);
+        const { teams } = createServicesWithModes({ teams: 'external', memberships: 'local' });
+
+        await teams.removeMember(team.id, 'user-1', 'user-9');
+
+        expect(mockRepositories.teamsRepository.removeMember).toHaveBeenCalledWith(team.id, 'user-1');
+      });
+
+      it('refuses when IDENTITY_MEMBERSHIPS_MODE=external', async () => {
+        const { teams } = createServicesWithModes({ teams: 'external', memberships: 'external' });
+
+        await expect(teams.removeMember(team.id, 'user-1', 'user-9')).rejects.toThrow(IdentityManagedError);
         expect(mockRepositories.teamsRepository.removeMember).not.toHaveBeenCalled();
       });
     });

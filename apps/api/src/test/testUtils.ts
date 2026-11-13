@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
+import type { IdentityModes } from 'shared-types';
 import { vi } from 'vitest';
 
 import createApplicationsService from 'services/applicationsService.js';
@@ -9,6 +10,7 @@ import createEnvironmentsService from 'services/environmentsService.js';
 import createFeatureFlagService from 'services/featureFlagService.js';
 import createFlagEnvironmentsService from 'services/flagEnvironmentsService.js';
 import createFlagdService from 'services/flagdService.js';
+import { createIdentityPolicy } from 'services/identityPolicy.js';
 import createLogsService from 'services/logsService.js';
 import createOrganizationsService from 'services/organizationsService.js';
 import createRulesService from 'services/rulesService.js';
@@ -35,10 +37,18 @@ export const notAMemberError = (): ForbiddenError =>
     message: 'You are not a member of the team that owns this resource',
     context: { reason: AuthorizationDenialReason.NotAMember },
   });
+export const localIdentityModes = {
+  users: 'local',
+  teams: 'local',
+  memberships: 'local',
+  applications: 'local',
+} as const;
+
 const serviceConfig = {
   repositories: mockRepositories,
   withTransaction: mockWithTransaction,
   assertCanWrite: mockAssertCanWrite,
+  identityPolicy: createIdentityPolicy(localIdentityModes),
 };
 
 const flagEnvironmentsService = createFlagEnvironmentsService(serviceConfig);
@@ -61,3 +71,10 @@ export const createServiceWithMocks = {
   users: createUsersService(serviceConfig),
   variations: createVariationsService(serviceConfig),
 };
+
+/** Services whose writes follow the given identity modes, for per-mode tests. Unset entities stay local. */
+export function createServicesWithModes(modes: Partial<IdentityModes>) {
+  const config = { ...serviceConfig, identityPolicy: createIdentityPolicy({ ...localIdentityModes, ...modes }) };
+
+  return { applications: createApplicationsService(config), teams: createTeamsService(config) };
+}

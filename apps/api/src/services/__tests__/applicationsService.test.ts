@@ -6,9 +6,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ApplicationsService } from '../applicationsService.js';
 import { ColumnSortingDirection } from '../../types/common.js';
 import { PAGINATION_NO_LIMIT } from '../../constants/pagination.js';
-import { ConflictError, NotFoundError } from '../../errors/AppError.js';
-import { ForbiddenError } from '../../errors/AppError.js';
-import { createServiceWithMocks, mockAssertCanWrite, mockRepositories, notAMemberError } from 'test/testUtils.js';
+import { ConflictError, ForbiddenError, IdentityManagedError, NotFoundError } from '../../errors/AppError.js';
+import {
+  createServicesWithModes,
+  createServiceWithMocks,
+  mockAssertCanWrite,
+  mockRepositories,
+  notAMemberError,
+} from 'test/testUtils.js';
 import { user } from 'test/setup.js';
 import { EnvironmentKey, FeatureFlagType } from 'shared-types';
 
@@ -300,6 +305,34 @@ describe('createApplicationsService', () => {
         expect(mockRepositories.applicationsRepository.softDeleteById).not.toHaveBeenCalled();
         expect(mockRepositories.applicationsRepository.hardDeleteById).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('with IDENTITY_APPLICATIONS_MODE=external', () => {
+    const { applications } = createServicesWithModes({ applications: 'external' });
+
+    it('refuses createApplication before touching the database', async () => {
+      const input = { name: 'checkout-web', description: 'Checkout storefront', teamId: 'team-1' };
+
+      await expect(applications.createApplication(input, user.id)).rejects.toMatchObject({
+        code: 'IDENTITY_MANAGED',
+        status: 403,
+        detail: 'Applications are managed by your identity provider.',
+      });
+      expect(mockRepositories.applicationsRepository.findByName).not.toHaveBeenCalled();
+      expect(mockRepositories.applicationsRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses updateApplication, including a move to another team', async () => {
+      await expect(applications.updateApplication(mockApplication.id, { teamId: 'team-9' }, user.id)).rejects.toThrow(
+        IdentityManagedError,
+      );
+      expect(mockRepositories.applicationsRepository.updateById).not.toHaveBeenCalled();
+    });
+
+    it('refuses deleteApplication', async () => {
+      await expect(applications.deleteApplication(mockApplication.id, user.id)).rejects.toThrow(IdentityManagedError);
+      expect(mockRepositories.applicationsRepository.softDeleteById).not.toHaveBeenCalled();
     });
   });
 });

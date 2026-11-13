@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { organization } from 'better-auth/plugins';
 import { ActionType, SubjectType, TeamCreateErrorCode } from 'shared-types';
 
 import { SYSTEM } from '../constants/common.js';
 import { afterCreateTeam, auth, beforeCreateTeam, organizationRoles } from '../auth.js';
+import type { createIdentityHooks } from '../utils/identityHooks.js';
 import { mockRepositories } from 'test/testUtils.js';
 
 const mocks = vi.hoisted(() => ({
@@ -14,7 +16,22 @@ const mocks = vi.hoisted(() => ({
   getBySlug: vi.fn(),
   getTeamByName: vi.fn(),
   addMembers: vi.fn(),
+  identityHooks: undefined as ReturnType<typeof createIdentityHooks> | undefined,
 }));
+
+vi.mock('../utils/identityHooks.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../utils/identityHooks.js')>();
+
+  return {
+    createIdentityHooks: (...args: Parameters<typeof actual.createIdentityHooks>) => {
+      mocks.identityHooks = actual.createIdentityHooks(...args);
+      return mocks.identityHooks;
+    },
+  };
+});
+
+// auth.ts builds the plugin once on load, and the clearAllMocks calls below would drop this call.
+const organizationOptions = vi.mocked(organization).mock.calls[0]?.[0];
 
 vi.mock('../utils/createRepositories.js', () => ({
   default: vi.fn(() => ({
@@ -247,6 +264,34 @@ describe('auth database hooks', () => {
         subjectType: SubjectType.Team,
       });
     });
+  });
+});
+
+describe('identity hooks on the organization plugin', () => {
+  function identityHooks() {
+    if (!mocks.identityHooks) {
+      throw new Error('auth.ts did not create the identity hooks');
+    }
+    return mocks.identityHooks;
+  }
+
+  it('passes every identity hook to the plugin', () => {
+    // beforeCreateTeam is wrapped, so the next test checks it by calling it.
+    const { beforeCreateTeam: _wrapped, ...hooks } = identityHooks().organizationHooks;
+
+    expect(organizationOptions?.organizationHooks).toMatchObject(hooks);
+  });
+
+  it('runs the identity check when Better Auth creates a team', async () => {
+    const check = vi.spyOn(identityHooks().organizationHooks, 'beforeCreateTeam');
+    const organization = { createdAt: new Date(), id: 'org-1', name: 'default', slug: 'default' };
+
+    await organizationOptions?.organizationHooks?.beforeCreateTeam?.({
+      team: { name: 'payments-platform', organizationId: organization.id },
+      organization,
+    });
+
+    expect(check).toHaveBeenCalledOnce();
   });
 });
 

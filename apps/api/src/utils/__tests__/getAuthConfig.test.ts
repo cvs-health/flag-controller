@@ -5,9 +5,8 @@ import { discoverOIDCConfig } from '@better-auth/sso';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { clientSecret, discovery, issuer, loadSsoConfig, stubSsoEnv } from 'test/sso.js';
+import { localIdentityModes } from 'test/testUtils.js';
 import { getAuthConfig, getPublicConfig, initializeAuthConfig } from '../getAuthConfig.js';
-
-const localModes = { users: 'local', teams: 'local', memberships: 'local', applications: 'local' };
 
 afterEach(async () => {
   vi.unstubAllEnvs();
@@ -23,7 +22,7 @@ describe('getAuthConfig', () => {
       socialProviders: {
         github: { clientId: 'test-github-client-id', clientSecret: 'test-github-client-secret' },
       },
-      identity: { modes: localModes, defaultTeam: true },
+      identity: { modes: localIdentityModes, defaultTeam: true },
     });
   });
 
@@ -94,7 +93,7 @@ describe('getAuthConfig with AUTH_PROVIDER=sso', () => {
           overrideUserInfo: true,
         },
       },
-      identity: { modes: localModes, defaultTeam: true },
+      identity: { modes: localIdentityModes, defaultTeam: true },
     });
   });
 
@@ -164,7 +163,7 @@ describe('getPublicConfig', () => {
     expect(publicConfig).toEqual({
       authProviders: [{ id: 'github', label: 'GitHub', kind: 'social' }],
       features: {},
-      modes: localModes,
+      modes: localIdentityModes,
     });
     expect(JSON.stringify(publicConfig)).not.toContain('test-github-client');
   });

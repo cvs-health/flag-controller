@@ -17,12 +17,14 @@ import * as schema from './db/schema/auth.js';
 import createOrganizationsService from 'services/organizationsService.js';
 import createRepositories from 'utils/createRepositories.js';
 import createTeamsService from 'services/teamsService.js';
+import { createIdentityPolicy } from 'services/identityPolicy.js';
 import { getAuthConfig, type SsoConfig } from './utils/getAuthConfig.js';
 import getCorsOrigins from './utils/getCorsOrigins.js';
 import normalizeTeamName from 'utils/normalizeTeamName.js';
 import { DEFAULT_ORGANIZATION } from './constants/organizations.js';
 import { SYSTEM } from './constants/common.js';
 import { createWithTransaction } from 'utils/withTransaction.js';
+import { createIdentityHooks } from 'utils/identityHooks.js';
 import { createProvisionSsoUser, createResolveSsoUser } from 'utils/ssoUser.js';
 import { poolSettings } from './plugins/drizzle.js';
 
@@ -33,10 +35,12 @@ type HookParameters<T extends keyof NonNullable<OrganizationOptions['organizatio
 // Initialized by main() before this module loads.
 const authConfig = getAuthConfig();
 const ssoConfig = 'sso' in authConfig ? authConfig.sso : undefined;
+const identityPolicy = createIdentityPolicy(authConfig.identity.modes);
 
 const pool = new Pool(poolSettings);
 const db = drizzle(pool);
 const withTransaction = createWithTransaction(db);
+const identityHooks = createIdentityHooks(identityPolicy);
 
 function createSsoPlugin(config: SsoConfig) {
   return sso({
@@ -121,6 +125,7 @@ async function addUserToDefaultTeam(userId: string, repositories: ReturnType<typ
     withTransaction,
     // No caller to authorize against here; see hooks below. Don't reuse this instance elsewhere.
     assertCanWrite: () => Promise.resolve(),
+    identityPolicy,
   });
   const defaultTeam = await teamService.getTeamByName(DEFAULT_ORGANIZATION.slug);
   await teamService.addMembers(defaultTeam.id, [userId], userId);
@@ -148,6 +153,7 @@ export const auth = betterAuth({
             // against; the injected `assertCanWrite` short-circuits to a no-op for this call
             // path only. Never reuse this instance outside better-auth's hooks.
             assertCanWrite: () => Promise.resolve(),
+            identityPolicy,
           });
           const organization = await organizationService.getBySlug(DEFAULT_ORGANIZATION.slug);
 
@@ -176,6 +182,7 @@ export const auth = betterAuth({
     },
     user: {
       create: {
+        before: identityHooks.beforeCreateUser,
         after: async (user) => {
           const repositories = createRepositories(db);
           const organizationService = createOrganizationsService({
@@ -186,6 +193,7 @@ export const auth = betterAuth({
             // whose team membership we could check. The no-op `assertCanWrite` is scoped to this
             // hook and must never be reused for a normal request flow.
             assertCanWrite: () => Promise.resolve(),
+            identityPolicy,
           });
           const organization = await organizationService.getBySlug(DEFAULT_ORGANIZATION.slug);
 
@@ -197,7 +205,9 @@ export const auth = betterAuth({
                 userId: user.id,
               },
             });
-            await addUserToDefaultTeam(user.id, repositories);
+            if (authConfig.identity.defaultTeam) {
+              await addUserToDefaultTeam(user.id, repositories);
+            }
           } else {
             // Creates the default organization and team of the same name
             await auth.api.createOrganization({
@@ -215,15 +225,26 @@ export const auth = betterAuth({
   plugins: [
     organization({
       ...organizationPluginOptions,
+      // When the IdP owns teams, the organization starts empty and teams arrive from the IdP.
+      teams: {
+        ...organizationPluginOptions.teams,
+        defaultTeam: { enabled: authConfig.identity.modes.teams === 'local' },
+      },
       roles: organizationRoles,
       membershipLimit: 1000000,
       organizationHooks: {
-        beforeCreateTeam,
+        ...identityHooks.organizationHooks,
+        beforeCreateTeam: async (data) => {
+          await identityHooks.organizationHooks.beforeCreateTeam();
+          return beforeCreateTeam(data);
+        },
         afterCreateTeam,
       },
     }),
     ...(ssoConfig ? [createSsoPlugin(ssoConfig)] : []),
   ],
+  // Leaving the organization deletes the caller's team memberships, and Better Auth runs no hook for it.
+  disabledPaths: authConfig.identity.modes.memberships === 'external' ? ['/organization/leave'] : [],
   // Trusting the issuer lets the plugin reach an IdP on a private network.
   trustedOrigins: [...getCorsOrigins(), ...(ssoConfig ? [ssoConfig.issuerOrigin] : [])],
   ...(process.env.AUTH_COOKIE_DOMAIN

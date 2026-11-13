@@ -9,6 +9,7 @@ import createEnvironmentsService from 'services/environmentsService.js';
 import createFeatureFlagService from 'services/featureFlagService.js';
 import createFlagEnvironmentsService from 'services/flagEnvironmentsService.js';
 import createFlagdService from 'services/flagdService.js';
+import { createIdentityPolicy } from 'services/identityPolicy.js';
 import createLogsService from 'services/logsService.js';
 import createOrganizationsService from 'services/organizationsService.js';
 import createRulesService from 'services/rulesService.js';
@@ -31,12 +32,24 @@ function mockService<R extends object>(repository: R): MockedMethods<R> {
 
 const repositoryMocks = createRepositoryMocks();
 const noopWithTransaction = createMockWithTransaction(repositoryMocks);
+const identityPolicy = createIdentityPolicy({
+  users: 'local',
+  teams: 'local',
+  memberships: 'local',
+  applications: 'local',
+});
 const flagEnvironmentsServiceForMocks = createFlagEnvironmentsService({
   repositories: repositoryMocks,
   withTransaction: noopWithTransaction,
   assertCanWrite: vi.fn(),
+  identityPolicy,
 });
-const serviceConfig = { repositories: repositoryMocks, withTransaction: noopWithTransaction, assertCanWrite: vi.fn() };
+const serviceConfig = {
+  repositories: repositoryMocks,
+  withTransaction: noopWithTransaction,
+  assertCanWrite: vi.fn(),
+  identityPolicy,
+};
 
 export const createServiceMocks = () => ({
   applications: mockService(createApplicationsService(serviceConfig)),

@@ -8,6 +8,7 @@ import type { FeatureFlagService } from 'services/featureFlagService.js';
 import type { Filters, Sort, With } from './common.js';
 import type { FlagEnvironmentsService } from 'services/flagEnvironmentsService.js';
 import type { FlagdService } from 'services/flagdService.js';
+import type { IdentityPolicy } from 'services/identityPolicy.js';
 import type { LogsService } from 'services/logsService.js';
 import type { OrganizationsService } from 'services/organizationsService.js';
 import type { Repositories } from 'utils/createRepositories.js';
@@ -38,6 +39,7 @@ export interface ServiceDependencies {
   repositories: Repositories;
   withTransaction: WithTransaction;
   assertCanWrite: AssertCanWrite;
+  identityPolicy: IdentityPolicy;
 }
 
 export interface Services {

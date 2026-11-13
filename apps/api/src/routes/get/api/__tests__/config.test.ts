@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest';
 
 import testBuild from 'test/app.js';
+import { localIdentityModes } from 'test/testUtils.js';
 
 describe('get/api/config', () => {
   it('describes the configured sign-in method without a session', async () => {
@@ -20,7 +21,7 @@ describe('get/api/config', () => {
     expect(response.json()).toEqual({
       authProviders: [{ id: 'github', label: 'GitHub', kind: 'social' }],
       features: {},
-      modes: { users: 'local', teams: 'local', memberships: 'local', applications: 'local' },
+      modes: localIdentityModes,
     });
   });
 

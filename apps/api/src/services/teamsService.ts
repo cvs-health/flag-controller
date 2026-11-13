@@ -17,10 +17,11 @@ interface ListTeamsWith extends With {
 
 export type TeamsService = ReturnType<typeof createTeamsService>;
 
-function createTeamsService({ repositories, assertCanWrite, withTransaction }: ServiceDependencies) {
+function createTeamsService({ repositories, assertCanWrite, withTransaction, identityPolicy }: ServiceDependencies) {
   return {
     addMembers: async (teamId: string, userIds: string[], actorUserId: string) => {
       await assertCanWrite(actorUserId, 'team', teamId);
+      identityPolicy.assertLocallyManaged('memberships');
 
       const uniqueUserIds = [...new Set(userIds)];
 
@@ -35,6 +36,7 @@ function createTeamsService({ repositories, assertCanWrite, withTransaction }: S
     },
     removeMember: async (teamId: string, userId: string, actorUserId: string) => {
       await assertCanWrite(actorUserId, 'team', teamId);
+      identityPolicy.assertLocallyManaged('memberships');
 
       const removed = await repositories.teamsRepository.removeMember(teamId, userId);
       if (!removed) {
@@ -158,6 +160,7 @@ function createTeamsService({ repositories, assertCanWrite, withTransaction }: S
     },
     deleteTeam: async (teamId: string, userId: string, hard = false) => {
       await assertCanWrite(userId, 'team', teamId);
+      identityPolicy.assertLocallyManaged('teams');
 
       const team = await repositories.teamsRepository.findById(teamId);
       if (!team) {
