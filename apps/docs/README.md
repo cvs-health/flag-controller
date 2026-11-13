@@ -4,7 +4,7 @@ This website is built using [Docusaurus](https://docusaurus.io/), a modern stati
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) `>=20`
+- [Node.js](https://nodejs.org/), according to the `.nvmrc` file at the root of the repository.
 - [pnpm](https://pnpm.io/) (this repository uses pnpm workspaces)
 
 ## Getting started

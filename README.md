@@ -23,7 +23,7 @@ This Turborepo includes the following apps:
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) `>= 22`
+- [Node.js](https://nodejs.org/), according to the `.nvmrc` file at the root of the repository.
 - [pnpm](https://pnpm.io/) (the repo pins its version in `package.json`; run `corepack enable pnpm` to use it automatically)
 - [Docker](https://www.docker.com/) (optional — used to run the whole stack together, see [Docker](#docker))
 - A local [PostgreSQL](https://www.postgresql.org/) database when running the API outside of Docker (see [Database](#database))
@@ -88,13 +88,13 @@ We are using docker compose to be able to run the different parts of the system 
 You can run production builds all of the applications together using docker compose:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 You can also use compose to just run a specific service:
 
 ```bash
-docker compose up --build api
+docker compose up -d --build api
 ```
 
 ### Troubleshooting
@@ -105,7 +105,7 @@ docker compose up --build api
 >
 >```bash
 > # Build everything with no cache
-> docker compose build --no-cache
+> docker compose build --no-cache && docker compose up -d
 > # Build a specific service with no cache
-> docker compose build --no-cache docs
+> docker compose build --no-cache docs && docker compose up -d docs
 >```
