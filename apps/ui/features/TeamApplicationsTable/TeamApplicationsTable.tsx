@@ -31,6 +31,8 @@ import useTableParams from '../../hooks/useTableParams';
 import { ActionTableCell } from '../../components/ActionTableCell/ActionTableCell';
 import { CreateApplicationModal } from '../CreateApplicationModal/CreateApplicationModal';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
+import { IdentityManagedNote } from '../../components/IdentityManagedNote/IdentityManagedNote';
+import { useIsIdentityManaged } from '../IdentityModes/IdentityModes';
 import { RemoveApplicationModal } from '../RemoveApplicationModal/RemoveApplicationModal';
 import { SkeletonTable } from '../../components/SkeletonTable/SkeletonTable';
 
@@ -46,6 +48,7 @@ export function TeamApplicationsTable({ teamId = '' }: TeamApplicationsTableProp
     enabled: !!teamId,
   });
   const [showCreateApplicationModal, setShowCreateApplicationModal] = useState(false);
+  const applicationsManaged = useIsIdentityManaged('applications');
   const [applicationToRemove, setApplicationToRemove] = useState<ApplicationsTableColumns | null>(null);
   const headers = [
     {
@@ -109,9 +112,13 @@ export function TeamApplicationsTable({ teamId = '' }: TeamApplicationsTableProp
               placeholder="Search by application name"
               defaultValue={searchApplicationName}
             />
-            <Button type="button" renderIcon={Add} onClick={toggleCreateApplicationModal}>
-              Create application
-            </Button>
+            {applicationsManaged ? (
+              <IdentityManagedNote />
+            ) : (
+              <Button type="button" renderIcon={Add} onClick={toggleCreateApplicationModal}>
+                Create application
+              </Button>
+            )}
           </TableToolbarContent>
         </TableToolbar>
         <DataTable rows={filteredRows} headers={headers} size="xl">
@@ -124,7 +131,7 @@ export function TeamApplicationsTable({ teamId = '' }: TeamApplicationsTableProp
                       {header.header}
                     </TableHeader>
                   ))}
-                  <TableHeader>Action</TableHeader>
+                  {!applicationsManaged && <TableHeader>Action</TableHeader>}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -136,18 +143,20 @@ export function TeamApplicationsTable({ teamId = '' }: TeamApplicationsTableProp
                       {row.cells.map((cell) => (
                         <TableCell key={cell.id}>{cell.value}</TableCell>
                       ))}
-                      <ActionTableCell
-                        key={`${row.id}-actions`}
-                        rowId={row.id}
-                        items={[
-                          {
-                            label: 'Remove application',
-                            icon: Delete,
-                            onClick: handleRemoveApplication,
-                            isDelete: true,
-                          },
-                        ]}
-                      />
+                      {!applicationsManaged && (
+                        <ActionTableCell
+                          key={`${row.id}-actions`}
+                          rowId={row.id}
+                          items={[
+                            {
+                              label: 'Remove application',
+                              icon: Delete,
+                              onClick: handleRemoveApplication,
+                              isDelete: true,
+                            },
+                          ]}
+                        />
+                      )}
                     </TableRow>
                   ))
                 )}

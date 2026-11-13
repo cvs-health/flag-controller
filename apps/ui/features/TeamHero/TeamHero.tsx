@@ -12,6 +12,8 @@ import useGetUserTeamsQuery, { getUserTeamsQueryKey } from '../../api/queries/us
 import { Hero } from '../../components/Hero/Hero';
 import { MenuButton, MenuItem } from '../../components/Carbon';
 import { RemoveTeamModal } from '../RemoveTeamModal/RemoveTeamModal';
+import { IdentityManagedNote } from '../../components/IdentityManagedNote/IdentityManagedNote';
+import { useIsIdentityManaged } from '../IdentityModes/IdentityModes';
 import { authClient } from '../../lib/auth-client';
 import { getTeamsQueryKey } from '../../api/queries/useGetTeamsQuery';
 
@@ -24,6 +26,7 @@ export function TeamHero({ teamName }: TeamHeroProps) {
   const queryClient = useQueryClient();
   const session = authClient.useSession();
   const getUserTeamsQuery = useGetUserTeamsQuery(session.data?.user.id || '');
+  const teamsManaged = useIsIdentityManaged('teams');
   const [teamForRemove, setTeamForRemove] = useState<Pick<TeamsTableColumns, 'id' | 'name'> | null>(null);
 
   const teamInQuery = getUserTeamsQuery.data?.data.find((t) => t.name === teamName);
@@ -52,15 +55,19 @@ export function TeamHero({ teamName }: TeamHeroProps) {
           },
         ]}
       >
-        <MenuButton label="Actions" menuAlignment="bottom" kind="tertiary">
-          <MenuItem
-            kind="danger"
-            disabled={getUserTeamsQuery.isPending || !teamInQuery}
-            label="Remove team"
-            shortcut="⌫"
-            onClick={handleOpenRemoveTeamModal}
-          />
-        </MenuButton>
+        {teamsManaged ? (
+          <IdentityManagedNote />
+        ) : (
+          <MenuButton label="Actions" menuAlignment="bottom" kind="tertiary">
+            <MenuItem
+              kind="danger"
+              disabled={getUserTeamsQuery.isPending || !teamInQuery}
+              label="Remove team"
+              shortcut="⌫"
+              onClick={handleOpenRemoveTeamModal}
+            />
+          </MenuButton>
+        )}
       </Hero>
       {teamForRemove && (
         <RemoveTeamModal

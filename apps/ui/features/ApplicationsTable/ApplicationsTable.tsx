@@ -31,6 +31,8 @@ import useTableParams from '../../hooks/useTableParams';
 import { ActionTableCell } from '../../components/ActionTableCell/ActionTableCell';
 import { CreateApplicationModal } from '../CreateApplicationModal/CreateApplicationModal';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
+import { IdentityManagedNote } from '../../components/IdentityManagedNote/IdentityManagedNote';
+import { useIsIdentityManaged } from '../IdentityModes/IdentityModes';
 import { RemoveApplicationModal } from '../RemoveApplicationModal/RemoveApplicationModal';
 import { SkeletonTable } from '../../components/SkeletonTable/SkeletonTable';
 
@@ -39,6 +41,7 @@ export function ApplicationsTable() {
   const tableParams = useTableParams();
   const queryClient = useQueryClient();
   const getApplicationsQuery = useGetApplicationsQuery(tableParams.pagination, tableParams.scope);
+  const applicationsManaged = useIsIdentityManaged('applications');
   const [showCreateApplicationModal, setShowCreateApplicationModal] = useState(false);
   const [applicationToRemove, setApplicationToRemove] = useState<GetApplicationsApplication | null>(null);
   const rows =
@@ -91,9 +94,13 @@ export function ApplicationsTable() {
       <TableContainer title="Your applications">
         <TableToolbar>
           <TableToolbarContent>
-            <Button type="button" renderIcon={Add} onClick={toggleCreateApplicationModal}>
-              Create application
-            </Button>
+            {applicationsManaged ? (
+              <IdentityManagedNote />
+            ) : (
+              <Button type="button" renderIcon={Add} onClick={toggleCreateApplicationModal}>
+                Create application
+              </Button>
+            )}
           </TableToolbarContent>
         </TableToolbar>
         <DataTable rows={rows} headers={headers} size="xl">
@@ -106,7 +113,7 @@ export function ApplicationsTable() {
                       {header.header}
                     </TableHeader>
                   ))}
-                  <TableHeader>Action</TableHeader>
+                  {!applicationsManaged && <TableHeader>Action</TableHeader>}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -118,18 +125,20 @@ export function ApplicationsTable() {
                       {row.cells.map((cell) => (
                         <TableCell key={cell.id}>{cell.value}</TableCell>
                       ))}
-                      <ActionTableCell
-                        key={`${row.id}-actions`}
-                        rowId={row.id}
-                        items={[
-                          {
-                            label: 'Remove application',
-                            icon: Delete,
-                            onClick: handleRemoveApplication,
-                            isDelete: true,
-                          },
-                        ]}
-                      />
+                      {!applicationsManaged && (
+                        <ActionTableCell
+                          key={`${row.id}-actions`}
+                          rowId={row.id}
+                          items={[
+                            {
+                              label: 'Remove application',
+                              icon: Delete,
+                              onClick: handleRemoveApplication,
+                              isDelete: true,
+                            },
+                          ]}
+                        />
+                      )}
                     </TableRow>
                   ))
                 )}

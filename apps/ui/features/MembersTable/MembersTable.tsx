@@ -27,6 +27,8 @@ import { ActionTableCell } from '../../components/ActionTableCell/ActionTableCel
 import { AddMembersModal } from '../AddMembersModal/AddMembersModal';
 import { ColumnSortingDirection } from '../../typings/api';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
+import { IdentityManagedNote } from '../../components/IdentityManagedNote/IdentityManagedNote';
+import { useIsIdentityManaged } from '../IdentityModes/IdentityModes';
 import { RemoveMemberModal } from '../RemoveMemberModal/RemoveMemberModal';
 import { SkeletonTable } from '../../components/SkeletonTable/SkeletonTable';
 
@@ -45,6 +47,7 @@ export function MembersTable({ teamId }: MembersTableProps) {
   const [removeMemberId, setRemoveMemberId] = useState('');
   const [showAddMembersModal, setShowAddMembersModal] = useState(false);
   const getTeamMembersQuery = useGetTeamMembersQuery(teamId, tableParams.pagination);
+  const membershipsManaged = useIsIdentityManaged('memberships');
   const members = getTeamMembersQuery.data?.data || [];
   const memberToRemove = members.find((m) => m.id === removeMemberId);
 
@@ -79,9 +82,13 @@ export function MembersTable({ teamId }: MembersTableProps) {
       <TableContainer title="Members">
         <TableToolbar>
           <TableToolbarContent>
-            <Button type="button" renderIcon={Add} onClick={toggleAddMembersModal}>
-              Add members
-            </Button>
+            {membershipsManaged ? (
+              <IdentityManagedNote />
+            ) : (
+              <Button type="button" renderIcon={Add} onClick={toggleAddMembersModal}>
+                Add members
+              </Button>
+            )}
           </TableToolbarContent>
         </TableToolbar>
         <DataTable rows={members} headers={headers} size="xl">
@@ -94,7 +101,7 @@ export function MembersTable({ teamId }: MembersTableProps) {
                       {header.header}
                     </TableHeader>
                   ))}
-                  <TableHeader>Action</TableHeader>
+                  {!membershipsManaged && <TableHeader>Action</TableHeader>}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -107,18 +114,20 @@ export function MembersTable({ teamId }: MembersTableProps) {
                         {row.cells.map((cell) => (
                           <TableCell key={cell.id}>{cell.value}</TableCell>
                         ))}
-                        <ActionTableCell
-                          key={`${row.id}-actions`}
-                          rowId={row.id}
-                          items={[
-                            {
-                              label: 'Remove member',
-                              isDelete: true,
-                              icon: Delete,
-                              onClick: () => handleRemoveMember(row.id),
-                            },
-                          ]}
-                        />
+                        {!membershipsManaged && (
+                          <ActionTableCell
+                            key={`${row.id}-actions`}
+                            rowId={row.id}
+                            items={[
+                              {
+                                label: 'Remove member',
+                                isDelete: true,
+                                icon: Delete,
+                                onClick: () => handleRemoveMember(row.id),
+                              },
+                            ]}
+                          />
+                        )}
                       </TableRow>
                     );
                   })

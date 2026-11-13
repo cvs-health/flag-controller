@@ -56,4 +56,19 @@ describe('TeamHero', () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it('replaces the Actions menu with a note when the identity provider manages teams', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce(
+      resolvePromiseWithData({ data: [{ id: 'team-1', name: 'iguana-ecommerce' }], metadata: { totalRecords: 1 } }),
+    );
+
+    render(
+      <TestProviders identityModes={{ teams: 'external' }}>
+        <TeamHero teamName="iguana-ecommerce" />
+      </TestProviders>,
+    );
+
+    expect(await screen.findByText('Managed by your identity provider')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Actions' })).not.toBeInTheDocument();
+  });
 });

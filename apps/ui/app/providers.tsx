@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode, useState } from 'react';
 
 import '../i18n';
+import { IdentityModesProvider } from '../features/IdentityModes/IdentityModes';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -19,9 +20,11 @@ export default function Providers({ children }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <OpenFeatureProvider>
-        <NavigationGuardProvider>{children}</NavigationGuardProvider>
-      </OpenFeatureProvider>
+      <IdentityModesProvider>
+        <OpenFeatureProvider>
+          <NavigationGuardProvider>{children}</NavigationGuardProvider>
+        </OpenFeatureProvider>
+      </IdentityModesProvider>
     </QueryClientProvider>
   );
 }

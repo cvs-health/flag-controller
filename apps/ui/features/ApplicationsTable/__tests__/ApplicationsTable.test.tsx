@@ -87,4 +87,40 @@ describe('ApplicationsTable', () => {
 
     expect(mocks.replace).toHaveBeenCalledWith('/applications?page=2&rows=10', { scroll: false });
   });
+
+  describe('identity modes', () => {
+    const application = {
+      id: 'k2Vd8Qm1',
+      name: 'checkout-web',
+      team: { id: 'b7Rt3Wz8YcD1', name: 'payments-platform' },
+    };
+
+    function renderTable(applications: 'local' | 'external') {
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        resolvePromiseWithData({ data: [application], metadata: { totalRecords: 1 } }),
+      );
+      render(
+        <TestProviders identityModes={{ applications }}>
+          <ApplicationsTable />
+        </TestProviders>,
+      );
+    }
+
+    it('offers create and remove when Flag Controller manages applications', async () => {
+      renderTable('local');
+
+      expect(await screen.findByRole('link', { name: application.name })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Create application' })).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: 'Action' })).toBeInTheDocument();
+    });
+
+    it('replaces create and remove with a note when the identity provider manages applications', async () => {
+      renderTable('external');
+
+      expect(await screen.findByRole('link', { name: application.name })).toBeInTheDocument();
+      expect(screen.getByText('Managed by your identity provider')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Create application' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('columnheader', { name: 'Action' })).not.toBeInTheDocument();
+    });
+  });
 });

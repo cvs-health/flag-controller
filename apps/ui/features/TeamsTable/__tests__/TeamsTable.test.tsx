@@ -4,6 +4,7 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import TestProviders from '../../../test/TestProviders';
 import TestQueryClientProvider from '../../../test/TestQueryClientProvider';
 import resolvePromiseWithData from '../../../test/resolvePromiseWithData';
 import { TeamsTable } from '../TeamsTable';
@@ -59,5 +60,38 @@ describe('TeamsTable', () => {
     );
 
     expect(await screen.findByText('There are no teams assigned to you yet')).toBeInTheDocument();
+  });
+
+  describe('identity modes', () => {
+    const team = { id: 'b7Rt3Wz8YcD1', name: 'payments-platform', applications: [] };
+
+    function renderTeamsTable(teams: 'local' | 'external') {
+      vi.spyOn(global, 'fetch').mockResolvedValueOnce(
+        resolvePromiseWithData({ data: [team], metadata: { totalRecords: 1 } }),
+      );
+      render(
+        <TestProviders identityModes={{ teams }}>
+          <TeamsTable />
+        </TestProviders>,
+      );
+    }
+
+    it('offers create and remove when Flag Controller manages teams', async () => {
+      renderTeamsTable('local');
+
+      expect(await screen.findByRole('link', { name: team.name })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Create team' })).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: 'Actions' })).toBeInTheDocument();
+      expect(screen.queryByText('Managed by your identity provider')).not.toBeInTheDocument();
+    });
+
+    it('replaces create and remove with a note when the identity provider manages teams', async () => {
+      renderTeamsTable('external');
+
+      expect(await screen.findByRole('link', { name: team.name })).toBeInTheDocument();
+      expect(screen.getByText('Managed by your identity provider')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Create team' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('columnheader', { name: 'Actions' })).not.toBeInTheDocument();
+    });
   });
 });

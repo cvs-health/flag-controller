@@ -30,6 +30,8 @@ import useTableParams from '../../hooks/useTableParams';
 import { ActionTableCell } from '../../components/ActionTableCell/ActionTableCell';
 import { CreateTeamModal } from '../CreateTeamModal/CreateTeamModal';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
+import { IdentityManagedNote } from '../../components/IdentityManagedNote/IdentityManagedNote';
+import { useIsIdentityManaged } from '../IdentityModes/IdentityModes';
 import { RemoveTeamModal } from '../RemoveTeamModal/RemoveTeamModal';
 import { SkeletonTable } from '../../components/SkeletonTable/SkeletonTable';
 
@@ -38,6 +40,7 @@ export function TeamsTable() {
   const queryClient = useQueryClient();
   const tableParams = useTableParams();
   const getTeamsQuery = useGetTeamsQuery(tableParams.pagination);
+  const teamsManaged = useIsIdentityManaged('teams');
   const [createTeamModalOpen, setCreateTeamModalOpen] = useState(false);
   const [teamToRemove, setTeamToRemove] = useState<Pick<Team, 'id' | 'name'> | null>(null);
   const rows =
@@ -93,9 +96,13 @@ export function TeamsTable() {
       <TableContainer title="All Teams">
         <TableToolbar>
           <TableToolbarContent>
-            <Button type="button" onClick={toggleCreateTeamModal} size="lg" renderIcon={Add}>
-              Create team
-            </Button>
+            {teamsManaged ? (
+              <IdentityManagedNote />
+            ) : (
+              <Button type="button" onClick={toggleCreateTeamModal} size="lg" renderIcon={Add}>
+                Create team
+              </Button>
+            )}
           </TableToolbarContent>
         </TableToolbar>
         <DataTable rows={rows} headers={headers} size="xl">
@@ -108,7 +115,7 @@ export function TeamsTable() {
                       {header.header}
                     </TableHeader>
                   ))}
-                  <TableHeader>Actions</TableHeader>
+                  {!teamsManaged && <TableHeader>Actions</TableHeader>}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -120,18 +127,20 @@ export function TeamsTable() {
                       {row.cells.map((cell) => (
                         <TableCell key={cell.id}>{cell.value}</TableCell>
                       ))}
-                      <ActionTableCell
-                        key={`${row.id}-actions`}
-                        rowId={row.id}
-                        items={[
-                          {
-                            label: 'Remove team',
-                            icon: Delete,
-                            onClick: () => handleRemoveTeamClick(row.id),
-                            isDelete: true,
-                          },
-                        ]}
-                      />
+                      {!teamsManaged && (
+                        <ActionTableCell
+                          key={`${row.id}-actions`}
+                          rowId={row.id}
+                          items={[
+                            {
+                              label: 'Remove team',
+                              icon: Delete,
+                              onClick: () => handleRemoveTeamClick(row.id),
+                              isDelete: true,
+                            },
+                          ]}
+                        />
+                      )}
                     </TableRow>
                   ))
                 )}

@@ -7,13 +7,18 @@ import { NavigationGuardProvider } from 'next-navigation-guard';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type JsonValue, OpenFeatureTestProvider } from '@openfeature/react-sdk';
 import { type ReactNode, useState } from 'react';
+import type { IdentityModes } from 'shared-types';
+
+import { IdentityModesContext, localModes } from '../features/IdentityModes/IdentityModes';
 
 interface ProvidersProps {
   children: ReactNode;
   featureFlags?: Record<string, JsonValue>;
+  /** Overrides the identity modes, which are all local otherwise. */
+  identityModes?: Partial<IdentityModes>;
 }
 
-function TestProviders({ children, featureFlags = {} }: ProvidersProps) {
+function TestProviders({ children, featureFlags = {}, identityModes }: ProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -27,7 +32,9 @@ function TestProviders({ children, featureFlags = {} }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <OpenFeatureTestProvider flagValueMap={featureFlags}>
-        <NavigationGuardProvider>{children}</NavigationGuardProvider>
+        <IdentityModesContext value={{ ...localModes, ...identityModes }}>
+          <NavigationGuardProvider>{children}</NavigationGuardProvider>
+        </IdentityModesContext>
       </OpenFeatureTestProvider>
     </QueryClientProvider>
   );
