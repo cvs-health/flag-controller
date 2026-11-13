@@ -47,6 +47,10 @@ const config: Config = {
           editUrl: 'https://github.com/GH-ORG-NAME/flag-controller/tree/main/apps/docs',
           remarkPlugins: [remarkFeatureFlaggedHeadings],
         },
+        gtag: {
+          trackingID: 'G-1G2772PSL4',
+          anonymizeIP: true,
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
