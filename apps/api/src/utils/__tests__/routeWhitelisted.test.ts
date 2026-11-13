@@ -10,6 +10,7 @@ describe('routeWhitelisted', () => {
     expect(routeWhitelisted('/flagd')).toEqual(true);
     expect(routeWhitelisted('/healthz')).toEqual(true);
     expect(routeWhitelisted('/healthz?probe=1')).toEqual(true);
+    expect(routeWhitelisted('/api/config')).toEqual(true);
     expect(routeWhitelisted('/documentation')).toEqual(true);
     expect(routeWhitelisted('/documentation/static/index.html')).toEqual(true);
     expect(routeWhitelisted('/api/auth/session')).toEqual(true);
@@ -25,5 +26,6 @@ describe('routeWhitelisted', () => {
     expect(routeWhitelisted('/applications/documentation')).toEqual(false);
     expect(routeWhitelisted('/flagd-admin')).toEqual(false);
     expect(routeWhitelisted('/api/auth-bypass')).toEqual(false);
+    expect(routeWhitelisted('/api/config/extra')).toEqual(false);
   });
 });

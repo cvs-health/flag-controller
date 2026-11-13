@@ -8,6 +8,7 @@ import classNames from 'classnames';
 
 import styles from './LoginForm.module.scss';
 import { ActionStatus } from '../../typings/common';
+import useGetApiConfigQuery from '../../api/queries/useGetApiConfigQuery';
 import { InlineNotification, ModalBody, ModalFooter, ModalHeader } from '../../components/Carbon';
 import { SubmitButton } from '../../components/SubmitButton/SubmitButton';
 import { authClient } from '../../lib/auth-client';
@@ -18,15 +19,22 @@ interface LoginFormProps {
 
 export function LoginForm({ className }: LoginFormProps) {
   const [submitStatus, setSubmitStatus] = useState(ActionStatus.Idle);
+  const getApiConfigQuery = useGetApiConfigQuery();
+  // One provider per deployment.
+  const [provider] = getApiConfigQuery.data?.authProviders ?? [];
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
+    if (!provider) {
+      return;
+    }
+
     setSubmitStatus(ActionStatus.Pending);
 
     try {
       const callbackURL = new URL('/flags', window.location.origin).toString();
       await authClient.signIn.social({
-        provider: 'github',
+        provider: provider.id,
         callbackURL,
       });
     } catch (_error) {
@@ -38,6 +46,14 @@ export function LoginForm({ className }: LoginFormProps) {
     <form onSubmit={handleSubmit} className={classNames(styles.form, className)}>
       <ModalHeader title="Welcome" />
       <ModalBody>
+        {getApiConfigQuery.isError && (
+          <InlineNotification
+            hideCloseButton
+            kind="error"
+            subtitle="Sign-in options could not be loaded. Please refresh the page."
+            title="Sign-in unavailable"
+          />
+        )}
         {submitStatus === ActionStatus.Error && (
           <InlineNotification
             hideCloseButton
@@ -48,7 +64,11 @@ export function LoginForm({ className }: LoginFormProps) {
         )}
       </ModalBody>
       <ModalFooter>
-        <SubmitButton label="Login" status={submitStatus} />
+        <SubmitButton
+          disabled={!provider}
+          label={provider?.label ? `Login with ${provider.label}` : 'Login'}
+          status={submitStatus}
+        />
       </ModalFooter>
     </form>
   );

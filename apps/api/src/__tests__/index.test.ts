@@ -94,6 +94,19 @@ describe('main', () => {
     expect(app.default).not.toHaveBeenCalled();
   });
 
+  it('exits with code 1 before migrating when the sign-in configuration is invalid', async () => {
+    vi.stubEnv('AUTH_PROVIDER', 'nope');
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const mockExit = mockProcessExit(new Error('Mock'));
+
+    await expect(main()).rejects.toThrow();
+
+    expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('AUTH_PROVIDER must be one of github'));
+    expect(mockExit).toHaveBeenCalledExactlyOnceWith(1);
+    expect(migrateFile.migrate).not.toHaveBeenCalled();
+    expect(app.default).not.toHaveBeenCalled();
+  });
+
   it('logs and exits with code 1 when the server fails to listen', async () => {
     const listenError = new Error('port in use');
     mocks.serverListen.mockImplementation((_options, callback) => {

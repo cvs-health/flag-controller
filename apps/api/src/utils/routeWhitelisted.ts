@@ -6,6 +6,7 @@ function routeWhitelisted(route?: string) {
   return (
     path === '/flagd' ||
     path === '/healthz' ||
+    path === '/api/config' ||
     path === '/documentation' ||
     path.startsWith('/documentation/') ||
     path.startsWith('/api/auth/')

@@ -145,8 +145,22 @@ In `src/auth.ts`, a `betterAuth` instance is created using the `better-auth/mini
 
 - **Database**: A Drizzle adapter backed by a PostgreSQL connection pool, using a dedicated auth schema defined in `src/db/schema/auth.ts`. The option `usePlural: true` maps to plural table names (`users`, `sessions`, `accounts`, etc.).
 - **Plugins**: The `organization` plugin (with teams enabled) adds multi-tenancy support (organizations, teams, members, invitations).
-- **Social Providers**: GitHub OAuth is configured via environment variables (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`).
+- **Social Providers**: The provider comes from `AUTH_PROVIDER` (default `github`), read once at startup by `src/utils/getAuthConfig.ts`. GitHub OAuth needs `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`. An unknown `AUTH_PROVIDER`, or a missing variable the provider needs, stops startup with a message naming the variable.
 - **Trusted Origins**: The UI origin (`http://localhost:3000`) is explicitly trusted.
+
+#### Public configuration endpoint
+
+`GET /api/config` needs no session. It tells the UI which sign-in method the API uses, so the login page starts the right flow without its own configuration:
+
+```json
+{
+  "authProviders": [{ "id": "github", "label": "GitHub", "kind": "social" }],
+  "features": {},
+  "modes": {}
+}
+```
+
+The response never includes client ids or secrets.
 
 #### Setting up the GitHub OAuth App
 
