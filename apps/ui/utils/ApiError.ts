@@ -36,6 +36,7 @@ const GENERIC_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.Validation]: 'Some of the information provided is not valid.',
   [ErrorCode.Unauthorized]: 'You must be signed in.',
   [ErrorCode.Forbidden]: 'You do not have access to this resource.',
+  [ErrorCode.IdentityManaged]: 'Managed by your identity provider.',
   [ErrorCode.NotFound]: 'The requested item could not be found.',
   [ErrorCode.Conflict]: 'This conflicts with something that already exists.',
   [ErrorCode.Unprocessable]: 'This change could not be applied.',
@@ -46,6 +47,7 @@ const GENERIC_MESSAGES: Record<ErrorCode, string> = {
 const DISPLAYS_DETAIL: ReadonlySet<ErrorCode> = new Set([
   ErrorCode.Validation,
   ErrorCode.Forbidden,
+  ErrorCode.IdentityManaged,
   ErrorCode.NotFound,
   ErrorCode.Conflict,
   ErrorCode.Unprocessable,

@@ -62,6 +62,12 @@ export class ForbiddenError extends AppError {
   }
 }
 
+/** Forbidden because the identity provider owns the entity, so Flag Controller may not change it. */
+export class IdentityManagedError extends AppError {
+  readonly code = Code.IdentityManaged;
+  readonly status = 403;
+}
+
 /** The addressed resource does not exist or is soft-deleted. */
 export class NotFoundError extends AppError {
   readonly code = Code.NotFound;
