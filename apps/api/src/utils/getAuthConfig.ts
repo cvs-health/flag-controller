@@ -4,6 +4,9 @@
 import { discoverOIDCConfig } from '@better-auth/sso';
 import type { PublicConfig } from 'shared-types';
 
+import { fail, readEnv, readList } from './authEnv.js';
+import { readIdentityConfig } from './readIdentityConfig.js';
+
 const DEFAULT_AUTH_PROVIDER = 'github';
 const SSO_PROVIDER_ID = 'sso';
 const DEFAULT_SSO_SCOPES = ['openid', 'profile', 'email'];
@@ -16,21 +19,6 @@ const AUTH_PROVIDERS = {
 };
 
 let runtimeAuthConfig: Awaited<ReturnType<typeof readAuthConfig>> | undefined;
-
-function fail(message: string): never {
-  throw new Error(`Invalid auth configuration: ${message}`);
-}
-
-function readEnv(name: string) {
-  return process.env[name]?.trim() || undefined;
-}
-
-function readList(name: string) {
-  return readEnv(name)
-    ?.split(',')
-    .map((value) => value.trim())
-    .filter(Boolean);
-}
 
 function joinNames(names: string[]) {
   return names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0];
@@ -104,7 +92,7 @@ async function readAuthConfig() {
     fail(`AUTH_PROVIDER must be one of ${Object.keys(AUTH_PROVIDERS).join(', ')}, got "${id}"`);
   }
 
-  return AUTH_PROVIDERS[id]();
+  return { ...(await AUTH_PROVIDERS[id]()), identity: readIdentityConfig() };
 }
 
 export async function initializeAuthConfig() {
@@ -121,7 +109,7 @@ export function getAuthConfig() {
 }
 
 export function getPublicConfig(): PublicConfig {
-  const { provider } = getAuthConfig();
+  const { provider, identity } = getAuthConfig();
 
-  return { authProviders: [provider], features: {}, modes: {} };
+  return { authProviders: [provider], features: {}, modes: identity.modes };
 }

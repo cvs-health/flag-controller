@@ -20,7 +20,7 @@ describe('get/api/config', () => {
     expect(response.json()).toEqual({
       authProviders: [{ id: 'github', label: 'GitHub', kind: 'social' }],
       features: {},
-      modes: {},
+      modes: { users: 'local', teams: 'local', memberships: 'local', applications: 'local' },
     });
   });
 

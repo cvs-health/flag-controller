@@ -7,6 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { clientSecret, discovery, issuer, loadSsoConfig, stubSsoEnv } from 'test/sso.js';
 import { getAuthConfig, getPublicConfig, initializeAuthConfig } from '../getAuthConfig.js';
 
+const localModes = { users: 'local', teams: 'local', memberships: 'local', applications: 'local' };
+
 afterEach(async () => {
   vi.unstubAllEnvs();
   await initializeAuthConfig();
@@ -21,7 +23,14 @@ describe('getAuthConfig', () => {
       socialProviders: {
         github: { clientId: 'test-github-client-id', clientSecret: 'test-github-client-secret' },
       },
+      identity: { modes: localModes, defaultTeam: true },
     });
+  });
+
+  it('fails startup on an invalid identity setting', async () => {
+    vi.stubEnv('IDENTITY_TEAMS_MODE', 'external');
+
+    await expect(initializeAuthConfig()).rejects.toThrow('IDENTITY_TEAMS_MODE=external needs a provisioning source');
   });
 
   it('returns the config stored by initializeAuthConfig', async () => {
@@ -85,6 +94,7 @@ describe('getAuthConfig with AUTH_PROVIDER=sso', () => {
           overrideUserInfo: true,
         },
       },
+      identity: { modes: localModes, defaultTeam: true },
     });
   });
 
@@ -148,13 +158,13 @@ describe('getAuthConfig with AUTH_PROVIDER=sso', () => {
 });
 
 describe('getPublicConfig', () => {
-  it('reports the GitHub provider without its credentials', () => {
+  it('reports the GitHub provider and identity modes without credentials', () => {
     const publicConfig = getPublicConfig();
 
     expect(publicConfig).toEqual({
       authProviders: [{ id: 'github', label: 'GitHub', kind: 'social' }],
       features: {},
-      modes: {},
+      modes: localModes,
     });
     expect(JSON.stringify(publicConfig)).not.toContain('test-github-client');
   });
@@ -162,10 +172,10 @@ describe('getPublicConfig', () => {
   it('reports the SSO provider without its credentials or issuer', async () => {
     await loadSsoConfig();
 
-    const publicConfig = JSON.stringify(getPublicConfig());
+    const publicConfig = getPublicConfig();
 
-    expect(publicConfig).toBe('{"authProviders":[{"id":"sso","kind":"oidc"}],"features":{},"modes":{}}');
-    expect(publicConfig).not.toContain(clientSecret);
-    expect(publicConfig).not.toContain('sso.example.com');
+    expect(publicConfig.authProviders).toEqual([{ id: 'sso', kind: 'oidc' }]);
+    expect(JSON.stringify(publicConfig)).not.toContain(clientSecret);
+    expect(JSON.stringify(publicConfig)).not.toContain('sso.example.com');
   });
 });

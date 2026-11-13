@@ -5,6 +5,8 @@ import type { FastifyInstance } from 'fastify';
 
 import { getPublicConfig } from '../../../utils/getAuthConfig.js';
 
+const identityMode = { type: 'string', enum: ['local', 'external'] } as const;
+
 const schema = {
   description: 'Public configuration the UI needs before anyone is signed in',
   response: {
@@ -24,7 +26,16 @@ const schema = {
           },
         },
         features: { type: 'object', additionalProperties: true },
-        modes: { type: 'object', additionalProperties: true },
+        modes: {
+          type: 'object',
+          properties: {
+            users: identityMode,
+            teams: identityMode,
+            memberships: identityMode,
+            applications: identityMode,
+          },
+          required: ['users', 'teams', 'memberships', 'applications'],
+        },
       },
       required: ['authProviders', 'features', 'modes'],
     },
