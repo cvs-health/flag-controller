@@ -4,7 +4,7 @@ packages:
 overrides:
   ws: ^8.17.1
   braces: ^3.0.3
-  minimatch: 10.2.6
+  minimatch: 11.0.1
   postcss: 8.5.23
   esbuild: 0.28.1
   proxy-addr: 2.0.8
