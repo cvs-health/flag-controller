@@ -23,7 +23,7 @@ This Turborepo includes the following apps:
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) `>= 22`
+- [Node.js](https://nodejs.org/), according to the `.nvmrc` file at the root of the repository.
 - [pnpm](https://pnpm.io/) (the repo pins its version in `package.json`; run `corepack enable pnpm` to use it automatically)
 - [Docker](https://www.docker.com/) (optional — used to run the whole stack together, see [Docker](#docker))
 - A local [PostgreSQL](https://www.postgresql.org/) database when running the API outside of Docker (see [Database](#database))

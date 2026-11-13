@@ -4,7 +4,7 @@ A [Next.js](https://nextjs.org/) application built with React and the [Carbon De
 
 ## Prerequisites
 
-- **Node.js** `>=22`
+- **Node.js**, according to the `.nvmrc` file at the root of the repository.
 - **pnpm** — this repo pins the package manager via `packageManager` in the root `package.json`. Enable it with [Corepack](https://nodejs.org/api/corepack.html):
   ```bash
   corepack enable
