@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ActionType, SubjectType } from 'shared-types';
+import { ActionType, SubjectType, TeamCreateErrorCode } from 'shared-types';
 
 import { SYSTEM } from '../constants/common.js';
 import { afterCreateTeam, auth, beforeCreateTeam, organizationRoles } from '../auth.js';
@@ -152,6 +152,32 @@ describe('auth database hooks', () => {
       });
 
       expect(result).toEqual({ data: { name: team.name, organizationId: organization.id } });
+    });
+
+    it('checks for an existing team using the normalized name', async () => {
+      await beforeCreateTeam({
+        team: { name: 'My Team', organizationId: organization.id },
+        organization,
+      });
+
+      expect(mockRepositories.teamsRepository.findByName).toHaveBeenCalledExactlyOnceWith(organization.id, team.name);
+    });
+
+    it('rejects a team name that is already in use', async () => {
+      mockRepositories.teamsRepository.findByName.mockResolvedValueOnce({
+        ...team,
+        createdAt: new Date(),
+        deletedAt: null,
+        memberCount: 0,
+        updatedAt: null,
+      });
+
+      await expect(
+        beforeCreateTeam({ team: { name: team.name, organizationId: organization.id }, organization }),
+      ).rejects.toMatchObject({
+        status: 'CONFLICT',
+        body: { code: TeamCreateErrorCode.AlreadyExists, message: 'Team already exists' },
+      });
     });
   });
 

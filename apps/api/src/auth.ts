@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
-import { ActionType, SubjectType } from 'shared-types';
+import { ActionType, SubjectType, TeamCreateErrorCode } from 'shared-types';
 import { Pool } from 'pg';
+import { APIError } from 'better-auth/api';
 import { betterAuth } from 'better-auth/minimal';
 import { defaultAc, adminAc, ownerAc } from 'better-auth/plugins/organization/access';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -43,10 +44,18 @@ export const organizationRoles = {
 
 // Exported for direct unit testing since better-auth does not expose plugin hook options on `auth.options`.
 export async function beforeCreateTeam({ team }: HookParameters<'beforeCreateTeam'>) {
+  const name = normalizeTeamName(team.name);
+  const repositories = createRepositories(db);
+  const existingTeam = await repositories.teamsRepository.findByName(team.organizationId, name);
+
+  if (existingTeam) {
+    throw APIError.from('CONFLICT', { code: TeamCreateErrorCode.AlreadyExists, message: 'Team already exists' });
+  }
+
   return {
     data: {
       ...team,
-      name: normalizeTeamName(team.name),
+      name,
     },
   };
 }

@@ -114,6 +114,32 @@ describe('teamsRepository', () => {
     });
   });
 
+  describe('findByName', () => {
+    it('returns the team with the name in the organization', async () => {
+      const team = { id: 'id', name: 'team-1', organizationId: 'org-1' };
+      const [db, methods] = mockDb();
+      const teamsRepository = createTeamsRepository(db);
+
+      methods.limit.mockResolvedValueOnce([team]);
+
+      const result = await teamsRepository.findByName(team.organizationId, team.name);
+
+      expect(result).toEqual(team);
+      expect(methods.where).toHaveBeenCalledExactlyOnceWith(
+        and(eq(teams.organizationId, team.organizationId), eq(teams.name, team.name)),
+      );
+    });
+
+    it('returns null when no team has the name', async () => {
+      const [db, methods] = mockDb();
+      const teamsRepository = createTeamsRepository(db);
+
+      methods.limit.mockResolvedValueOnce([]);
+
+      await expect(teamsRepository.findByName('org-1', 'team-1')).resolves.toBeNull();
+    });
+  });
+
   describe('getByName', () => {
     it('gets by name', async () => {
       const team = { id: 'id', name: 'team-1' };
