@@ -23,7 +23,7 @@ The API requires Node.js 22 or newer and pnpm (version pinned in the root `packa
 
 5. Build the shared libraries (`libs/shared-*`), which the API imports at runtime:
     ```bash
-    pnpm --filter "../../libs/shared-*" build
+    pnpm --filter 'flag-controller-api^...' build
     ```
 
 The API runs database migrations automatically when it starts. To start it:
