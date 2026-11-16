@@ -45,6 +45,18 @@ cp .env.example .env
 
 Each variable is documented inline in `.env.example`. If you're running via Docker Compose, the `environment:` block in `docker-compose.yml` documents which variables need Docker-specific values. Anything not listed there flows through from your `.env` as-is.
 
+### Required variables
+
+This is the one list of what the API needs to start. Everything else has a working default.
+
+| Variable | Required |
+| --- | --- |
+| `DATABASE_URL` | Always, unless you set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` and `DB_NAME` instead. |
+| `BETTER_AUTH_SECRET` | When `NODE_ENV=production`. Generate one with `openssl rand -base64 32`. |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | When `AUTH_PROVIDER=github`, which is the default. |
+
+Each sign-in provider adds its own row here as it is added.
+
 ## Available Scripts
 
 Available scripts in package.json:
@@ -135,7 +147,7 @@ CORS_ORIGIN=http://localhost:3000,https://my-ui.example.com
 
 The API uses [better-auth](https://www.better-auth.com/) for server-side authentication.
 
-> `BETTER_AUTH_URL` must point at this API and match the UI's value, and `BETTER_AUTH_SECRET` is required when `NODE_ENV=production`. See `.env.example` for details.
+> `BETTER_AUTH_URL` must point at this API and match the UI's value. See `.env.example` for details, and [Required variables](#required-variables) for what must be set.
 
 The implementation is split across several files:
 
@@ -145,7 +157,7 @@ In `src/auth.ts`, a `betterAuth` instance is created using the `better-auth/mini
 
 - **Database**: A Drizzle adapter backed by a PostgreSQL connection pool, using a dedicated auth schema defined in `src/db/schema/auth.ts`. The option `usePlural: true` maps to plural table names (`users`, `sessions`, `accounts`, etc.).
 - **Plugins**: The `organization` plugin (with teams enabled) adds multi-tenancy support (organizations, teams, members, invitations).
-- **Social Providers**: The provider comes from `AUTH_PROVIDER` (default `github`), read once at startup by `src/utils/getAuthConfig.ts`. GitHub OAuth needs `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`. An unknown `AUTH_PROVIDER`, or a missing variable the provider needs, stops startup with a message naming the variable.
+- **Social Providers**: The provider comes from `AUTH_PROVIDER` (default `github`), read once at startup by `src/utils/getAuthConfig.ts`. The variables each provider needs are listed under [Required variables](#required-variables). An unknown `AUTH_PROVIDER`, or a missing variable the provider needs, stops startup with a message naming the variable.
 - **Trusted Origins**: The UI origin (`http://localhost:3000`) is explicitly trusted.
 
 #### Public configuration endpoint
