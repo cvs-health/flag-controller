@@ -15,18 +15,14 @@ const githubConfig = {
   modes: {},
 };
 
-function renderLoginForm() {
-  render(
-    <TestProviders>
-      <LoginForm />
-    </TestProviders>,
-  );
-}
-
 describe('LoginForm', () => {
   it('signs in with the provider the API reports', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValueOnce(resolvePromiseWithData(githubConfig));
-    renderLoginForm();
+    render(
+      <TestProviders>
+        <LoginForm />
+      </TestProviders>,
+    );
 
     fireEvent.click(await screen.findByRole('button', { name: 'Login with GitHub' }));
 
@@ -45,7 +41,11 @@ describe('LoginForm', () => {
         authProviders: [{ id: 'gitlab', label: 'GitLab', kind: 'social' }],
       }),
     );
-    renderLoginForm();
+    render(
+      <TestProviders>
+        <LoginForm />
+      </TestProviders>,
+    );
 
     fireEvent.click(await screen.findByRole('button', { name: 'Login with GitLab' }));
 
@@ -64,9 +64,13 @@ describe('LoginForm', () => {
         authProviders: [{ id: 'github', kind: 'social' }],
       }),
     );
-    renderLoginForm();
+    render(
+      <TestProviders>
+        <LoginForm />
+      </TestProviders>,
+    );
 
-    // The disabled placeholder is also named "Login".
+    // The button reads "Login" while loading too, so wait for it to enable.
     await waitFor(() => expect(screen.getByRole('button', { name: 'Login' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Login' }));
 
@@ -80,7 +84,11 @@ describe('LoginForm', () => {
 
   it('keeps the button disabled until the API has answered', () => {
     vi.spyOn(global, 'fetch').mockReturnValueOnce(new Promise(() => {}));
-    renderLoginForm();
+    render(
+      <TestProviders>
+        <LoginForm />
+      </TestProviders>,
+    );
 
     expect(screen.getByRole('button', { name: 'Login' })).toBeDisabled();
   });
@@ -88,7 +96,11 @@ describe('LoginForm', () => {
   it('shows an error when login fails', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValueOnce(resolvePromiseWithData(githubConfig));
     vi.mocked(authClient.signIn.social).mockRejectedValueOnce(new Error('Authentication failed'));
-    renderLoginForm();
+    render(
+      <TestProviders>
+        <LoginForm />
+      </TestProviders>,
+    );
 
     fireEvent.click(await screen.findByRole('button', { name: 'Login with GitHub' }));
 
@@ -97,7 +109,11 @@ describe('LoginForm', () => {
 
   it('shows an error instead of an empty page when the API cannot be reached', async () => {
     vi.spyOn(global, 'fetch').mockRejectedValueOnce(new TypeError('fetch failed'));
-    renderLoginForm();
+    render(
+      <TestProviders>
+        <LoginForm />
+      </TestProviders>,
+    );
 
     expect(
       await screen.findByText('Sign-in options could not be loaded. Please refresh the page.'),
