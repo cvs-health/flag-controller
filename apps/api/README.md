@@ -621,7 +621,7 @@ Every CUD operation *must* write to the `logs` table. We need to ensure each rou
 
 ## FAQ / Troubleshooting
 1. Issue: When starting the API with `pnpm start`, you encounter `Module not found`.
-- Solution: From the `apps/api` directory, run `pnpm --filter "../../libs/shared-*" build`. This builds the shared libraries if they have not been built yet.
+- Solution: The shared libraries haven't been built yet. Build them as described in step 5 of [Getting started](#getting-started).
 
 2. Failure to update schemas when running `pnpm update:schemas`
 - This is common behind corporate proxies or networks that use TLS-intercepting certificates not trusted by Node.js.
