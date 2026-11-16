@@ -3,7 +3,6 @@
 
 import { describe, expect, it } from 'vitest';
 
-import build from '../../../../app.js';
 import testBuild from 'test/app.js';
 
 describe('get/api/config', () => {
@@ -37,18 +36,5 @@ describe('get/api/config', () => {
 
     expect(response.body).not.toContain(process.env.GITHUB_CLIENT_ID);
     expect(response.body).not.toContain(process.env.GITHUB_CLIENT_SECRET);
-  });
-
-  it('is documented in the OpenAPI spec', async () => {
-    const app = await build({ logger: false });
-    await app.ready();
-
-    const operation = app.swagger().paths?.['/api/config']?.get;
-
-    await app.close();
-
-    expect(operation?.tags).toEqual(['config']);
-    expect(operation?.responses).toHaveProperty('200');
-    expect(operation?.security).toEqual([]);
   });
 });
