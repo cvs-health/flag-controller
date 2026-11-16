@@ -634,3 +634,12 @@ Every CUD operation *must* write to the `logs` table. We need to ensure each rou
   NODE_TLS_REJECT_UNAUTHORIZED=0 pnpm update:schemas
   ```
   ⚠️ **Never use `NODE_TLS_REJECT_UNAUTHORIZED=0` in production or CI** — it disables all TLS verification and exposes you to man-in-the-middle attacks.
+
+3. Issue: The API console keeps logging `Export retry time ... exceeds remaining timeout` and `PeriodicExportingMetricReader: metrics export failed`.
+- Cause: `.env.example` sets `OTEL_TRACES_EXPORTER` and `OTEL_METRICS_EXPORTER` to `otlp`, so the API sends telemetry to an OpenTelemetry collector (`http://localhost:4318` unless you configure an endpoint). If no collector is running, every export fails. The API keeps working; only the telemetry is dropped.
+- Solution: In the OpenTelemetry section of `apps/api/.env`, set both exporters to `none` to stop exporting, or to `console` to print telemetry to the terminal instead, then restart the API:
+  ```
+  OTEL_TRACES_EXPORTER=none
+  OTEL_METRICS_EXPORTER=none
+  ```
+- To turn OpenTelemetry off entirely, set `OTEL_SDK_DISABLED=true` instead.
