@@ -21,9 +21,9 @@ The API requires Node.js 22 or newer and pnpm (version pinned in the root `packa
     cp .env.example .env
     ```
 
-5. Build the shared types package, which the API imports at runtime:
+5. Build the shared libraries (`libs/shared-*`), which the API imports at runtime:
     ```bash
-    pnpm --dir ../../libs/shared-types build
+    pnpm --filter "../../libs/shared-*" build
     ```
 
 The API runs database migrations automatically when it starts. To start it:
@@ -621,7 +621,7 @@ Every CUD operation *must* write to the `logs` table. We need to ensure each rou
 
 ## FAQ / Troubleshooting
 1. Issue: When starting the API with `pnpm start`, you encounter `Module not found`.
-- Solution: From the `apps/api` directory, run `pnpm --dir ../../libs/shared-types build`. This builds the library if it has not been built yet.
+- Solution: From the `apps/api` directory, run `pnpm --filter "../../libs/shared-*" build`. This builds the shared libraries if they have not been built yet.
 
 2. Failure to update schemas when running `pnpm update:schemas`
 - This is common behind corporate proxies or networks that use TLS-intercepting certificates not trusted by Node.js.
