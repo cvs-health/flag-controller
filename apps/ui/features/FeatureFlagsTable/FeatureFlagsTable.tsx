@@ -3,6 +3,7 @@
 
 'use client';
 import { DesignResearch, FaceVeryDissatisfied, Flag } from '@carbon/pictograms-react';
+import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import {
   DataTable,
@@ -22,7 +23,7 @@ import {
 
 import featureFlagsTableData from '../../utils/featureFlagsTableData';
 import parseFlagsFiltersSearchParams from '../../utils/parseFlagsFiltersSearchParams';
-import useGetFeatureFlagsQuery from '../../api/queries/useGetFeatureFlagsQuery';
+import useGetFeatureFlagsQuery, { getFeatureFlagsQueryKey } from '../../api/queries/useGetFeatureFlagsQuery';
 import useTableParams from '../../hooks/useTableParams';
 import { ColumnSortingDirection } from '../../typings/api';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
@@ -34,6 +35,7 @@ interface FeatureFlagsTableProps {
 }
 
 export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
+  const queryClient = useQueryClient();
   const tableParams = useTableParams('key', ColumnSortingDirection.ASC);
   const initialFilters = parseFlagsFiltersSearchParams(tableParams.filters);
   const getFeatureFlagsQuery = useGetFeatureFlagsQuery(
@@ -44,12 +46,19 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
     tableParams.filters,
   );
 
+  function handleArchived() {
+    void queryClient.invalidateQueries({ queryKey: [getFeatureFlagsQueryKey] });
+  }
+
   const noResults = !!(
     getFeatureFlagsQuery.isSuccess &&
     !getFeatureFlagsQuery.data?.data.length &&
     (tableParams.search || tableParams.filters)
   );
-  const reducedFlagsByIdentifier = featureFlagsTableData(getFeatureFlagsQuery.data?.data, { includeActions: true });
+  const reducedFlagsByIdentifier = featureFlagsTableData(getFeatureFlagsQuery.data?.data, {
+    includeActions: true,
+    onArchived: handleArchived,
+  });
   const sortableHeaders = ['key', 'applicationName', 'createdAt', 'updatedAt', 'type'];
   const rows = getFeatureFlagsQuery.isError ? [] : Object.values(reducedFlagsByIdentifier);
   const headers = [

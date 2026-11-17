@@ -24,8 +24,7 @@ interface ArchiveFeatureFlagProps {
   featureFlagKey: string;
   children: (onOpen: () => void) => React.ReactNode;
   featureFlagId: string;
-  id?: string;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 export function ArchiveFeatureFlagModal({
@@ -33,7 +32,6 @@ export function ArchiveFeatureFlagModal({
   featureFlagId,
   featureFlagKey,
   children,
-  id = 'archiveFeatureFlag',
   onSuccess,
 }: ArchiveFeatureFlagProps) {
   const [open, setOpen] = useState(false);
@@ -52,14 +50,14 @@ export function ArchiveFeatureFlagModal({
   }
 
   function handleSubmitDone() {
-    onSuccess();
+    onSuccess?.();
     setOpen(false);
   }
 
   return (
     <>
       <form action={formAction}>
-        <ComposedModal open={open} onClose={handleToggleModal} id={id}>
+        <ComposedModal open={open} onClose={handleToggleModal} id={`archiveFeatureFlag-${featureFlagId}`}>
           <ModalHeader title="Archive Flag" />
           <ModalBody>
             <p>

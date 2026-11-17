@@ -13,11 +13,12 @@ import formatDateTime from './formatDateTime';
 
 interface FeatureFlagsTableDataOptions {
   includeActions?: boolean;
+  onArchived?: () => void;
 }
 
 function featureFlagsTableData(
   featureFlags: FeatureFlagListItem[] = [],
-  { includeActions = false }: FeatureFlagsTableDataOptions = {},
+  { includeActions = false, onArchived }: FeatureFlagsTableDataOptions = {},
 ) {
   return featureFlags.map((flag) => {
     const id = `${flag.applicationName}/${flag.key}`;
@@ -31,6 +32,7 @@ function featureFlagsTableData(
           applicationId={flag.applicationId}
           featureFlagId={flag.id}
           featureFlagKey={flag.key}
+          onArchived={onArchived}
         />
       ) : null,
       applicationName: <Link href={`/applications/${flag.applicationName}`}>{flag.applicationName}</Link>,
