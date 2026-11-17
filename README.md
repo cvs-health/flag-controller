@@ -43,7 +43,9 @@ This Turborepo includes the following apps:
    cp apps/ui/.env.example apps/ui/.env
    ```
 
-   Review each `.env` and fill in the required values. Every setting is documented inline in the example files. At a minimum the API needs a valid `DATABASE_URL`, and GitHub sign-in requires `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and a `BETTER_AUTH_SECRET` (generate one with `openssl rand -base64 32`).
+   Review each `.env` and fill in the required values. Every setting is documented inline in the example files, and the API README lists the [variables the API requires](apps/api/README.md#required-variables).
+
+   Sign-in is configured with `AUTH_PROVIDER`. GitHub is the only option today, and the setting is designed to take more providers, such as OpenID Connect identity providers, as they are added.
 
 ### Flagd schema sync
 
