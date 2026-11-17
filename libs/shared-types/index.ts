@@ -4,6 +4,7 @@
 export * from './src/applications';
 export * from './src/audits';
 export * from './src/common';
+export * from './src/config';
 export * from './src/environments';
 export * from './src/errors';
 export * from './src/featureFlagEnvironments';
