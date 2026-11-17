@@ -75,4 +75,62 @@ describe('authHandler', () => {
     );
     expect(JSON.stringify(reply.send.mock.calls[0]?.[0])).not.toContain('Authentication failed');
   });
+
+  describe('identity-mode refusals from Better Auth', () => {
+    function fakeReply() {
+      const reply = { code: vi.fn(), type: vi.fn(), status: vi.fn(), header: vi.fn(), send: vi.fn() };
+      reply.code.mockReturnValue(reply);
+      reply.type.mockReturnValue(reply);
+      return reply;
+    }
+    const createTeam = {
+      id: 'req-7',
+      url: '/api/auth/organization/create-team',
+      method: 'POST',
+      headers: { host: 'localhost:8080' },
+      body: { name: 'payments-platform' },
+    };
+
+    it('answers with the IDENTITY_MANAGED problem document', async () => {
+      mocks.handler.mockResolvedValue(
+        new Response(
+          JSON.stringify({ code: 'IDENTITY_MANAGED', message: 'Teams are managed by your identity provider.' }),
+          { status: 403, headers: { 'content-type': 'application/json' } },
+        ),
+      );
+      const reply = fakeReply();
+
+      // @ts-expect-error We don't need the entire request
+      await authHandler(Fastify(), createTeam, reply);
+
+      expect(reply.code).toHaveBeenCalledExactlyOnceWith(403);
+      expect(reply.type).toHaveBeenCalledExactlyOnceWith(PROBLEM_CONTENT_TYPE);
+      expect(reply.send).toHaveBeenCalledExactlyOnceWith({
+        type: 'urn:fliposs:error:identity-managed',
+        title: 'Managed by Identity Provider',
+        status: 403,
+        code: ErrorCode.IdentityManaged,
+        detail: 'Teams are managed by your identity provider.',
+        instance: 'req-7',
+      });
+    });
+
+    it('passes any other Better Auth 403 through unchanged', async () => {
+      const body = JSON.stringify({
+        code: 'YOU_ARE_NOT_ALLOWED_TO_CREATE_TEAMS_IN_THIS_ORGANIZATION',
+        message: 'Forbidden',
+      });
+      mocks.handler.mockResolvedValue(
+        new Response(body, { status: 403, headers: { 'content-type': 'application/json' } }),
+      );
+      const reply = fakeReply();
+
+      // @ts-expect-error We don't need the entire request
+      await authHandler(Fastify(), createTeam, reply);
+
+      expect(reply.status).toHaveBeenCalledExactlyOnceWith(403);
+      expect(reply.send).toHaveBeenCalledExactlyOnceWith(body);
+      expect(reply.type).not.toHaveBeenCalled();
+    });
+  });
 });
