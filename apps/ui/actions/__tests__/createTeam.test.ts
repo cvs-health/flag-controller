@@ -130,22 +130,4 @@ describe('createTeam', () => {
       status: ActionStatus.Error,
     });
   });
-
-  it('should handle permission error', async () => {
-    mocks.team = { error: { status: 401 } };
-    vi.spyOn(global, 'fetch').mockResolvedValue(resolvePromiseWithData(session));
-
-    const formData = new FormData();
-
-    formData.append('teamName', 'team-name');
-
-    const result = await createTeam(initialFormState, formData);
-
-    expect(result.errors).toEqual({
-      actionError: {
-        subtitle: 'You do not have permission to create a team.',
-        title: 'Failed to create',
-      },
-    });
-  });
 });

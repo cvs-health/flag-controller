@@ -133,7 +133,6 @@ function createTeamsRepository(db: DbOrTx) {
 
       return team;
     },
-    // Includes soft-deleted teams, since the unique index on (organizationId, name) still counts them.
     findByName: async (organizationId: string, name: string) => {
       const [team = null] = await db
         .select()
