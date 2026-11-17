@@ -28,8 +28,8 @@ async function Logs({ searchParams }: LogsProps) {
   return (
     <Stack className={styles.root} gap={6}>
       <h1>Logs</h1>
-        <Switcher className={styles.switcher} parameter="scope" selected={scope} switches={logsSwitches} />
-        <p className={styles.sublabel}>{switchSublabel[scope]}</p>
+      <Switcher className={styles.switcher} parameter="scope" selected={scope} switches={logsSwitches} />
+      <p className={styles.sublabel}>{switchSublabel[scope]}</p>
       <LogTable />
     </Stack>
   );

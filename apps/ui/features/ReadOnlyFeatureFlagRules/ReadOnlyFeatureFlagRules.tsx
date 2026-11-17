@@ -5,7 +5,12 @@
 
 import { Stack } from '@carbon/react';
 import { useMemo } from 'react';
-import type { RulesJoined, FeatureFlagType, FlagVariationsTableColumns, FeatureFlagEnvironmentsJoined } from 'shared-types';
+import type {
+  RulesJoined,
+  FeatureFlagType,
+  FlagVariationsTableColumns,
+  FeatureFlagEnvironmentsJoined,
+} from 'shared-types';
 
 import styles from './ReadOnlyFeatureFlagRules.module.scss';
 import type { SegmentWithRules } from '../../typings/segments';
@@ -56,22 +61,22 @@ export function ReadOnlyFeatureFlagRules({
         <div className={styles.toolbar}>
           <EnvironmentSwitcher environments={normalizedEnvironments} environmentId={environmentId} />
         </div>
-          <Stack gap={7}>
-            {rulesWithIdConditions.map((rule, index) => (
-              <ReadOnlyFeatureFlagRule
-                assignedKey={rule.key}
-                conditions={rule.conditions}
-                id={rule.id}
-                key={rule.id}
-                orderPosition={index}
-                segments={segments}
-                serveFractional={rule.serveFractional}
-                serveVariationId={rule.serveVariationId}
-                variations={variations}
-              />
-            ))}
-            <ReadOnlyDefaultRule defaultVariationId={defaultVariationId} variations={variations} />
-          </Stack>
+        <Stack gap={7}>
+          {rulesWithIdConditions.map((rule, index) => (
+            <ReadOnlyFeatureFlagRule
+              assignedKey={rule.key}
+              conditions={rule.conditions}
+              id={rule.id}
+              key={rule.id}
+              orderPosition={index}
+              segments={segments}
+              serveFractional={rule.serveFractional}
+              serveVariationId={rule.serveVariationId}
+              variations={variations}
+            />
+          ))}
+          <ReadOnlyDefaultRule defaultVariationId={defaultVariationId} variations={variations} />
+        </Stack>
       </div>
       <ReadOnlyFeatureFlagRulesSidebar
         applicationId={applicationId}
