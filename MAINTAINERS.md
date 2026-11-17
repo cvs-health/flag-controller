@@ -4,7 +4,7 @@
 | --- | --- |
 | Juan Bernal | [@juanparadox](https://github.com/juanparadox) |
 | Oscasavia Birungi | [@obirungi](https://github.com/obirungi) |
-| Josh Garcia | [@jg2024cvs-star](https://github.com/jg2024cvs-star) |
+| Josh Garcia | [@garciaj-oss](https://github.com/garciaj-oss) |
 | Tim Hart | [@imtimothy](https://github.com/imtimothy) |
 | Nolan Mabusth | [@nmabusth](https://github.com/nmabusth) |
 | Dipesh Patel | [@slothonautic](https://github.com/slothonautic) |
