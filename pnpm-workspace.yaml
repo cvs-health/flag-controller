@@ -8,7 +8,7 @@ overrides:
   postcss: 8.5.23
   esbuild: 0.28.1
   proxy-addr: 2.0.8
-  undici: 7.30.0
+  undici: 7.30.1
   websocket-driver: 0.7.5
   immutable: 5.1.8
   fast-uri: 3.1.7
