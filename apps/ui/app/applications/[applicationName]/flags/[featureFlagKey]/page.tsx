@@ -101,9 +101,10 @@ async function Flag({ searchParams, params }: FlagProps) {
           {!userCanActOnFeatureFlag || archived ? (
             <ReadOnlyFeatureFlagRules
               applicationId={applicationId}
-              defaultVariationKey={currentEnvironment?.defaultServeKey || ''}
               defaultVariationId={currentEnvironment?.defaultServeId || ''}
-              environmentKey={environmentKey}
+              defaultVariationKey={currentEnvironment?.defaultServeKey || ''}
+              environmentId={environmentId}
+              environments={flagEnvironments}
               featureFlagRules={readOnlyFeatureFlagRules}
               featureFlagType={featureFlag.type}
               segments={segments}

@@ -3,7 +3,6 @@
 
 'use client';
 import { AssessmentUsed, DesignResearch, FaceVeryDissatisfied } from '@carbon/pictograms-react';
-import { Scope } from 'shared-types';
 
 import useGetAuditLogQuery from '../../api/queries/useGetAuditLogQuery';
 import {
@@ -48,10 +47,9 @@ export function LogTable() {
   const log = parseAuditLogResponse(getAuditLogQuery.data?.data);
   const sortableHeaders = ['action', 'applicationName', 'environmentKey', 'actorEmail', 'createdAt'];
   const rows = getAuditLogQuery.isError ? [] : log;
-  const title = tableParams.scope === Scope.Me ? 'Your logs' : 'All logs';
 
   return (
-    <TableContainer title={title} className={styles.root}>
+    <TableContainer className={styles.root}>
       <TableToolbar>
         <TableToolbarContent>
           <TableToolbarSearch

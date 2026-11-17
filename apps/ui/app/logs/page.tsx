@@ -13,18 +13,23 @@ interface LogsProps {
 }
 
 const logsSwitches = {
-  [Scope.Me]: 'Logs from your applications',
-  [Scope.All]: 'Logs across all applications',
+  [Scope.Me]: 'My logs',
+  [Scope.All]: 'All logs',
 } as const;
+const switchSublabel = {
+  [Scope.Me]: "Logs from your teams' applications",
+  [Scope.All]: "Logs across the organization's applications",
+};
 
 async function Logs({ searchParams }: LogsProps) {
   const searchParameters = await searchParams;
   const scope = (searchParameters.scope === Scope.All ? Scope.All : Scope.Me) as Scope;
 
   return (
-    <Stack className={styles.root} gap={7}>
+    <Stack className={styles.root} gap={6}>
       <h1>Logs</h1>
-      <Switcher className={styles.switcher} parameter="scope" selected={scope} switches={logsSwitches} />
+        <Switcher className={styles.switcher} parameter="scope" selected={scope} switches={logsSwitches} />
+        <p className={styles.sublabel}>{switchSublabel[scope]}</p>
       <LogTable />
     </Stack>
   );

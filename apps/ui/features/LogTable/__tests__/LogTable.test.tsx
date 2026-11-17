@@ -55,7 +55,6 @@ describe('LogTable', () => {
     );
 
     expect(await screen.findByText(auditEntry.subject.key)).toBeInTheDocument();
-    expect(screen.getByText('Your logs')).toBeInTheDocument();
   });
 
   it('should allow the user to search for a log entry', async () => {
