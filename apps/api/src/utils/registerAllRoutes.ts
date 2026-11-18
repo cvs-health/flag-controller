@@ -10,6 +10,7 @@ import deleteTeamMember from '../routes/delete/teams/[teamId]/member.js';
 import deleteVariation from '../routes/delete/variations/[variationId].js';
 import deleteVariations from '../routes/delete/variations.js';
 import getApiAuth from '../routes/get/api/auth.js';
+import getApiConfig from '../routes/get/api/config.js';
 import getApplication from '../routes/get/applications/[applicationName].js';
 import getApplicationAuditLog from '../routes/get/applications/[applicationId]/audit-log.js';
 import getApplicationEnvironments from '../routes/get/applications/[applicationId]/environments.js';
@@ -62,6 +63,7 @@ function registerAllRoutes(fastify: FastifyInstance) {
   fastify.register(deleteVariation);
   fastify.register(deleteVariations);
   fastify.register(getApiAuth);
+  fastify.register(getApiConfig);
   fastify.register(getApplication);
   fastify.register(getApplicationAuditLog);
   fastify.register(getApplicationEnvironments);
