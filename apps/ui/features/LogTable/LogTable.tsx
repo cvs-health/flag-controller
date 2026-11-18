@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 'use client';
+
 import { AssessmentUsed, DesignResearch, FaceVeryDissatisfied } from '@carbon/pictograms-react';
+import { Scope } from 'shared-types';
+import { useSearchParams } from 'next/navigation';
 
 import useGetAuditLogQuery from '../../api/queries/useGetAuditLogQuery';
 import {
@@ -20,9 +23,11 @@ import {
   TableToolbarContent,
   TableToolbarSearch,
 } from '../../components/Carbon';
+import Link from 'next/link';
 import parseAuditLogResponse from '../../utils/parseAuditLogResponse';
 import parseLogFiltersSearchParams from '../../utils/parseLogFiltersSearchParams';
 import styles from './LogTable.module.scss';
+import updateSearchParams from '../../utils/updateSearchParams';
 import useTableParams from '../../hooks/useTableParams';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { LOG_TABLE_COLUMNS } from '../../constants/logs';
@@ -30,6 +35,7 @@ import { LogFilters } from '../../components/LogFilters/LogFilters';
 import { SkeletonTable } from '../../components/SkeletonTable/SkeletonTable';
 
 export function LogTable() {
+  const searchParams = useSearchParams();
   const tableParams = useTableParams('createdAt');
   const initialFilters = parseLogFiltersSearchParams(tableParams.filters);
   const getAuditLogQuery = useGetAuditLogQuery(
@@ -47,6 +53,7 @@ export function LogTable() {
   const log = parseAuditLogResponse(getAuditLogQuery.data?.data);
   const sortableHeaders = ['action', 'applicationName', 'environmentKey', 'actorEmail', 'createdAt'];
   const rows = getAuditLogQuery.isError ? [] : log;
+  const noLogsFoundCopy = tableParams.scope === Scope.Me ? <>Search <Link href={`/logs?${updateSearchParams(searchParams, [['scope', Scope.All]])}`}>All logs</Link> instead</> : "Try adjusting your search to find what you’re looking for.";
 
   return (
     <TableContainer className={styles.root}>
@@ -115,9 +122,9 @@ export function LogTable() {
       ) : null}
       {noResults ? (
         <EmptyState
+          body={noLogsFoundCopy}  
           icon={DesignResearch}
-          title="No results found"
-          body="Try adjusting your search to find what you're looking for."
+          title="No logs found"
         />
       ) : null}
       <Pagination

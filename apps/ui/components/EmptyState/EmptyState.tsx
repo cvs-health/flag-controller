@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
+import type { ReactNode } from 'react';
 import type { CarbonPictogramType } from '@carbon/pictograms-react';
 import { Tile } from '@carbon/react';
 import classNames from 'classnames';
@@ -8,7 +9,7 @@ import classNames from 'classnames';
 import styles from './EmptyState.module.scss';
 
 interface EmptyStateProps {
-  body: string;
+  body: ReactNode;
   className?: string;
   icon: CarbonPictogramType;
   title: string;
@@ -19,7 +20,7 @@ export function EmptyState({ icon: Icon, title, body, className }: EmptyStatePro
     <Tile className={classNames(styles.root, className)}>
       {<Icon width={48} />}
       <h4>{title}</h4>
-      <p>{body}</p>
+      {typeof body === 'string' ? <p>{body}</p> : body}
     </Tile>
   );
 }

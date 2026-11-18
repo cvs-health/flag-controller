@@ -117,6 +117,6 @@ describe('LogTable', () => {
       </TestQueryClientProvider>,
     );
 
-    expect(await screen.findByText('No results found')).toBeInTheDocument();
+    expect(await screen.findByText('No logs found')).toBeInTheDocument();
   });
 });
