@@ -188,6 +188,8 @@ overrides:
   '@codemirror/view': 6.43.13
   tinypool: ^2.1.2
 
+pnpmfileChecksum: sha256-UZOpMic6alRlDx20yEH9l99LkP4pfh7/P5nT//3Cig0=
+
 importers:
 
   .:
