@@ -53,7 +53,14 @@ export function LogTable() {
   const log = parseAuditLogResponse(getAuditLogQuery.data?.data);
   const sortableHeaders = ['action', 'applicationName', 'environmentKey', 'actorEmail', 'createdAt'];
   const rows = getAuditLogQuery.isError ? [] : log;
-  const noLogsFoundCopy = tableParams.scope === Scope.Me ? <>Search <Link href={`/logs?${updateSearchParams(searchParams, [['scope', Scope.All]])}`}>All logs</Link> instead</> : "Try adjusting your search to find what you’re looking for.";
+  const noLogsFoundCopy =
+    tableParams.scope === Scope.Me ? (
+      <>
+        Search <Link href={`/logs?${updateSearchParams(searchParams, [['scope', Scope.All]])}`}>All logs</Link> instead
+      </>
+    ) : (
+      'Try adjusting your search to find what you’re looking for.'
+    );
 
   return (
     <TableContainer className={styles.root}>
@@ -120,13 +127,7 @@ export function LogTable() {
           body="Log entries will exist when a flag or segment is created"
         />
       ) : null}
-      {noResults ? (
-        <EmptyState
-          body={noLogsFoundCopy}  
-          icon={DesignResearch}
-          title="No logs found"
-        />
-      ) : null}
+      {noResults ? <EmptyState body={noLogsFoundCopy} icon={DesignResearch} title="No logs found" /> : null}
       <Pagination
         onChange={tableParams.updatePagination}
         page={tableParams.pagination.page}
