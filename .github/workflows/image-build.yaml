@@ -43,15 +43,27 @@ jobs:
           --output "type=docker,dest=${RUNNER_TEMP}/image.tar"
           .
 
-      - name: Scan image with Trivy
+      - name: Scan image with Trivy (all severities)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          input: ${{ runner.temp }}/image.tar
-          format: sarif
-          output: trivy-results.sarif
-          severity: CRITICAL,HIGH
-          exit-code: '1'
           cache: true
+          exit-code: '0'
+          format: sarif
+          input: ${{ runner.temp }}/image.tar
+          output: trivy-results.sarif
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2
+
+      - name: Fail on critical vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          cache: true
+          exit-code: '1'
+          format: table
+          input: ${{ runner.temp }}/image.tar
+          severity: CRITICAL
+          skip-setup-trivy: true
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2
 

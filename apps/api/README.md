@@ -21,9 +21,9 @@ The API requires Node.js (according to the `.nvmrc` file at the root of the repo
     cp .env.example .env
     ```
 
-5. Build the shared types package, which the API imports at runtime:
+5. Build the shared libraries (`libs/shared-*`), which the API imports at runtime:
     ```bash
-    pnpm --dir ../../libs/shared-types build
+    pnpm --filter 'flag-controller-api^...' build
     ```
 
 The API runs database migrations automatically when it starts. To start it:
@@ -44,6 +44,18 @@ cp .env.example .env
 ```
 
 Each variable is documented inline in `.env.example`. If you're running via Docker Compose, the `environment:` block in `docker-compose.yml` documents which variables need Docker-specific values. Anything not listed there flows through from your `.env` as-is.
+
+### Required variables
+
+This is the one list of what the API needs to start. Everything else has a working default.
+
+| Variable | Required |
+| --- | --- |
+| `DATABASE_URL` | Always, unless you set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` and `DB_NAME` instead. |
+| `BETTER_AUTH_SECRET` | When `NODE_ENV=production`. Generate one with `openssl rand -base64 32`. |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | When `AUTH_PROVIDER=github`, which is the default. |
+
+Each sign-in provider adds its own row here as it is added.
 
 ## Available Scripts
 
@@ -135,7 +147,7 @@ CORS_ORIGIN=http://localhost:3000,https://my-ui.example.com
 
 The API uses [better-auth](https://www.better-auth.com/) for server-side authentication.
 
-> `BETTER_AUTH_URL` must point at this API and match the UI's value, and `BETTER_AUTH_SECRET` is required when `NODE_ENV=production`. See `.env.example` for details.
+> `BETTER_AUTH_URL` must point at this API and match the UI's value. See `.env.example` for details, and [Required variables](#required-variables) for what must be set.
 
 The implementation is split across several files:
 
@@ -145,8 +157,22 @@ In `src/auth.ts`, a `betterAuth` instance is created using the `better-auth/mini
 
 - **Database**: A Drizzle adapter backed by a PostgreSQL connection pool, using a dedicated auth schema defined in `src/db/schema/auth.ts`. The option `usePlural: true` maps to plural table names (`users`, `sessions`, `accounts`, etc.).
 - **Plugins**: The `organization` plugin (with teams enabled) adds multi-tenancy support (organizations, teams, members, invitations).
-- **Social Providers**: GitHub OAuth is configured via environment variables (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`).
+- **Social Providers**: The provider comes from `AUTH_PROVIDER` (default `github`), read once at startup by `src/utils/getAuthConfig.ts`. The variables each provider needs are listed under [Required variables](#required-variables). An unknown `AUTH_PROVIDER`, or a missing variable the provider needs, stops startup with a message naming the variable.
 - **Trusted Origins**: The UI origin (`http://localhost:3000`) is explicitly trusted.
+
+#### Public configuration endpoint
+
+`GET /api/config` needs no session. It tells the UI which sign-in method the API uses, so the login page starts the right flow without its own configuration:
+
+```json
+{
+  "authProviders": [{ "id": "github", "label": "GitHub", "kind": "social" }],
+  "features": {},
+  "modes": {}
+}
+```
+
+The response never includes client ids or secrets.
 
 #### Setting up the GitHub OAuth App
 
@@ -621,7 +647,7 @@ Every CUD operation *must* write to the `logs` table. We need to ensure each rou
 
 ## FAQ / Troubleshooting
 1. Issue: When starting the API with `pnpm start`, you encounter `Module not found`.
-- Solution: From the `apps/api` directory, run `pnpm --dir ../../libs/shared-types build`. This builds the library if it has not been built yet.
+- Solution: The shared libraries haven't been built yet. Build them as described in step 5 of [Getting started](#getting-started).
 
 2. Failure to update schemas when running `pnpm update:schemas`
 - This is common behind corporate proxies or networks that use TLS-intercepting certificates not trusted by Node.js.
