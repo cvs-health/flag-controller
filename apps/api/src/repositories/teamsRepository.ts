@@ -133,6 +133,15 @@ function createTeamsRepository(db: DbOrTx) {
 
       return team;
     },
+    findByName: async (organizationId: string, name: string) => {
+      const [team = null] = await db
+        .select()
+        .from(teams)
+        .where(and(eq(teams.organizationId, organizationId), eq(teams.name, name)))
+        .limit(1);
+
+      return team;
+    },
     getByName: async (name: string) => {
       const [team = null] = await db.select().from(teams).where(eq(teams.name, name)).limit(1);
 

@@ -7,6 +7,7 @@ import createTeam from '../createTeam';
 import resolvePromiseWithData from '../../test/resolvePromiseWithData';
 import type { authClient } from '../../lib/auth-client';
 import { ActionStatus } from '../../typings/common';
+import { TeamCreateErrorCode } from 'shared-types';
 
 const mocks = vi.hoisted(() => ({
   team: { name: 'team-name' } as ReturnType<(typeof authClient)['organization']['createTeam']>,
@@ -96,6 +97,34 @@ describe('createTeam', () => {
         actionError: {
           subtitle: 'Failed to create a team. Please try again later.',
           title: 'System error',
+        },
+      },
+      status: ActionStatus.Error,
+    });
+  });
+
+  it('should handle team name already in use', async () => {
+    mocks.team = { error: { code: TeamCreateErrorCode.AlreadyExists, status: 409 } };
+    vi.spyOn(global, 'fetch').mockResolvedValue(resolvePromiseWithData(session));
+
+    const formData = new FormData();
+
+    formData.append('teamName', 'team-name');
+
+    const result = await createTeam(initialFormState, formData);
+
+    expect(result).toEqual({
+      ...initialFormState,
+      form: {
+        teamName: 'team-name',
+      },
+      errors: {
+        fieldErrors: {
+          teamName: ['Please choose a unique team name.'],
+        },
+        actionError: {
+          subtitle: 'Team name already in use.',
+          title: 'Failed to create team',
         },
       },
       status: ActionStatus.Error,
