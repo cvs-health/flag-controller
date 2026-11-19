@@ -2,7 +2,7 @@
 
 ## Getting started
 
-The API requires Node.js 22 or newer and pnpm (version pinned in the root `package.json`). Install workspace dependencies from the repository root, then run API commands from `apps/api`.
+The API requires Node.js (according to the `.nvmrc` file at the root of the repository) and pnpm (version pinned in the root `package.json`). Install workspace dependencies from the repository root, then run API commands from `apps/api`.
 
 1. Install the workspace dependencies:
    ```bash
