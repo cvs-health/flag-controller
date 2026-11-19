@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Scope } from 'shared-types';
 
 import type { ColumnSorting, Pagination, QueryOptions } from '../../typings/api';
 import getFeatureFlags from '../requests/getFeatureFlags';
@@ -14,13 +15,14 @@ function useGetFeatureFlagsQuery(
   summary = true,
   sort: ColumnSorting = 'key:asc',
   filter = '',
+  scope = Scope.Me,
   options: QueryOptions<typeof getFeatureFlags> = {},
 ) {
   return useQuery({
     ...options,
     placeholderData: keepPreviousData,
-    queryKey: [getFeatureFlagsQueryKey, search, summary, sort, filter, pagination],
-    queryFn: () => getFeatureFlags(pagination, search, summary, sort, filter),
+    queryKey: [getFeatureFlagsQueryKey, search, summary, sort, filter, scope, pagination],
+    queryFn: () => getFeatureFlags(pagination, search, summary, sort, filter, scope),
   });
 }
 

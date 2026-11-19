@@ -3,10 +3,14 @@
 
 'use client';
 import { DesignResearch, FaceVeryDissatisfied, Flag } from '@carbon/pictograms-react';
+import NextLink from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { Scope } from 'shared-types';
 import {
   DataTable,
   type DataTableSortState,
+  Link,
   Pagination,
   Table,
   TableBody,
@@ -22,18 +26,27 @@ import {
 
 import featureFlagsTableData from '../../utils/featureFlagsTableData';
 import parseFlagsFiltersSearchParams from '../../utils/parseFlagsFiltersSearchParams';
+import updateSearchParams from '../../utils/updateSearchParams';
 import useGetFeatureFlagsQuery from '../../api/queries/useGetFeatureFlagsQuery';
 import useTableParams from '../../hooks/useTableParams';
 import { ColumnSortingDirection } from '../../typings/api';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { FeatureFlagsFilters } from '../../components/FeatureFlagsFilters/FeatureFlagsFilters';
 import { SkeletonTable } from '../../components/SkeletonTable/SkeletonTable';
+import { flagsScopeLabels } from '../../constants/common';
 
 interface FeatureFlagsTableProps {
   children?: ReactNode;
 }
 
+const searchPlaceholders = {
+  [Scope.Me]: "Search flags from your teams' applications by flag and/or application",
+  [Scope.All]: "Search flags across the organization's applications by flag and/or application",
+};
+
 export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const tableParams = useTableParams('key', ColumnSortingDirection.ASC);
   const initialFilters = parseFlagsFiltersSearchParams(tableParams.filters);
   const getFeatureFlagsQuery = useGetFeatureFlagsQuery(
@@ -42,6 +55,7 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
     true,
     `${tableParams.columnSorting.column}:${tableParams.columnSorting.direction}`,
     tableParams.filters,
+    tableParams.scope,
   );
 
   const noResults = !!(
@@ -49,6 +63,10 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
     !getFeatureFlagsQuery.data?.data.length &&
     (tableParams.search || tableParams.filters)
   );
+  const allFlagsSearchParams = updateSearchParams(searchParams, [
+    ['scope', Scope.All],
+    ['page', '1'],
+  ]);
   const reducedFlagsByIdentifier = featureFlagsTableData(getFeatureFlagsQuery.data?.data);
   const sortableHeaders = ['key', 'applicationName', 'createdAt', 'updatedAt', 'type'];
   const rows = getFeatureFlagsQuery.isError ? [] : Object.values(reducedFlagsByIdentifier);
@@ -80,10 +98,7 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
   ];
 
   return (
-    <TableContainer
-      title="All flags"
-      description="Feature flags shown by default are related to you. Use the search input to search across all flags."
-    >
+    <TableContainer>
       <TableToolbar>
         <TableToolbarContent>
           <TableToolbarSearch
@@ -92,7 +107,7 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
             labelText="search"
             onChange={tableParams.updateSearch}
             persistent
-            placeholder="Search by flag name and/or application"
+            placeholder={searchPlaceholders[tableParams.scope]}
             size="lg"
           />
           <FeatureFlagsFilters onApplyFilters={tableParams.updateFilters} initialFilters={initialFilters} />
@@ -101,7 +116,7 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
       </TableToolbar>
       <DataTable rows={rows} headers={headers} size="xl">
         {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-          <Table {...getTableProps()}>
+          <Table {...getTableProps()} aria-label={flagsScopeLabels[tableParams.scope]}>
             <TableHead>
               <TableRow>
                 {headers.map((header) => (
@@ -145,8 +160,20 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
       {noResults ? (
         <EmptyState
           icon={DesignResearch}
-          title="No results found"
-          body="Try adjusting your search to find what you're looking for."
+          title="No flags found"
+          body={
+            tableParams.scope === Scope.Me ? (
+              <>
+                Search{' '}
+                <Link as={NextLink} href={`${pathname}?${allFlagsSearchParams}`} inline>
+                  {flagsScopeLabels[Scope.All]}
+                </Link>{' '}
+                instead
+              </>
+            ) : (
+              "Try adjusting your search to find what you're looking for."
+            )
+          }
         />
       ) : null}
       {getFeatureFlagsQuery.isSuccess &&
