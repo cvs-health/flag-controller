@@ -59,12 +59,8 @@
           "name": "applications_team_id_teams_id_fk",
           "tableFrom": "applications",
           "tableTo": "teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -74,9 +70,7 @@
         "applications_name_unique": {
           "name": "applications_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -189,12 +183,8 @@
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -303,12 +293,8 @@
           "name": "invitations_organization_id_organizations_id_fk",
           "tableFrom": "invitations",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -316,12 +302,8 @@
           "name": "invitations_inviter_id_users_id_fk",
           "tableFrom": "invitations",
           "tableTo": "users",
-          "columnsFrom": [
-            "inviter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["inviter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -405,12 +387,8 @@
           "name": "members_organization_id_organizations_id_fk",
           "tableFrom": "members",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -418,12 +396,8 @@
           "name": "members_user_id_users_id_fk",
           "tableFrom": "members",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -482,9 +456,7 @@
         "organizations_slug_unique": {
           "name": "organizations_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -579,12 +551,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -594,9 +562,7 @@
         "sessions_token_unique": {
           "name": "sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -662,12 +628,8 @@
           "name": "sso_providers_user_id_users_id_fk",
           "tableFrom": "sso_providers",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -677,9 +639,7 @@
         "sso_providers_provider_id_unique": {
           "name": "sso_providers_provider_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "provider_id"
-          ]
+          "columns": ["provider_id"]
         }
       },
       "policies": {},
@@ -758,12 +718,8 @@
           "name": "team_members_team_id_teams_id_fk",
           "tableFrom": "team_members",
           "tableTo": "teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -771,12 +727,8 @@
           "name": "team_members_user_id_users_id_fk",
           "tableFrom": "team_members",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -786,9 +738,7 @@
         "team_members_membership_key_unique": {
           "name": "team_members_membership_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "membership_key"
-          ]
+          "columns": ["membership_key"]
         }
       },
       "policies": {},
@@ -886,12 +836,8 @@
           "name": "teams_organization_id_organizations_id_fk",
           "tableFrom": "teams",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -965,16 +911,12 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "users_external_id_unique": {
           "name": "users_external_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "external_id"
-          ]
+          "columns": ["external_id"]
         }
       },
       "policies": {},
@@ -1103,12 +1045,8 @@
           "name": "contexts_application_id_applications_id_fk",
           "tableFrom": "contexts",
           "tableTo": "applications",
-          "columnsFrom": [
-            "application_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["application_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1178,12 +1116,8 @@
           "name": "environments_application_id_applications_id_fk",
           "tableFrom": "environments",
           "tableTo": "applications",
-          "columnsFrom": [
-            "application_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["application_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1193,10 +1127,7 @@
         "environments_application_id_key_unique": {
           "name": "environments_application_id_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "application_id",
-            "key"
-          ]
+          "columns": ["application_id", "key"]
         }
       },
       "policies": {},
@@ -1272,12 +1203,8 @@
           "name": "feature_flags_application_id_applications_id_fk",
           "tableFrom": "feature_flags",
           "tableTo": "applications",
-          "columnsFrom": [
-            "application_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["application_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1287,10 +1214,7 @@
         "feature_flags_app_id_feature_flag_key_unique": {
           "name": "feature_flags_app_id_feature_flag_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "application_id",
-            "key"
-          ]
+          "columns": ["application_id", "key"]
         }
       },
       "policies": {},
@@ -1368,12 +1292,8 @@
           "name": "flag_environments_flag_id_feature_flags_id_fk",
           "tableFrom": "flag_environments",
           "tableTo": "feature_flags",
-          "columnsFrom": [
-            "flag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["flag_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1381,12 +1301,8 @@
           "name": "flag_environments_environment_id_environments_id_fk",
           "tableFrom": "flag_environments",
           "tableTo": "environments",
-          "columnsFrom": [
-            "environment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["environment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1394,12 +1310,8 @@
           "name": "flag_environments_default_serve_id_flag_variations_id_fk",
           "tableFrom": "flag_environments",
           "tableTo": "flag_variations",
-          "columnsFrom": [
-            "default_serve_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["default_serve_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1407,10 +1319,7 @@
       "compositePrimaryKeys": {
         "flag_environments_flag_id_environment_id_pk": {
           "name": "flag_environments_flag_id_environment_id_pk",
-          "columns": [
-            "flag_id",
-            "environment_id"
-          ]
+          "columns": ["flag_id", "environment_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1546,12 +1455,8 @@
           "name": "flag_variations_flag_id_feature_flags_id_fk",
           "tableFrom": "flag_variations",
           "tableTo": "feature_flags",
-          "columnsFrom": [
-            "flag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["flag_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1561,10 +1466,7 @@
         "flag_variations_flag_id_key_unique": {
           "name": "flag_variations_flag_id_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "flag_id",
-            "key"
-          ]
+          "columns": ["flag_id", "key"]
         }
       },
       "policies": {},
@@ -1749,12 +1651,8 @@
           "name": "logs_application_id_applications_id_fk",
           "tableFrom": "logs",
           "tableTo": "applications",
-          "columnsFrom": [
-            "application_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["application_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1762,12 +1660,8 @@
           "name": "logs_environment_id_environments_id_fk",
           "tableFrom": "logs",
           "tableTo": "environments",
-          "columnsFrom": [
-            "environment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["environment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1972,12 +1866,8 @@
           "name": "rules_environment_id_environments_id_fk",
           "tableFrom": "rules",
           "tableTo": "environments",
-          "columnsFrom": [
-            "environment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["environment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1985,12 +1875,8 @@
           "name": "rules_flag_id_feature_flags_id_fk",
           "tableFrom": "rules",
           "tableTo": "feature_flags",
-          "columnsFrom": [
-            "flag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["flag_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1998,12 +1884,8 @@
           "name": "rules_serve_fractional_id_fractionals_id_fk",
           "tableFrom": "rules",
           "tableTo": "fractionals",
-          "columnsFrom": [
-            "serve_fractional_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["serve_fractional_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2011,12 +1893,8 @@
           "name": "rules_serve_variation_id_flag_variations_id_fk",
           "tableFrom": "rules",
           "tableTo": "flag_variations",
-          "columnsFrom": [
-            "serve_variation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["serve_variation_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2024,12 +1902,8 @@
           "name": "rules_segment_id_segments_id_fk",
           "tableFrom": "rules",
           "tableTo": "segments",
-          "columnsFrom": [
-            "segment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["segment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2116,12 +1990,8 @@
           "name": "segments_application_id_applications_id_fk",
           "tableFrom": "segments",
           "tableTo": "applications",
-          "columnsFrom": [
-            "application_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["application_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2131,10 +2001,7 @@
         "segments_application_id_key_unique": {
           "name": "segments_application_id_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "application_id",
-            "key"
-          ]
+          "columns": ["application_id", "key"]
         }
       },
       "policies": {},
