@@ -14,10 +14,11 @@ interface SwitcherProps {
   className?: string;
   parameter: string;
   selected: string;
+  size?: 'sm' | 'md' | 'lg';
   switches: Record<string, string>;
 }
 
-export function Switcher({ className, parameter, selected, switches }: SwitcherProps) {
+export function Switcher({ className, parameter, selected, size = 'lg', switches }: SwitcherProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -26,7 +27,11 @@ export function Switcher({ className, parameter, selected, switches }: SwitcherP
   const selectedIndex = Object.keys(switches).indexOf(selected);
 
   function handleTabChange(event: SwitchEventHandlersParams) {
-    const params = updateSearchParams(searchParams, [[parameter, event.name as string]]);
+    // The current page may not exist for the newly selected switch
+    const params = updateSearchParams(searchParams, [
+      [parameter, event.name as string],
+      ['page', '1'],
+    ]);
 
     startTransition(() => {
       router.push(`${pathname}?${params}`, { scroll: false });
@@ -39,7 +44,7 @@ export function Switcher({ className, parameter, selected, switches }: SwitcherP
       onChange={handleTabChange}
       selectedIndex={selectedIndex}
       selectionMode="manual"
-      size="lg"
+      size={size}
     >
       {Object.entries(switches).map(([key, text]) => (
         <Switch name={key} text={text as string} key={key} />

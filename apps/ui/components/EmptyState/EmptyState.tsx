@@ -4,11 +4,12 @@
 import type { CarbonPictogramType } from '@carbon/pictograms-react';
 import { Tile } from '@carbon/react';
 import classNames from 'classnames';
+import type { ReactNode } from 'react';
 
 import styles from './EmptyState.module.scss';
 
 interface EmptyStateProps {
-  body: string;
+  body: ReactNode;
   className?: string;
   icon: CarbonPictogramType;
   title: string;

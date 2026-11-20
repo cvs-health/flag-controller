@@ -4,6 +4,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import type { PreSerializedFromSchema } from '../../types/preSerializedFromSchema.js';
+import { Scope } from 'shared-types';
 
 import type { FeatureFlagsJoined } from 'repositories/featureFlagsRepository.js';
 import { environmentsSchema } from 'schemas/environments.js';
@@ -31,6 +32,7 @@ const querystringSchema = {
     updatedAtStartDate: { type: 'string', format: 'date-time' },
     page: { type: 'number' },
     rows: { type: 'number' },
+    scope: { type: 'string', enum: Object.values(Scope), default: Scope.Me },
     search: { type: 'string' },
     sort: {
       type: 'string',
@@ -64,7 +66,8 @@ async function getFeatureFlags(fastify: FastifyInstance) {
     Reply: Reply;
     Querystring: FromSchema<typeof querystringSchema>;
   }>('/feature-flags', { schema }, async (request, reply) => {
-    const applicationIds = await resolveRequestApplicationIds(fastify, request);
+    const applicationIds =
+      request.query.scope === Scope.All ? undefined : await resolveRequestApplicationIds(fastify, request);
     const [field, direction] = getFieldDirection<FeatureFlagsJoined>(request.query.sort);
     const featureFlagsResult = await fastify.services.featureFlagService.listFeatureFlags({
       filters: {
