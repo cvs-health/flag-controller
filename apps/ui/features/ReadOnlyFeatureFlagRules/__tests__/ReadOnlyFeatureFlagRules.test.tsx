@@ -7,7 +7,6 @@ import {
   Clause,
   FeatureFlagType,
   Operator,
-  EnvironmentKey,
   RuleConditionType,
   RuleConditionValueType,
   type ContextRuleCondition,
@@ -93,7 +92,7 @@ describe('ReadOnlyFeatureFlagRules', () => {
           applicationId="application-id"
           defaultVariationKey={featureFlag.defaultVariation}
           defaultVariationId={variation.id}
-          environmentKey={EnvironmentKey.Development}
+          environmentId={rule.environmentId}
           featureFlagRules={[rule]}
           featureFlagType={FeatureFlagType.Boolean}
           segments={[]}
