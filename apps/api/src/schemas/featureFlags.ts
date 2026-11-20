@@ -65,9 +65,10 @@ export const featureFlagWithEnvironmentListItemSchema = {
     archived: featureFlagSchema.properties.archived,
     createdAt: { type: 'string', format: 'date-time' },
     enabled: { type: 'object', patternProperties: { '^.{1,}$': { type: 'boolean' } } },
+    id: featureFlagSchema.properties.id,
     key: { type: 'string' },
     updatedAt: { type: 'string', format: 'date-time' },
     type: featureFlagTypeSchema,
   },
-  required: ['applicationId', 'archived', 'createdAt', 'enabled', 'key', 'updatedAt', 'type'],
+  required: ['applicationId', 'archived', 'createdAt', 'enabled', 'id', 'key', 'updatedAt', 'type'],
 } as const;
