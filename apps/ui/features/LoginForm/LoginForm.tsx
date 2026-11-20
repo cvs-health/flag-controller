@@ -15,9 +15,20 @@ import { authClient } from '../../lib/auth-client';
 
 interface LoginFormProps {
   className?: string;
+  /** Error code the API adds to the redirect when it rejects a sign-in. */
+  signInError?: string;
 }
 
-export function LoginForm({ className }: LoginFormProps) {
+// Fixed messages, so a crafted link can't put its own text on the login page.
+const signInErrorMessages: Record<string, string> = {
+  sso_email_domain_not_allowed: 'Your email domain is not allowed to sign in. Use your organization account.',
+  sso_claim_not_allowed: 'Your account is not allowed to sign in to this deployment.',
+  sso_email_not_verified: 'Your email address is not verified. Verify it with your identity provider, then try again.',
+  sso_external_id_missing: 'Your identity provider did not send an account identifier. Contact your administrator.',
+  'account not linked': 'An account with your email address already exists. Contact your administrator.',
+};
+
+export function LoginForm({ className, signInError }: LoginFormProps) {
   const [submitStatus, setSubmitStatus] = useState(ActionStatus.Idle);
   const getApiConfigQuery = useGetApiConfigQuery();
   // One provider per deployment.
@@ -33,10 +44,13 @@ export function LoginForm({ className }: LoginFormProps) {
 
     try {
       const callbackURL = new URL('/flags', window.location.origin).toString();
-      await authClient.signIn.social({
-        provider: provider.id,
-        callbackURL,
-      });
+      const errorCallbackURL = new URL('/login', window.location.origin).toString();
+
+      if (provider.kind === 'oidc') {
+        await authClient.signIn.sso({ providerId: provider.id, callbackURL, errorCallbackURL });
+      } else {
+        await authClient.signIn.social({ provider: provider.id, callbackURL, errorCallbackURL });
+      }
     } catch (_error) {
       setSubmitStatus(ActionStatus.Error);
     }
@@ -52,6 +66,16 @@ export function LoginForm({ className }: LoginFormProps) {
             kind="error"
             subtitle="Sign-in options could not be loaded. Please refresh the page."
             title="Sign-in unavailable"
+          />
+        )}
+        {signInError && (
+          <InlineNotification
+            hideCloseButton
+            kind="error"
+            subtitle={
+              signInErrorMessages[signInError] ?? 'Sign-in failed. Please try again or contact your administrator.'
+            }
+            title="Sign-in rejected"
           />
         )}
         {submitStatus === ActionStatus.Error && (

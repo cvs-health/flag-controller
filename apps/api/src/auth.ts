@@ -4,8 +4,10 @@
 import { ActionType, SubjectType, TeamCreateErrorCode } from 'shared-types';
 import { Pool } from 'pg';
 import { APIError } from 'better-auth/api';
+import { sso } from '@better-auth/sso';
 import { betterAuth } from 'better-auth/minimal';
 import { defaultAc, adminAc, ownerAc } from 'better-auth/plugins/organization/access';
+import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { organization, type OrganizationOptions } from 'better-auth/plugins';
@@ -15,12 +17,13 @@ import * as schema from './db/schema/auth.js';
 import createOrganizationsService from 'services/organizationsService.js';
 import createRepositories from 'utils/createRepositories.js';
 import createTeamsService from 'services/teamsService.js';
-import { getAuthConfig } from './utils/getAuthConfig.js';
+import { getAuthConfig, type SsoConfig } from './utils/getAuthConfig.js';
 import getCorsOrigins from './utils/getCorsOrigins.js';
 import normalizeTeamName from 'utils/normalizeTeamName.js';
 import { DEFAULT_ORGANIZATION } from './constants/organizations.js';
 import { SYSTEM } from './constants/common.js';
 import { createWithTransaction } from 'utils/withTransaction.js';
+import { createProvisionSsoUser, createResolveSsoUser } from 'utils/ssoUser.js';
 import { poolSettings } from './plugins/drizzle.js';
 
 type HookParameters<T extends keyof NonNullable<OrganizationOptions['organizationHooks']>> = Parameters<
@@ -29,10 +32,30 @@ type HookParameters<T extends keyof NonNullable<OrganizationOptions['organizatio
 
 // Initialized by main() before this module loads.
 const authConfig = getAuthConfig();
+const ssoConfig = 'sso' in authConfig ? authConfig.sso : undefined;
 
 const pool = new Pool(poolSettings);
 const db = drizzle(pool);
 const withTransaction = createWithTransaction(db);
+
+function createSsoPlugin(config: SsoConfig) {
+  return sso({
+    defaultSSO: [
+      {
+        providerId: config.providerId,
+        domain: new URL(config.issuerOrigin).hostname,
+        oidcConfig: config.oidcConfig,
+      },
+    ],
+    // The provider comes from the environment only; registering one through the API is disabled.
+    providersLimit: 0,
+    resolveUser: createResolveSsoUser(config),
+    provisionUser: createProvisionSsoUser(config, (userId, externalId) =>
+      db.update(schema.users).set({ externalId }).where(eq(schema.users.id, userId)),
+    ),
+    provisionUserOnEveryLogin: true,
+  });
+}
 
 /**
  * Team membership is what grants write access (see `authorizationService.assertCanWrite`), so
@@ -104,7 +127,13 @@ async function addUserToDefaultTeam(userId: string, repositories: ReturnType<typ
 }
 
 export const auth = betterAuth({
-  database: drizzleAdapter(db, { provider: 'pg', usePlural: true, schema }),
+  // The SSO plugin's resolveUser requires native transactions; after-hooks still run post-commit.
+  database: drizzleAdapter(db, { provider: 'pg', usePlural: true, schema, transaction: true }),
+  user: {
+    additionalFields: {
+      externalId: { type: 'string', required: false, input: false },
+    },
+  },
   databaseHooks: {
     session: {
       create: {
@@ -179,8 +208,10 @@ export const auth = betterAuth({
         afterCreateTeam,
       },
     }),
+    ...(ssoConfig ? [createSsoPlugin(ssoConfig)] : []),
   ],
-  trustedOrigins: getCorsOrigins(),
+  // Trusting the issuer lets the plugin reach an IdP on a private network.
+  trustedOrigins: [...getCorsOrigins(), ...(ssoConfig ? [ssoConfig.issuerOrigin] : [])],
   ...(process.env.AUTH_COOKIE_DOMAIN
     ? {
         advanced: {
@@ -191,5 +222,5 @@ export const auth = betterAuth({
         },
       }
     : {}),
-  socialProviders: authConfig.socialProviders,
+  socialProviders: 'socialProviders' in authConfig ? authConfig.socialProviders : {},
 });

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
+import { ssoClient } from '@better-auth/sso/client';
 import { createAuthClient } from 'better-auth/react';
 import { organizationClient } from 'better-auth/client/plugins';
 import { organizationPluginOptions } from 'shared-constants';
@@ -11,5 +12,5 @@ const baseURL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BETTER_AU
 
 export const authClient = createAuthClient({
   baseURL: baseURL || 'http://localhost:8080',
-  plugins: [organizationClient(organizationPluginOptions)],
+  plugins: [organizationClient(organizationPluginOptions), ssoClient()],
 });

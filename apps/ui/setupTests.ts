@@ -55,7 +55,7 @@ vi.mock('better-auth/react', () => ({
         },
       },
     }),
-    signIn: { social: vi.fn(), email: vi.fn() },
+    signIn: { social: vi.fn(), email: vi.fn(), sso: vi.fn() },
     signOut: vi.fn(),
   }),
 }));
