@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim AS base
+FROM node:24-bookworm-slim AS base
 ARG PNPM_VERSION="12.11.0"
 ARG TURBO_VERSION="2.9.16"
 
@@ -35,7 +35,7 @@ COPY --from=pruner /app/out/full/ .
 
 RUN pnpm turbo build --filter=flag-controller-ui...
 
-FROM gcr.io/distroless/nodejs22-debian13:latest AS runner
+FROM gcr.io/distroless/nodejs24-debian13:latest AS runner
 WORKDIR /app
 
 COPY --from=installer --chown="nonroot:nonroot" /app/apps/ui/next.config.js .
