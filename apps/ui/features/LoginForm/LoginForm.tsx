@@ -5,6 +5,7 @@
 import type { SubmitEvent } from 'react';
 import { useState } from 'react';
 import classNames from 'classnames';
+import { SignInErrorCode } from 'shared-types';
 
 import styles from './LoginForm.module.scss';
 import { ActionStatus } from '../../typings/common';
@@ -21,12 +22,18 @@ interface LoginFormProps {
 
 // Fixed messages, so a crafted link can't put its own text on the login page.
 const signInErrorMessages: Record<string, string> = {
-  sso_email_domain_not_allowed: 'Your email domain is not allowed to sign in. Use your organization account.',
-  sso_claim_not_allowed: 'Your account is not allowed to sign in to this deployment.',
-  sso_email_not_verified: 'Your email address is not verified. Verify it with your identity provider, then try again.',
-  sso_external_id_missing: 'Your identity provider did not send an account identifier. Contact your administrator.',
+  [SignInErrorCode.EmailDomainNotAllowed]:
+    'Your email domain is not allowed to sign in. Use your organization account.',
+  [SignInErrorCode.ClaimNotAllowed]: 'Your account is not allowed to sign in to this deployment.',
+  [SignInErrorCode.EmailNotVerified]:
+    'Your email address is not verified. Verify it with your identity provider, then try again.',
+  [SignInErrorCode.ExternalIdMissing]:
+    'Your identity provider did not send an account identifier. Contact your administrator.',
+  [SignInErrorCode.ProtocolNotSupported]:
+    'Your identity provider uses a sign-in protocol this deployment does not support. Contact your administrator.',
+  // Better Auth's own code.
   'account not linked': 'An account with your email address already exists. Contact your administrator.',
-};
+} satisfies Record<SignInErrorCode | 'account not linked', string>;
 
 export function LoginForm({ className, signInError }: LoginFormProps) {
   const [submitStatus, setSubmitStatus] = useState(ActionStatus.Idle);

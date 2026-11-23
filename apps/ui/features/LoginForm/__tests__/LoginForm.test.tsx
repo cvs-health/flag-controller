@@ -142,6 +142,10 @@ describe('LoginForm', () => {
       'sso_external_id_missing',
       'Your identity provider did not send an account identifier. Contact your administrator.',
     ],
+    [
+      'sso_protocol_not_supported',
+      'Your identity provider uses a sign-in protocol this deployment does not support. Contact your administrator.',
+    ],
     ['anything_else', 'Sign-in failed. Please try again or contact your administrator.'],
   ])('explains a rejected sign-in with code %s', async (code, message) => {
     vi.spyOn(global, 'fetch').mockResolvedValueOnce(resolvePromiseWithData(githubConfig));

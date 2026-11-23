@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SSOOptions } from '@better-auth/sso';
+import { SignInErrorCode } from 'shared-types';
 
 import type { SsoConfig } from './getAuthConfig.js';
 
@@ -20,14 +21,17 @@ export function getSignInRestriction(
   if (sso.allowedEmailDomains) {
     // Entra ID omits email_verified, so only an explicit false is rejected.
     if (profile.email_verified === false) {
-      return { code: 'sso_email_not_verified', message: 'Verify your email address with your identity provider.' };
+      return {
+        code: SignInErrorCode.EmailNotVerified,
+        message: 'Verify your email address with your identity provider.',
+      };
     }
 
     const domain = /@([^@]+)$/.exec(profile.email)?.[1].toLowerCase();
 
     if (!domain || !sso.allowedEmailDomains.includes(domain)) {
       return {
-        code: 'sso_email_domain_not_allowed',
+        code: SignInErrorCode.EmailDomainNotAllowed,
         message: `Sign-in is limited to ${sso.allowedEmailDomains.join(', ')} email addresses.`,
       };
     }
@@ -38,7 +42,7 @@ export function getSignInRestriction(
     const claimValues = [claims[name]].flat().filter((value) => typeof value === 'string');
 
     if (!claimValues.some((value) => values.includes(value))) {
-      return { code: 'sso_claim_not_allowed', message: `Your account's ${name} is not allowed to sign in.` };
+      return { code: SignInErrorCode.ClaimNotAllowed, message: `Your account's ${name} is not allowed to sign in.` };
     }
   }
 }
@@ -47,7 +51,7 @@ export function getSignInRestriction(
 export function createResolveSsoUser(sso: SsoConfig) {
   return (async (input, { database }) => {
     if (input.protocol !== 'oidc') {
-      return { action: 'reject', code: 'sso_protocol_not_supported' };
+      return { action: 'reject', code: SignInErrorCode.ProtocolNotSupported };
     }
 
     const claims = input.verifiedIdTokenClaims;
@@ -60,7 +64,7 @@ export function createResolveSsoUser(sso: SsoConfig) {
     if (!externalId) {
       return {
         action: 'reject',
-        code: 'sso_external_id_missing',
+        code: SignInErrorCode.ExternalIdMissing,
         message: `The identity provider did not send the ${sso.externalIdClaims[0]} claim.`,
       };
     }
