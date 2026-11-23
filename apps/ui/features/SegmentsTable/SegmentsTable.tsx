@@ -41,9 +41,12 @@ export function SegmentsTable({ children = null }: SegmentsTableProps) {
     tableParams.search,
     tableParams.pagination,
     `${tableParams.columnSorting.column}:${tableParams.columnSorting.direction}`,
-    tableParams.scope
+    tableParams.scope,
   );
-  const searchPlaceholder = tableParams.scope === Scope.All ? 'Search segments across the organization\'s applications by segment name' : 'Search segments from your teams\' applications by segment name';
+  const searchPlaceholder =
+    tableParams.scope === Scope.All
+      ? "Search segments across the organization's applications by segment name"
+      : "Search segments from your teams' applications by segment name";
   const reducedSegmentsByIdentifier = segmentsTableData(getSegmentsQuery.data?.data);
   const sortableHeaders = ['key', 'applicationName', 'updatedAt'];
   const rows = getSegmentsQuery.isError ? [] : Object.values(reducedSegmentsByIdentifier);
@@ -73,12 +76,12 @@ export function SegmentsTable({ children = null }: SegmentsTableProps) {
   const noLogsFoundCopy =
     tableParams.scope === Scope.Me ? (
       <>
-        Search <Link href={`/segments?${updateSearchParams(searchParams, [['scope', Scope.All]])}`}>All segments</Link> instead
+        Search <Link href={`/segments?${updateSearchParams(searchParams, [['scope', Scope.All]])}`}>All segments</Link>{' '}
+        instead
       </>
     ) : (
-      'Try adjusting your search to find what you\'re looking for.'
+      "Try adjusting your search to find what you're looking for."
     );
-
 
   return (
     <TableContainer>
@@ -137,13 +140,7 @@ export function SegmentsTable({ children = null }: SegmentsTableProps) {
           body="We were unable to connect to the service. Please try again later."
         />
       )}
-      {noResults ? (
-        <EmptyState
-          icon={DesignResearch}
-          title="No segments found"
-          body={noLogsFoundCopy}
-        />
-      ) : null}
+      {noResults ? <EmptyState icon={DesignResearch} title="No segments found" body={noLogsFoundCopy} /> : null}
       {getSegmentsQuery.isSuccess && !getSegmentsQuery.data?.data.length && !tableParams.search ? (
         <EmptyState
           icon={AnalyzesData}

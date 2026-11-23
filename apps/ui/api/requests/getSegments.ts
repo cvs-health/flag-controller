@@ -6,11 +6,17 @@ import { Scope, type SegmentsJoinedWithTargetCount } from 'shared-types';
 import apiRequest from '../../utils/apiRequest';
 import type { MetadataResponse, Pagination } from '../../typings/api';
 
-export const getSegmentsUrl = (pagination: Pagination, search = '', sort = 'updatedAt:desc', scope: Scope = Scope.All) =>
-  `segments?search=${search}&sort=${sort}&page=${pagination.page}&rows=${pagination.rows}&scope=${scope}`;
+export const getSegmentsUrl = (
+  pagination: Pagination,
+  search = '',
+  sort = 'updatedAt:desc',
+  scope: Scope = Scope.All,
+) => `segments?search=${search}&sort=${sort}&page=${pagination.page}&rows=${pagination.rows}&scope=${scope}`;
 
-async function getSegments(pagination: Pagination, search = '', sort = 'updatedAt:desc', scope: Scope = Scope.All,) {
-  return await apiRequest<MetadataResponse<SegmentsJoinedWithTargetCount>>(getSegmentsUrl(pagination, search, sort, scope));
+async function getSegments(pagination: Pagination, search = '', sort = 'updatedAt:desc', scope: Scope = Scope.All) {
+  return await apiRequest<MetadataResponse<SegmentsJoinedWithTargetCount>>(
+    getSegmentsUrl(pagination, search, sort, scope),
+  );
 }
 
 export default getSegments;
