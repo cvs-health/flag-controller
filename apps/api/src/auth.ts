@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
-import { ActionType, SubjectType } from 'shared-types';
+import { ActionType, SubjectType, TeamCreateErrorCode } from 'shared-types';
 import { Pool } from 'pg';
+import { APIError } from 'better-auth/api';
 import { betterAuth } from 'better-auth/minimal';
 import { defaultAc, adminAc, ownerAc } from 'better-auth/plugins/organization/access';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -14,6 +15,7 @@ import * as schema from './db/schema/auth.js';
 import createOrganizationsService from 'services/organizationsService.js';
 import createRepositories from 'utils/createRepositories.js';
 import createTeamsService from 'services/teamsService.js';
+import { getAuthConfig } from './utils/getAuthConfig.js';
 import getCorsOrigins from './utils/getCorsOrigins.js';
 import normalizeTeamName from 'utils/normalizeTeamName.js';
 import { DEFAULT_ORGANIZATION } from './constants/organizations.js';
@@ -24,6 +26,9 @@ import { poolSettings } from './plugins/drizzle.js';
 type HookParameters<T extends keyof NonNullable<OrganizationOptions['organizationHooks']>> = Parameters<
   NonNullable<NonNullable<OrganizationOptions['organizationHooks']>[T]>
 >[0];
+
+// Initialized by main() before this module loads.
+const authConfig = getAuthConfig();
 
 const pool = new Pool(poolSettings);
 const db = drizzle(pool);
@@ -43,10 +48,18 @@ export const organizationRoles = {
 
 // Exported for direct unit testing since better-auth does not expose plugin hook options on `auth.options`.
 export async function beforeCreateTeam({ team }: HookParameters<'beforeCreateTeam'>) {
+  const name = normalizeTeamName(team.name);
+  const repositories = createRepositories(db);
+  const existingTeam = await repositories.teamsRepository.findByName(team.organizationId, name);
+
+  if (existingTeam) {
+    throw APIError.from('CONFLICT', { code: TeamCreateErrorCode.AlreadyExists, message: 'Team already exists' });
+  }
+
   return {
     data: {
       ...team,
-      name: normalizeTeamName(team.name),
+      name,
     },
   };
 }
@@ -178,10 +191,5 @@ export const auth = betterAuth({
         },
       }
     : {}),
-  socialProviders: {
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-    },
-  },
+  socialProviders: authConfig.socialProviders,
 });

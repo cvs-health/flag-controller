@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import userEvent from '@testing-library/user-event';
-import { ActionType, EnvironmentKey, SubjectType } from 'shared-types';
+import { ActionType, EnvironmentKey, Scope, SubjectType } from 'shared-types';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 
@@ -55,7 +55,6 @@ describe('LogTable', () => {
     );
 
     expect(await screen.findByText(auditEntry.subject.key)).toBeInTheDocument();
-    expect(screen.getByText('Your logs')).toBeInTheDocument();
   });
 
   it('should allow the user to search for a log entry', async () => {
@@ -118,6 +117,25 @@ describe('LogTable', () => {
       </TestQueryClientProvider>,
     );
 
-    expect(await screen.findByText('No results found')).toBeInTheDocument();
+    expect(await screen.findByText('No logs found')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'All logs' })).toBeInTheDocument();
+  });
+
+  it('should display the no-results copy when scope is all', async () => {
+    mocks.searchParams = new URLSearchParams({
+      scope: Scope.All,
+      search: 'search',
+    });
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce(
+      resolvePromiseWithData({ data: [], metadata: { rows: 0, page: 0, totalRecords: 0 } }),
+    );
+
+    render(
+      <TestQueryClientProvider>
+        <LogTable />
+      </TestQueryClientProvider>,
+    );
+
+    expect(await screen.findByText('Try adjusting your search to find what you’re looking for.')).toBeInTheDocument();
   });
 });

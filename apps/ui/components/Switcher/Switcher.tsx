@@ -39,7 +39,7 @@ export function Switcher({ className, parameter, selected, switches }: SwitcherP
       onChange={handleTabChange}
       selectedIndex={selectedIndex}
       selectionMode="manual"
-      size="lg"
+      size="sm"
     >
       {Object.entries(switches).map(([key, text]) => (
         <Switch name={key} text={text as string} key={key} />

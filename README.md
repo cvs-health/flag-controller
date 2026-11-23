@@ -43,7 +43,9 @@ This Turborepo includes the following apps:
    cp apps/ui/.env.example apps/ui/.env
    ```
 
-   Review each `.env` and fill in the required values. Every setting is documented inline in the example files. At a minimum the API needs a valid `DATABASE_URL`, and GitHub sign-in requires `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and a `BETTER_AUTH_SECRET` (generate one with `openssl rand -base64 32`).
+   Review each `.env` and fill in the required values. Every setting is documented inline in the example files, and the API README lists the [variables the API requires](apps/api/README.md#required-variables).
+
+   Sign-in is configured with `AUTH_PROVIDER`. GitHub is the only option today, and the setting is designed to take more providers, such as OpenID Connect identity providers, as they are added.
 
 ### Flagd schema sync
 
@@ -88,13 +90,13 @@ We are using docker compose to be able to run the different parts of the system 
 You can run production builds all of the applications together using docker compose:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 You can also use compose to just run a specific service:
 
 ```bash
-docker compose up --build api
+docker compose up -d --build api
 ```
 
 ### Troubleshooting
@@ -105,7 +107,7 @@ docker compose up --build api
 >
 >```bash
 > # Build everything with no cache
-> docker compose build --no-cache
+> docker compose build --no-cache && docker compose up -d
 > # Build a specific service with no cache
-> docker compose build --no-cache docs
+> docker compose build --no-cache docs && docker compose up -d docs
 >```
