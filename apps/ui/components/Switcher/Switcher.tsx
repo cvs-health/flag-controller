@@ -14,11 +14,10 @@ interface SwitcherProps {
   className?: string;
   parameter: string;
   selected: string;
-  size?: 'sm' | 'md' | 'lg';
   switches: Record<string, string>;
 }
 
-export function Switcher({ className, parameter, selected, size = 'lg', switches }: SwitcherProps) {
+export function Switcher({ className, parameter, selected, switches }: SwitcherProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -44,7 +43,7 @@ export function Switcher({ className, parameter, selected, size = 'lg', switches
       onChange={handleTabChange}
       selectedIndex={selectedIndex}
       selectionMode="manual"
-      size={size}
+      size="sm"
     >
       {Object.entries(switches).map(([key, text]) => (
         <Switch name={key} text={text as string} key={key} />

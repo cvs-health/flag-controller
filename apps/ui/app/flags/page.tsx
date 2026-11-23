@@ -38,13 +38,7 @@ function Flags() {
     <Stack className={styles.root} gap={8}>
       <h1>Flags</h1>
       <Stack gap={3}>
-        <Switcher
-          className={styles.switcher}
-          parameter="scope"
-          selected={scope}
-          size="sm"
-          switches={flagsScopeLabels}
-        />
+        <Switcher className={styles.switcher} parameter="scope" selected={scope} switches={flagsScopeLabels} />
         <p>{flagsScopeDescriptions[scope]}</p>
       </Stack>
       {showCreateFeatureFlagModal && (
