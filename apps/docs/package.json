@@ -45,6 +45,6 @@
     "unist-util-visit": "^5.0.0"
   },
   "engines": {
-    "node": ">=20.0"
+    "node": ">=24"
   }
 }
