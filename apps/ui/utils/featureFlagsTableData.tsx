@@ -27,14 +27,15 @@ function featureFlagsTableData(
       .map(([environmentKey, enabled]) => ({ environmentKey, enabled }));
 
     return {
-      action: includeActions && !flag.archived ? (
-        <FeatureFlagsTableActions
-          applicationId={flag.applicationId}
-          featureFlagId={flag.id}
-          featureFlagKey={flag.key}
-          onArchived={onArchived}
-        />
-      ) : null,
+      action:
+        includeActions && !flag.archived ? (
+          <FeatureFlagsTableActions
+            applicationId={flag.applicationId}
+            featureFlagId={flag.id}
+            featureFlagKey={flag.key}
+            onArchived={onArchived}
+          />
+        ) : null,
       applicationName: <Link href={`/applications/${flag.applicationName}`}>{flag.applicationName}</Link>,
       createdAt: formatDateTime(flag.createdAt),
       enabled: (
