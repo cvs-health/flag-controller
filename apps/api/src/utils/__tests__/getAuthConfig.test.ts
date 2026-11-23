@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { discoverOIDCConfig } from '@better-auth/sso';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { clientSecret, discovery, issuer, loadSsoConfig, stubSsoEnv } from 'test/sso.js';
 import { getAuthConfig, getPublicConfig, initializeAuthConfig } from '../getAuthConfig.js';
@@ -63,9 +63,11 @@ describe('getAuthConfig', () => {
 });
 
 describe('getAuthConfig with AUTH_PROVIDER=sso', () => {
-  it('needs only the issuer, client id and secret, and takes endpoints from discovery', async () => {
+  beforeEach(() => {
     stubSsoEnv();
+  });
 
+  it('needs only the issuer, client id and secret, and takes endpoints from discovery', async () => {
     expect(await initializeAuthConfig()).toEqual({
       provider: { id: 'sso', label: undefined, kind: 'oidc' },
       sso: {
@@ -87,7 +89,6 @@ describe('getAuthConfig with AUTH_PROVIDER=sso', () => {
   });
 
   it('only trusts the issuer origin during discovery', async () => {
-    stubSsoEnv();
     await initializeAuthConfig();
 
     const { isTrustedOrigin } = vi.mocked(discoverOIDCConfig).mock.calls[0][0];
@@ -124,7 +125,6 @@ describe('getAuthConfig with AUTH_PROVIDER=sso', () => {
   });
 
   it('fails with the IdP error when discovery fails', async () => {
-    stubSsoEnv();
     vi.mocked(discoverOIDCConfig).mockRejectedValue(new Error('Discovery endpoint not found'));
 
     await expect(initializeAuthConfig()).rejects.toThrow(
