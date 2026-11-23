@@ -3,6 +3,7 @@
 
 'use client';
 import { DesignResearch, FaceVeryDissatisfied, Flag } from '@carbon/pictograms-react';
+import { useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -27,7 +28,7 @@ import {
 import featureFlagsTableData from '../../utils/featureFlagsTableData';
 import parseFlagsFiltersSearchParams from '../../utils/parseFlagsFiltersSearchParams';
 import updateSearchParams from '../../utils/updateSearchParams';
-import useGetFeatureFlagsQuery from '../../api/queries/useGetFeatureFlagsQuery';
+import useGetFeatureFlagsQuery, { getFeatureFlagsQueryKey } from '../../api/queries/useGetFeatureFlagsQuery';
 import useTableParams from '../../hooks/useTableParams';
 import { ColumnSortingDirection } from '../../typings/api';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
@@ -47,6 +48,7 @@ const searchPlaceholders = {
 export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const tableParams = useTableParams('key', ColumnSortingDirection.ASC);
   const initialFilters = parseFlagsFiltersSearchParams(tableParams.filters);
   const getFeatureFlagsQuery = useGetFeatureFlagsQuery(
@@ -58,6 +60,10 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
     tableParams.scope,
   );
 
+  function handleArchived() {
+    void queryClient.invalidateQueries({ queryKey: [getFeatureFlagsQueryKey] });
+  }
+
   const noResults = !!(
     getFeatureFlagsQuery.isSuccess &&
     !getFeatureFlagsQuery.data?.data.length &&
@@ -67,7 +73,10 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
     ['scope', Scope.All],
     ['page', '1'],
   ]);
-  const reducedFlagsByIdentifier = featureFlagsTableData(getFeatureFlagsQuery.data?.data);
+  const reducedFlagsByIdentifier = featureFlagsTableData(getFeatureFlagsQuery.data?.data, {
+    includeActions: true,
+    onArchived: handleArchived,
+  });
   const sortableHeaders = ['key', 'applicationName', 'createdAt', 'updatedAt', 'type'];
   const rows = getFeatureFlagsQuery.isError ? [] : Object.values(reducedFlagsByIdentifier);
   const headers = [
@@ -94,6 +103,10 @@ export function FeatureFlagsTable({ children = null }: FeatureFlagsTableProps) {
     {
       header: 'Enabled',
       key: 'enabled',
+    },
+    {
+      header: 'Action',
+      key: 'action',
     },
   ];
 
