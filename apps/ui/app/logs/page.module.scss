@@ -3,11 +3,17 @@
  */
 
 @use '@carbon/layout';
+@use '@carbon/type';
+@include type.type-classes();
 
 .root {
   margin: layout.$spacing-11 layout.$spacing-07;
 }
 
 .switcher {
-  width: 432px;
+  width: 176px;
+}
+
+.sublabel {
+  @extend .cds--type-helper-text-02;
 }
