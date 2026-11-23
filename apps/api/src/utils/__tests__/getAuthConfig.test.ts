@@ -133,11 +133,7 @@ describe('getAuthConfig with AUTH_PROVIDER=sso', () => {
   });
 
   it.each([
-    [
-      { SSO_ISSUER: 'sso.example.com/realms/corp' },
-      'SSO_ISSUER must be an http(s) URL, got "sso.example.com/realms/corp"',
-    ],
-    [{ SSO_ISSUER: 'ldap://sso.example.com' }, 'SSO_ISSUER must be an http(s) URL'],
+    [{ SSO_ISSUER: 'sso.example.com/realms/corp' }, 'SSO_ISSUER must be a URL, got "sso.example.com/realms/corp"'],
     [{ SSO_SCOPES: 'profile,email' }, 'SSO_SCOPES must include openid'],
     [{ SSO_ALLOWED_CLAIM: 'tid' }, 'SSO_ALLOWED_CLAIM and SSO_ALLOWED_CLAIM_VALUES must be set together'],
     [

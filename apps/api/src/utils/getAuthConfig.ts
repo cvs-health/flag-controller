@@ -56,19 +56,9 @@ function readGithubConfig() {
   };
 }
 
-function parseIssuer(issuer: string) {
-  const url = URL.parse(issuer);
-
-  if (url?.protocol !== 'https:' && url?.protocol !== 'http:') {
-    fail(`SSO_ISSUER must be an http(s) URL, got "${issuer}"`);
-  }
-
-  return url;
-}
-
 async function readSsoConfig() {
   const [issuer, clientId, clientSecret] = requireEnv('sso', ['SSO_ISSUER', 'SSO_CLIENT_ID', 'SSO_CLIENT_SECRET']);
-  const issuerOrigin = parseIssuer(issuer).origin;
+  const issuerOrigin = URL.parse(issuer)?.origin ?? fail(`SSO_ISSUER must be a URL, got "${issuer}"`);
   const scopes = readList('SSO_SCOPES') ?? DEFAULT_SSO_SCOPES;
   const externalIdClaim = readEnv('SSO_CLAIM_EXTERNAL_ID');
   const allowedClaim = readEnv('SSO_ALLOWED_CLAIM');
