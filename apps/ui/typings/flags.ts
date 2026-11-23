@@ -19,6 +19,7 @@ export interface FeatureFlagListItem {
   archived: boolean;
   createdAt: string;
   enabled: Record<string, boolean>;
+  id: string;
   key: string;
   type: FeatureFlagType;
   updatedAt: string;
