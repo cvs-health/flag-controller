@@ -3,8 +3,8 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FeatureFlagType } from 'shared-types';
-import { describe, expect, it, vi } from 'vitest';
+import { FeatureFlagType, Scope } from 'shared-types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import TestProviders from '../../../test/TestProviders';
 import resolvePromiseWithData from '../../../test/resolvePromiseWithData';
@@ -40,6 +40,10 @@ describe('FeatureFlagsTable', () => {
     key: 'my-other-cool-flag',
     enabled: false,
   };
+
+  beforeEach(() => {
+    mocks.searchParams = new URLSearchParams();
+  });
 
   it('should render flags', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(
@@ -177,7 +181,7 @@ describe('FeatureFlagsTable', () => {
     expect(await screen.findByText('Start by adding a flag')).toBeInTheDocument();
   });
 
-  it('should show empty state when no search results exist when fetching the flags', async () => {
+  it('should show empty state when no search results exist when fetching my flags', async () => {
     mocks.searchParams.set('search', 'test');
     vi.spyOn(global, 'fetch').mockResolvedValue(resolvePromiseWithData({ data: [], metadata: { totalRecords: 0 } }));
 
@@ -187,6 +191,71 @@ describe('FeatureFlagsTable', () => {
       </TestProviders>,
     );
 
-    expect(await screen.findByText('No results found')).toBeInTheDocument();
+    expect(await screen.findByText('No flags found')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'All flags' })).toHaveAttribute(
+      'href',
+      `/flags?search=test&scope=${Scope.All}&page=1`,
+    );
+  });
+
+  it('should show empty state when no search results exist when fetching all flags', async () => {
+    mocks.searchParams.set('search', 'test');
+    mocks.searchParams.set('scope', Scope.All);
+    vi.spyOn(global, 'fetch').mockResolvedValue(resolvePromiseWithData({ data: [], metadata: { totalRecords: 0 } }));
+
+    render(
+      <TestProviders>
+        <FeatureFlagsTable />
+      </TestProviders>,
+    );
+
+    expect(await screen.findByText('No flags found')).toBeInTheDocument();
+    expect(screen.getByText("Try adjusting your search to find what you're looking for.")).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'All flags' })).not.toBeInTheDocument();
+  });
+
+  it('should request my flags by default', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      resolvePromiseWithData({ data: [featureFlag], metadata: { totalRecords: 1 } }),
+    );
+
+    render(
+      <TestProviders>
+        <FeatureFlagsTable />
+      </TestProviders>,
+    );
+
+    expect(await screen.findByText(featureFlag.key)).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(
+      `${process.env.API_BASE_URL}${getFeatureFlagsUrl({ page: 1, rows: 10 }, '', true, 'key:asc', '', Scope.Me)}`,
+      expect.any(Object),
+    );
+    expect(screen.getByRole('table', { name: 'My flags' })).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Search flags from your teams' applications by flag and/or application"),
+    ).toBeInTheDocument();
+  });
+
+  it('should request all flags when the all scope is selected', async () => {
+    mocks.searchParams.set('scope', Scope.All);
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      resolvePromiseWithData({ data: [featureFlag], metadata: { totalRecords: 1 } }),
+    );
+
+    render(
+      <TestProviders>
+        <FeatureFlagsTable />
+      </TestProviders>,
+    );
+
+    expect(await screen.findByText(featureFlag.key)).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(
+      `${process.env.API_BASE_URL}${getFeatureFlagsUrl({ page: 1, rows: 10 }, '', true, 'key:asc', '', Scope.All)}`,
+      expect.any(Object),
+    );
+    expect(screen.getByRole('table', { name: 'All flags' })).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Search flags across the organization's applications by flag and/or application"),
+    ).toBeInTheDocument();
   });
 });
