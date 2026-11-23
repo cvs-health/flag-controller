@@ -40,7 +40,7 @@ RFCs and ADRs document significant proposed changes and the decisions made about
 
 ### RFC process
 
-Create an RFC as a GitHub issue with a title beginning with `RFC:`. Keep the discussion in the issue and apply labels that describe the topic, such as `api` or `user-interface`.
+Create an RFC as a GitHub issue with a title beginning with `RFC:`. Use the [RFC issue template](.github/ISSUE_TEMPLATE/rfc.md), keep the discussion in the issue, and apply labels that describe the topic, such as `api` or `user-interface`.
 
 An RFC is recommended for changes that:
 
