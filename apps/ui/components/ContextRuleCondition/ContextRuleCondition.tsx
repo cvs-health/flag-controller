@@ -142,7 +142,7 @@ export function ContextRuleCondition({
             ))}
           </Select>
         </div>
-        {[Operator.InList, Operator.NotInList].includes(selectedOperator) ? (
+        {[Operator.InList, Operator.NotInList, Operator.Some, Operator.None].includes(selectedOperator) ? (
           <TextArea
             className={styles.column}
             value={valueDraft}

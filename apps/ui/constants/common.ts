@@ -47,6 +47,8 @@ export const operatorTranslation = {
   [Operator.LooseInequality]: 'does not equal',
   [Operator.InList]: 'is one of',
   [Operator.NotInList]: 'is not one of',
+  [Operator.Some]: 'has any of',
+  [Operator.None]: 'has none of',
   [Operator.Minor]: 'matches minor version',
   [Operator.Major]: 'matches major version',
 };
