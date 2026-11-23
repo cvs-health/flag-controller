@@ -56,6 +56,20 @@ describe('FeatureFlagsTable', () => {
     expect(screen.getByText(featureFlagDisabled.key)).toBeInTheDocument();
   });
 
+  it('should render an archive action for each flag', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      resolvePromiseWithData({ data: [featureFlag, featureFlagDisabled], metadata: { totalRecords: 2 } }),
+    );
+    render(
+      <TestProviders>
+        <FeatureFlagsTable />
+      </TestProviders>,
+    );
+
+    expect(screen.getByRole('columnheader', { name: 'Action' })).toBeInTheDocument();
+    expect(await screen.findAllByRole('button', { name: 'Actions' })).toHaveLength(2);
+  });
+
   it('should allow the user to search for a feature flag', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValueOnce(
       resolvePromiseWithData({ data: [featureFlag], metadata: { totalRecords: 1 } }),
