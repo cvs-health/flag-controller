@@ -3,7 +3,10 @@ title: Discovery
 sidebar_position: 1
 ---
 
-The default route of the feature flag UI is a list of feature flags. The list displays all feature flags which are related to you by default.
+The default route of the feature flag UI is a list of feature flags. A switcher at the top of the page controls which flags the list shows:
+
+- **My flags** (the default) - flags from your teams' applications
+- **All flags** - flags across the organization's applications
 
 Each of the feature flags in the list includes:
 
@@ -16,7 +19,7 @@ Each of the feature flags in the list includes:
 
 ## Finding a feature flag
 
-While the flags shown to you by default have a relation to you, you can use the search field or available filters to search for any feature flags which are or are not related to you, even if they are archived or completely toggled off.
+The search field and the filters apply within the switcher scope you have selected. Searching **My flags** will not return flags from applications your teams do not own, so if you cannot find a flag, switch to **All flags** to search across the organization's applications. When a search in **My flags** comes back empty, the empty state links you directly to the same search in **All flags**.
 
 The search field matches on flag name and/or application. The available filters are:
 
@@ -24,3 +27,8 @@ The search field matches on flag name and/or application. The available filters 
 - **Last modified date** - a start and end date range
 - **Type** - `Boolean`, `Number`, `Text`, and/or `Object`
 - **Enabled in** - `Development` and/or `Production`
+- **Status** - `Archived only`
+
+:::note
+Archived flags are hidden from the list by default. Select the **Archived only** status filter to see them.
+:::
