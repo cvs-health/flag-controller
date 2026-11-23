@@ -27,7 +27,7 @@ function featureFlagsTableData(
       .map(([environmentKey, enabled]) => ({ environmentKey, enabled }));
 
     return {
-      action: includeActions ? (
+      action: includeActions && !flag.archived ? (
         <FeatureFlagsTableActions
           applicationId={flag.applicationId}
           featureFlagId={flag.id}
