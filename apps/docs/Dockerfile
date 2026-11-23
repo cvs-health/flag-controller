@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim AS base
+FROM docker.io/library/node:24-bookworm-slim AS base
 ARG PNPM_VERSION="12.11.0"
 ARG TURBO_VERSION="2.9.16"
 
@@ -28,7 +28,7 @@ COPY turbo.json turbo.json
 
 RUN pnpm turbo build --filter=flag-controller-docs
 
-FROM nginxinc/nginx-unprivileged:1.31.4-alpine AS runner
+FROM docker.io/nginx/nginx-unprivileged:1.31.10-alpine AS runner
 USER root
 RUN apk add --no-cache --upgrade 'brotli-libs>=1.2.1-r0'
 USER nginx
