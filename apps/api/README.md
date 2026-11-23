@@ -57,6 +57,39 @@ This is the one list of what the API needs to start. Everything else has a worki
 
 Each sign-in provider adds its own row here as it is added.
 
+### OpenTelemetry
+
+The API is instrumented with the OpenTelemetry Node SDK (`src/otel.setup.ts`), which traces
+incoming HTTP requests, PostgreSQL queries and GraphQL operations.
+
+`.env.example` ships it turned off (`OTEL_SDK_DISABLED=true`, both exporters `none`). The repo
+runs no collector — there is no collector service in `docker-compose.yml` — so leaving the
+exporters pointed at one means every export fails and the console fills with retry errors. It is
+opt-in instead.
+
+To see telemetry in your terminal without running anything else, enable the SDK and print it:
+
+```
+OTEL_SDK_DISABLED=false
+OTEL_TRACES_EXPORTER=console
+OTEL_METRICS_EXPORTER=console
+```
+
+To export to a real collector, enable the SDK, set both exporters to `otlp`, and point them at it.
+Each exporter falls back to `OTEL_EXPORTER_OTLP_ENDPOINT`, then to `http://localhost:4318`:
+
+```
+OTEL_SDK_DISABLED=false
+OTEL_TRACES_EXPORTER=otlp
+OTEL_METRICS_EXPORTER=otlp
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
+OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://localhost:4318/v1/metrics
+```
+
+Restart the API after changing any of these. Note that `OTEL_SDK_DISABLED` is the SDK-wide kill
+switch: while it is `true`, the exporter variables are ignored and no instrumentation is
+registered at all.
+
 ## Available Scripts
 
 Available scripts in package.json:
@@ -660,3 +693,14 @@ Every CUD operation *must* write to the `logs` table. We need to ensure each rou
   NODE_TLS_REJECT_UNAUTHORIZED=0 pnpm update:schemas
   ```
   ⚠️ **Never use `NODE_TLS_REJECT_UNAUTHORIZED=0` in production or CI** — it disables all TLS verification and exposes you to man-in-the-middle attacks.
+
+3. Issue: The API console keeps logging `Export retry time ... exceeds remaining timeout` and `PeriodicExportingMetricReader: metrics export failed`.
+- Cause: OpenTelemetry is enabled with an `otlp` exporter, so the API sends telemetry to a collector (`http://localhost:4318` unless you configure an endpoint), and no collector is listening. Every export fails. The API keeps working; only the telemetry is dropped.
+- `.env.example` ships OpenTelemetry turned off, so you are seeing this either because you turned it on, or because your `.env` predates that change and still sets the exporters to `otlp`.
+- Solution: In the OpenTelemetry section of `apps/api/.env`, turn it off the way `.env.example` does, then restart the API:
+  ```
+  OTEL_SDK_DISABLED=true
+  OTEL_TRACES_EXPORTER=none
+  OTEL_METRICS_EXPORTER=none
+  ```
+- To keep the telemetry but stop the failures, set the exporters to `console` instead and they print to the terminal. See [OpenTelemetry](#opentelemetry) for exporting to a real collector.
