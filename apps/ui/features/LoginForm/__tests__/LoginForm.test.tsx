@@ -138,6 +138,7 @@ describe('LoginForm', () => {
       'Your email address is not verified. Verify it with your identity provider, then try again.',
     ],
     ['account not linked', 'An account with your email address already exists. Contact your administrator.'],
+    ['account_not_linked', 'An account with your email address already exists. Contact your administrator.'],
     [
       'sso_external_id_missing',
       'Your identity provider did not send an account identifier. Contact your administrator.',

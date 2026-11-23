@@ -20,6 +20,8 @@ interface LoginFormProps {
   signInError?: string;
 }
 
+const accountNotLinked = 'An account with your email address already exists. Contact your administrator.';
+
 // Fixed messages, so a crafted link can't put its own text on the login page.
 const signInErrorMessages: Record<string, string> = {
   [SignInErrorCode.EmailDomainNotAllowed]:
@@ -31,9 +33,10 @@ const signInErrorMessages: Record<string, string> = {
     'Your identity provider did not send an account identifier. Contact your administrator.',
   [SignInErrorCode.ProtocolNotSupported]:
     'Your identity provider uses a sign-in protocol this deployment does not support. Contact your administrator.',
-  // Better Auth's own code.
-  'account not linked': 'An account with your email address already exists. Contact your administrator.',
-} satisfies Record<SignInErrorCode | 'account not linked', string>;
+  // Better Auth's own code: SSO sends it with spaces, the GitHub callback with underscores.
+  'account not linked': accountNotLinked,
+  account_not_linked: accountNotLinked,
+} satisfies Record<SignInErrorCode | 'account not linked' | 'account_not_linked', string>;
 
 export function LoginForm({ className, signInError }: LoginFormProps) {
   const [submitStatus, setSubmitStatus] = useState(ActionStatus.Idle);
