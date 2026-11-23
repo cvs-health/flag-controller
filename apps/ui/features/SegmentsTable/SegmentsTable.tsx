@@ -4,11 +4,14 @@
 'use client';
 import { AnalyzesData, DesignResearch, FaceVeryDissatisfied } from '@carbon/pictograms-react';
 import type { ReactNode } from 'react';
+import { Scope } from 'shared-types';
+import { useSearchParams } from 'next/navigation';
 
 import useGetSegmentsQuery from '../../api/queries/useGetSegmentsQuery';
 import {
   DataTable,
   type DataTableSortState,
+  Link,
   Pagination,
   Table,
   TableBody,
@@ -22,6 +25,7 @@ import {
   TableToolbarSearch,
 } from '../../components/Carbon';
 import segmentsTableData from '../../utils/segmentsTableData';
+import updateSearchParams from '../../utils/updateSearchParams';
 import useTableParams from '../../hooks/useTableParams';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { SkeletonTable } from '../../components/SkeletonTable/SkeletonTable';
@@ -31,12 +35,15 @@ interface SegmentsTableProps {
 }
 
 export function SegmentsTable({ children = null }: SegmentsTableProps) {
+  const searchParams = useSearchParams();
   const tableParams = useTableParams('updatedAt');
   const getSegmentsQuery = useGetSegmentsQuery(
     tableParams.search,
     tableParams.pagination,
     `${tableParams.columnSorting.column}:${tableParams.columnSorting.direction}`,
+    tableParams.scope
   );
+  const searchPlaceholder = tableParams.scope === Scope.All ? 'Search segments across the organization\'s applications by segment name' : 'Search segments from your teams\' applications by segment name';
   const reducedSegmentsByIdentifier = segmentsTableData(getSegmentsQuery.data?.data);
   const sortableHeaders = ['key', 'applicationName', 'updatedAt'];
   const rows = getSegmentsQuery.isError ? [] : Object.values(reducedSegmentsByIdentifier);
@@ -58,12 +65,23 @@ export function SegmentsTable({ children = null }: SegmentsTableProps) {
       key: 'flagTargetCount',
     },
   ];
+  const noResults = !!(
+    getSegmentsQuery.isSuccess &&
+    !getSegmentsQuery.data?.data.length &&
+    (tableParams.search || tableParams.filters)
+  );
+  const noLogsFoundCopy =
+    tableParams.scope === Scope.Me ? (
+      <>
+        Search <Link href={`/segments?${updateSearchParams(searchParams, [['scope', Scope.All]])}`}>All segments</Link> instead
+      </>
+    ) : (
+      'Try adjusting your search to find what you\'re looking for.'
+    );
+
 
   return (
-    <TableContainer
-      title="All segments"
-      description="Segments shown by default are related to you based on your applications. Use the search input to search across all applications."
-    >
+    <TableContainer>
       <TableToolbar>
         <TableToolbarContent>
           <TableToolbarSearch
@@ -72,7 +90,7 @@ export function SegmentsTable({ children = null }: SegmentsTableProps) {
             labelText="search"
             onChange={tableParams.updateSearch}
             persistent
-            placeholder="Search by segment name"
+            placeholder={searchPlaceholder}
             size="lg"
           />
           {children}
@@ -119,11 +137,11 @@ export function SegmentsTable({ children = null }: SegmentsTableProps) {
           body="We were unable to connect to the service. Please try again later."
         />
       )}
-      {getSegmentsQuery.isSuccess && !getSegmentsQuery.data?.data.length && tableParams.search ? (
+      {noResults ? (
         <EmptyState
           icon={DesignResearch}
-          title="No results found"
-          body="Try adjusting your search to find what you're looking for."
+          title="No segments found"
+          body={noLogsFoundCopy}
         />
       ) : null}
       {getSegmentsQuery.isSuccess && !getSegmentsQuery.data?.data.length && !tableParams.search ? (

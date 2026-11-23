@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: © 2026 CVS Health and/or one of its affiliates.
 // SPDX-License-Identifier: Apache-2.0
 
+import { Scope } from 'shared-types';
 import { describe, expect, it, vi } from 'vitest';
 
 import build from 'test/app.js';
@@ -61,7 +62,6 @@ const listSegmentsResponse = {
 
 describe('get/segments', () => {
   it('requests the route successfully', async () => {
-    vi.mocked(mockServices.applications.listApplications).mockResolvedValue(listApplicationsResponse);
     vi.mocked(mockServices.segments.listSegments).mockResolvedValue(listSegmentsResponse);
 
     const app = build();
@@ -76,23 +76,10 @@ describe('get/segments', () => {
 
     await app.close();
 
-    expect(mockServices.applications.listApplications).toHaveBeenCalledExactlyOnceWith({
-      filters: {
-        teamIds: ['123'],
-      },
-      pagination: {
-        page: 1,
-        rows: -1,
-      },
-      sort: {
-        direction: 'asc',
-        field: 'name',
-      },
-    });
-
+    expect(mockServices.applications.listApplications).not.toHaveBeenCalled();
     expect(mockServices.segments.listSegments).toHaveBeenCalledExactlyOnceWith({
       filters: {
-        applicationIds: ['app-1'],
+        applicationIds: [],
         search: undefined,
       },
       pagination: {
@@ -132,7 +119,6 @@ describe('get/segments', () => {
       },
     };
 
-    vi.mocked(mockServices.applications.listApplications).mockResolvedValue(listApplicationsResponse);
     vi.mocked(mockServices.segments.listSegments).mockResolvedValue(listSegmentsResponseWithSearch);
 
     const app = build();
@@ -147,23 +133,9 @@ describe('get/segments', () => {
 
     await app.close();
 
-    expect(mockServices.applications.listApplications).toHaveBeenCalledExactlyOnceWith({
-      filters: {
-        teamIds: ['123'],
-      },
-      pagination: {
-        page: 1,
-        rows: -1,
-      },
-      sort: {
-        direction: 'asc',
-        field: 'name',
-      },
-    });
-
     expect(mockServices.segments.listSegments).toHaveBeenCalledExactlyOnceWith({
       filters: {
-        applicationIds: ['app-1'],
+        applicationIds: [],
         search: 'some-segment-key',
       },
       pagination: {
@@ -192,5 +164,54 @@ describe('get/segments', () => {
         totalRecords: 1,
       },
     });
+  });
+
+  it('limits results to the current user when scope is me', async () => {
+    vi.mocked(mockServices.applications.listApplications).mockResolvedValue(listApplicationsResponse);
+    vi.mocked(mockServices.segments.listSegments).mockResolvedValue(listSegmentsResponse);
+
+    const app = build();
+
+    const response = await app.inject({
+      method: 'GET',
+      url: `/segments?scope=${Scope.Me}&page=1&rows=10`,
+      headers: {
+        authorization: 'Bearer 1',
+      },
+    });
+
+    await app.close();
+
+    expect(mockServices.applications.listApplications).toHaveBeenCalledExactlyOnceWith({
+      filters: {
+        teamIds: ['123'],
+      },
+      pagination: {
+        page: 1,
+        rows: -1,
+      },
+      sort: {
+        direction: 'asc',
+        field: 'name',
+      },
+    });
+    expect(mockServices.segments.listSegments).toHaveBeenCalledExactlyOnceWith({
+      filters: {
+        applicationIds: ['app-1'],
+        search: undefined,
+      },
+      pagination: {
+        page: 1,
+        rows: 10,
+      },
+      sort: {
+        direction: 'desc',
+        field: 'updatedAt',
+      },
+      with: {
+        flagTargetCount: true,
+      },
+    });
+    expect(response.statusCode).toEqual(200);
   });
 });

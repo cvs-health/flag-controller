@@ -3,8 +3,9 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
-import type { PreSerializedFromSchema } from '../../types/preSerializedFromSchema.js';
+import { Scope } from 'shared-types';
 
+import type { PreSerializedFromSchema } from '../../types/preSerializedFromSchema.js';
 import getFieldDirection from 'utils/getFieldDirection.js';
 import type { segments } from 'db/schema/segments.js';
 import { resolveRequestApplicationIds } from 'utils/requestAccessContext.js';
@@ -17,6 +18,7 @@ const querystringSchema = {
   properties: {
     page: { type: 'number' },
     rows: { type: 'number' },
+    scope: { type: 'string', enum: Object.values(Scope) },
     search: { type: 'string' },
     sort: {
       type: 'string',
@@ -47,10 +49,14 @@ async function getSegments(fastify: FastifyInstance) {
     Querystring: FromSchema<typeof querystringSchema>;
     Reply: PreSerializedFromSchema<(typeof schema.response)[200]>;
   }>('/segments', { schema }, async (request, reply) => {
+    let applicationIds: string[] = [];
+
+    if (request.query.scope === Scope.Me) {
+      applicationIds = await resolveRequestApplicationIds(fastify, request);
+    }
+
     const sort = request.query.sort;
     const [field, direction] = getFieldDirection<typeof segments.$inferSelect>(sort);
-    const applicationIds = await resolveRequestApplicationIds(fastify, request);
-
     const segmentsResult = await fastify.services.segmentsService.listSegments({
       filters: {
         applicationIds,
