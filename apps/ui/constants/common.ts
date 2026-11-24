@@ -7,6 +7,7 @@ import {
   FeatureFlagType,
   Operator,
   RuleConditionValueType,
+  Scope,
   SubjectType,
 } from 'shared-types';
 import { TimeRange } from '../typings/common';
@@ -99,6 +100,11 @@ export const timeRangeLabels = {
 export const environmentLabels = {
   [EnvironmentKey.Development]: 'Development',
   [EnvironmentKey.Production]: 'Production',
+};
+
+export const flagsScopeLabels = {
+  [Scope.Me]: 'My flags',
+  [Scope.All]: 'All flags',
 };
 
 export const dateFormat = 'MM/dd/yyyy';

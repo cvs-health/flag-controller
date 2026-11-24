@@ -12,7 +12,7 @@ const push = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push }),
   usePathname: () => '/flags',
-  useSearchParams: () => new URLSearchParams('foo=bar'),
+  useSearchParams: () => new URLSearchParams('foo=bar&page=3'),
 }));
 
 describe('Switcher', () => {
@@ -20,7 +20,7 @@ describe('Switcher', () => {
     vi.clearAllMocks();
   });
 
-  it('pushes route with updated params when a different switch is selected', async () => {
+  it('pushes route with updated params and resets the page when a different switch is selected', async () => {
     render(
       <Switcher
         parameter="environment"
@@ -32,7 +32,7 @@ describe('Switcher', () => {
     await userEvent.click(screen.getByRole('tab', { name: 'Production' }));
 
     await waitFor(() => {
-      expect(push).toHaveBeenCalledWith('/flags?foo=bar&environment=production', { scroll: false });
+      expect(push).toHaveBeenCalledWith('/flags?foo=bar&page=1&environment=production', { scroll: false });
     });
   });
 });

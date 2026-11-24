@@ -26,7 +26,11 @@ export function Switcher({ className, parameter, selected, switches }: SwitcherP
   const selectedIndex = Object.keys(switches).indexOf(selected);
 
   function handleTabChange(event: SwitchEventHandlersParams) {
-    const params = updateSearchParams(searchParams, [[parameter, event.name as string]]);
+    // The current page may not exist for the newly selected switch
+    const params = updateSearchParams(searchParams, [
+      [parameter, event.name as string],
+      ['page', '1'],
+    ]);
 
     startTransition(() => {
       router.push(`${pathname}?${params}`, { scroll: false });
