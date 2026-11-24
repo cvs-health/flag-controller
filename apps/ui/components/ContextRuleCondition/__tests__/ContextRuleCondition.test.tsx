@@ -37,7 +37,7 @@ describe('ContextRuleCondition', () => {
 
     await userEvent.selectOptions(operatorSelect, Operator.NotInList);
     expect(screen.getByLabelText('Value').tagName).toBe('TEXTAREA');
-    
+
     await userEvent.selectOptions(operatorSelect, Operator.In);
     expect(screen.getByLabelText('Value').tagName).toBe('INPUT');
 

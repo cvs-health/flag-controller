@@ -25,10 +25,10 @@ function genericCondition(condition: ContextRuleCondition) {
     return { '!': { in: [variable, condition.values] } };
   }
 
-  if([Operator.Some, Operator.None].includes(condition.operator)) {
+  if ([Operator.Some, Operator.None].includes(condition.operator)) {
     return {
-      [condition.operator]: [variable, {in: [{var: ''}, condition.values]}]
-    }
+      [condition.operator]: [variable, { in: [{ var: '' }, condition.values] }],
+    };
   }
 
   return { [condition.operator]: [variable, condition.values] };
