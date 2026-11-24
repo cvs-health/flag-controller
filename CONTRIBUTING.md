@@ -52,7 +52,7 @@ An RFC is recommended for changes that:
 
 Bug fixes, refactors, small UI changes, and error messages do not need an RFC; an issue and a pull request are enough.
 
-Once the RFC is approved and its discussion has concluded, record the decision in an ADR. The ADR should be created after the RFC is approved and merged as a result of the RFC.
+Once the RFC is approved by at least 3 maintainers via discussion in the GitHub issue thread and its discussion has concluded, record the decision in an ADR. The ADR should be created after the RFC is approved.
 
 ### ADR process
 
