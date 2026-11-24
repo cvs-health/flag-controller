@@ -31,6 +31,35 @@ Feature requests are welcome. Please open an issue and describe:
 - Your proposed solution
 - Any alternatives you've considered
 
+## RFCs and ADRs
+
+RFCs and ADRs document significant proposed changes and the decisions made about them:
+
+- A **Request for Comments (RFC)** is a proposal for a significant change, shared for discussion and feedback before work begins.
+- An **Architecture Decision Record (ADR)** is a concise, durable record of a decision and its rationale, based on the outcome of the RFC discussion.
+
+### RFC process
+
+Create an RFC as a GitHub issue with a title beginning with `RFC:`. Use the [RFC issue template](.github/ISSUE_TEMPLATE/rfc.md), keep the discussion in the issue, and apply labels that describe the topic, such as `api` or `user-interface`.
+
+An RFC is recommended for changes that:
+
+- Are likely to take a sprint or more of work
+- Add a technology, service, or dependency that others will need to run
+- Change the public API, database schema, configuration, or flagd output
+- Significantly change the user experience
+- Are difficult to reverse
+
+Bug fixes, refactors, small UI changes, and error messages do not need an RFC; an issue and a pull request are enough.
+
+Once the RFC is approved and its discussion has concluded, record the decision in an ADR. The ADR should be created after the RFC is approved and merged as a result of the RFC.
+
+### ADR process
+
+Add the ADR as a Markdown file under `docs/` in a pull request. Use the [OpenFeature flagd ADR template](https://github.com/open-feature/flagd/blob/main/docs/architecture-decisions/.template.md) and name the file with a sequential number and short summary, for example `0001-short-summary.md`.
+
+Ideally, the ADR is merged before implementation issues are created and work begins. This is a best practice, not a requirement.
+
 ## Maintainers
 
 See [MAINTAINERS.md](MAINTAINERS.md).
