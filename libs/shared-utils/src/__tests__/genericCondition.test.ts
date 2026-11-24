@@ -24,8 +24,14 @@ const operatorCases: Record<Operator, { values: ContextRuleCondition['values']; 
   [Operator.LooseInequality]: { values: 'value', expected: { '!=': [variable, 'value'] } },
   [Operator.Major]: { values: 'value', expected: { '^': [variable, 'value'] } },
   [Operator.Minor]: { values: 'value', expected: { '~': [variable, 'value'] } },
-  [Operator.None]: { values: 'value', expected: { none: [variable, 'value'] } },
-  [Operator.Some]: { values: 'value', expected: { some: [variable, 'value'] } },
+  [Operator.None]: {
+    values: ['us', 'ca'],
+    expected: { none: [variable, { in: [{ var: '' }, ['us', 'ca']] }] },
+  },
+  [Operator.Some]: {
+    values: ['us', 'ca'],
+    expected: { some: [variable, { in: [{ var: '' }, ['us', 'ca']] }] },
+  },
   [Operator.Not]: { values: 'value', expected: { '!': [variable, 'value'] } },
   [Operator.Or]: { values: 'value', expected: { or: [variable, 'value'] } },
   [Operator.StartsWith]: { values: 'value', expected: { starts_with: [variable, 'value'] } },

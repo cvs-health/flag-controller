@@ -68,6 +68,8 @@ The operator is the logical comparator used to evaluate the feature flag. It tak
 | **does not equal** | Exclude specific value | Exclude users in specific country (`US`) |
 | **is one of** | Match a context attribute against any value in a list | Target users whose `user.language` is `english` or `spanish` |
 | **is not one of** | Match a context attribute only when it matches none of the values in a list | Exclude users whose `user.language` is `english` or `spanish` |
+| **has any of** | Match an array-valued context attribute when at least one item appears in the list | Target users whose `user.groups` includes `groupA` or `groupB` |
+| **has none of** | Match an array-valued context attribute when no items appear in the list | Exclude users whose `user.groups` includes `groupA` or `groupB` |
 | **matches minor version** | Compare semantic versions at minor level | Target applications running version `1.2.x` |
 | **matches major version** | Compare semantic versions at major level | Target applications running version `2.x.x` |
 
@@ -85,7 +87,7 @@ Values align with the value of your context's attribute.
 
 #### Multiple values
 
-To compare a context attribute against a list of values, select **is one of** or **is not one of**. These operators display a list input where you enter one value per line or paste a list from a spreadsheet or text file. Multiple values are only supported with these two operators. All values must match the selected type.
+To compare a context attribute against a list of values, select **is one of** or **is not one of**. To compare the items in an array-valued context attribute against a list, select **has any of** or **has none of**. These operators display a list input where you enter one value per line or paste a list from a spreadsheet or text file. All values must match the selected type.
 
 For example, consider this evaluation context:
 
@@ -115,6 +117,18 @@ french
 ```
 
 The condition matches because `english` is one of the strings in the list. With **is not one of**, the same condition would not match; a value outside the list, such as `german`, would match instead.
+
+For example, consider this evaluation context with an array-valued `user.groups` attribute:
+
+```json
+{
+  "user": {
+    "groups": ["engineering", "groupA"]
+  }
+}
+```
+
+Set the context to `user`, the attribute to `groups`, and the type to **String**. Enter `groupA` and `groupB` as values. **Has any of** matches because `groupA` appears in both the context array and the values list. **Has none of** matches only when neither `groupA` nor `groupB` appears in `user.groups`.
 
 The rule serves its configured variation when this condition and all other conditions in the rule are met, provided no earlier rule matches.
 

@@ -37,9 +37,15 @@ describe('ContextRuleCondition', () => {
 
     await userEvent.selectOptions(operatorSelect, Operator.NotInList);
     expect(screen.getByLabelText('Value').tagName).toBe('TEXTAREA');
-
+    
     await userEvent.selectOptions(operatorSelect, Operator.In);
     expect(screen.getByLabelText('Value').tagName).toBe('INPUT');
+
+    await userEvent.selectOptions(operatorSelect, Operator.Some);
+    expect(screen.getByLabelText('Value').tagName).toBe('TEXTAREA');
+
+    await userEvent.selectOptions(operatorSelect, Operator.None);
+    expect(screen.getByLabelText('Value').tagName).toBe('TEXTAREA');
   });
 
   it('keeps unsaved values when switching between input types', async () => {

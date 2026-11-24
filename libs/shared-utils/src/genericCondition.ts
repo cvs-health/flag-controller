@@ -7,17 +7,15 @@ import conditionVariable from './conditionVariable.js';
 
 function genericCondition(condition: ContextRuleCondition) {
   const variable = { var: conditionVariable(condition.context, condition.attribute) };
-  const isInOperator = condition.operator === Operator.In || condition.operator === Operator.NotIn;
-  const isListOperator = condition.operator === Operator.InList || condition.operator === Operator.NotInList;
 
   // Used strictly for string matches with non-array values even though flagd's in operator can handle arrays
-  if (isInOperator) {
+  if ([Operator.In, Operator.NotIn].includes(condition.operator)) {
     return condition.operator === Operator.In
       ? { in: [condition.values, variable] }
       : { '!': { in: [condition.values, variable] } };
   }
 
-  if (isListOperator && Array.isArray(condition.values)) {
+  if ([Operator.InList, Operator.NotInList].includes(condition.operator) && Array.isArray(condition.values)) {
     const inListOperator = condition.operator === Operator.InList;
 
     if (inListOperator) {
@@ -25,6 +23,12 @@ function genericCondition(condition: ContextRuleCondition) {
     }
 
     return { '!': { in: [variable, condition.values] } };
+  }
+
+  if([Operator.Some, Operator.None].includes(condition.operator)) {
+    return {
+      [condition.operator]: [variable, {in: [{var: ''}, condition.values]}]
+    }
   }
 
   return { [condition.operator]: [variable, condition.values] };

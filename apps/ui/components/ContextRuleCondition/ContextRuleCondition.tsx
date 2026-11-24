@@ -4,7 +4,8 @@
 'use client';
 
 import { Button, Select, SelectItem, Stack, TextArea, TextInput } from '@carbon/react';
-import { Clause, Operator, RuleConditionType, RuleConditionValueType, type Values } from 'shared-types';
+import { Clause, type Operator, RuleConditionType, RuleConditionValueType, type Values } from 'shared-types';
+import { ARRAY_VALUE_OPERATORS } from 'shared-constants';
 import { SubtractAlt } from '@carbon/icons-react';
 import { type ChangeEvent, useState } from 'react';
 import { z } from 'zod';
@@ -116,7 +117,7 @@ export function ContextRuleCondition({
           <Select
             className={styles.column}
             defaultValue={operator}
-            helperText="Multiple values are only supported with 'is one of' and 'is not one of'."
+            helperText="Multiple values are supported with 'is one of', 'is not one of', 'has any of', and 'has none of'."
             id={operatorId}
             labelText="Operator"
             name={`${id}-operator`}
@@ -142,7 +143,7 @@ export function ContextRuleCondition({
             ))}
           </Select>
         </div>
-        {[Operator.InList, Operator.NotInList, Operator.Some, Operator.None].includes(selectedOperator) ? (
+        {ARRAY_VALUE_OPERATORS.includes(selectedOperator) ? (
           <TextArea
             className={styles.column}
             value={valueDraft}
