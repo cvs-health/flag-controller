@@ -251,18 +251,17 @@ The logic lives in `src/utils/getAuthConfig.ts` (configuration and discovery) an
 
 #### Identity ownership modes
 
-Each entity has a mode that says whether Flag Controller or the identity provider owns it. The modes come from `IDENTITY_USERS_MODE`, `IDENTITY_TEAMS_MODE`, `IDENTITY_MEMBERSHIPS_MODE` and `IDENTITY_APPLICATIONS_MODE`, and each is `local` (the default) or `external`.
+Each entity has a mode that says whether Flag Controller or the identity provider owns it. The modes come from `IDENTITY_USERS_MODE`, `IDENTITY_TEAMS_MODE` and `IDENTITY_APPLICATIONS_MODE`, and each is `local` (the default) or `external`. The teams mode covers team memberships too, because an identity provider that owns teams also owns who is in them.
 
 - **local**: managed in Flag Controller, as before.
 - **external**: owned by the identity provider. Writes to that entity return `403` with the problem code `IDENTITY_MANAGED` (type `urn:fliposs:error:identity-managed`), and the UI hides the create, edit and delete controls in favor of "Managed by your identity provider". With external users, sign-in can't create an account the directory didn't provision.
 
-The modes are enforced in `src/services/identityPolicy.ts`, which the team and application services call before every write. The same policy guards Better Auth's own team, membership and organization endpoints through the hooks in `src/utils/identityHooks.ts`, because org admins can reach those directly. With external teams, deleting the organization is refused, since it deletes every team. With external memberships, removing an organization member and creating invitations are refused too, and `/organization/leave` is disabled, since each of these changes team memberships. `GET /api/config` returns the modes so the UI can follow them.
+The modes are enforced in `src/services/identityPolicy.ts`, which the team and application services call before every write. The same policy guards Better Auth's own team, membership and organization endpoints through the hooks in `src/utils/identityHooks.ts`, because org admins can reach those directly. With external teams, deleting the organization is refused, since it deletes every team. Adding and removing team members, removing an organization member and creating invitations are refused too, and `/organization/leave` is disabled, since each of these changes team memberships. `GET /api/config` returns the modes so the UI can follow them.
 
 Startup rejects combinations that can't work:
 
 - Any external mode needs a provisioning source (SCIM or the bulk endpoint). None exists yet, so for now every external mode stops startup.
-- External memberships need external teams.
-- `IDENTITY_DEFAULT_TEAM=true` needs local teams and memberships. With external teams, the organization starts without a default team.
+- `IDENTITY_DEFAULT_TEAM=true` needs local teams. With external teams, the organization starts without a default team.
 
 #### Auth route handler (passthrough to better-auth)
 

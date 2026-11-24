@@ -40,7 +40,6 @@ export const notAMemberError = (): ForbiddenError =>
 export const localIdentityModes = {
   users: 'local',
   teams: 'local',
-  memberships: 'local',
   applications: 'local',
 } as const;
 

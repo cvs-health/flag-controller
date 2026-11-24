@@ -334,16 +334,16 @@ describe('createTeamsService', () => {
     });
 
     describe('addMembers', () => {
-      it('adds members to an IdP-owned team when IDENTITY_MEMBERSHIPS_MODE=local', async () => {
-        const { teams } = createServicesWithModes({ teams: 'external', memberships: 'local' });
+      it('adds members when IDENTITY_TEAMS_MODE=local', async () => {
+        const { teams } = createServicesWithModes({ teams: 'local' });
 
         await teams.addMembers(team.id, ['user-2'], 'user-1');
 
         expect(mockRepositories.teamsRepository.addMember).toHaveBeenCalledWith(team.id, 'user-2');
       });
 
-      it('refuses when IDENTITY_MEMBERSHIPS_MODE=external', async () => {
-        const { teams } = createServicesWithModes({ teams: 'external', memberships: 'external' });
+      it('refuses when IDENTITY_TEAMS_MODE=external', async () => {
+        const { teams } = createServicesWithModes({ teams: 'external' });
 
         await expect(teams.addMembers(team.id, ['user-2'], 'user-1')).rejects.toMatchObject({
           code: 'IDENTITY_MANAGED',
@@ -354,17 +354,17 @@ describe('createTeamsService', () => {
     });
 
     describe('removeMember', () => {
-      it('removes the member when IDENTITY_MEMBERSHIPS_MODE=local', async () => {
+      it('removes the member when IDENTITY_TEAMS_MODE=local', async () => {
         vi.mocked(mockRepositories.teamsRepository.removeMember).mockResolvedValue(membership);
-        const { teams } = createServicesWithModes({ teams: 'external', memberships: 'local' });
+        const { teams } = createServicesWithModes({ teams: 'local' });
 
         await teams.removeMember(team.id, 'user-1', 'user-9');
 
         expect(mockRepositories.teamsRepository.removeMember).toHaveBeenCalledWith(team.id, 'user-1');
       });
 
-      it('refuses when IDENTITY_MEMBERSHIPS_MODE=external', async () => {
-        const { teams } = createServicesWithModes({ teams: 'external', memberships: 'external' });
+      it('refuses when IDENTITY_TEAMS_MODE=external', async () => {
+        const { teams } = createServicesWithModes({ teams: 'external' });
 
         await expect(teams.removeMember(team.id, 'user-1', 'user-9')).rejects.toThrow(IdentityManagedError);
         expect(mockRepositories.teamsRepository.removeMember).not.toHaveBeenCalled();

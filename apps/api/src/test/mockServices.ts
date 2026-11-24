@@ -35,7 +35,6 @@ const noopWithTransaction = createMockWithTransaction(repositoryMocks);
 const identityPolicy = createIdentityPolicy({
   users: 'local',
   teams: 'local',
-  memberships: 'local',
   applications: 'local',
 });
 const flagEnvironmentsServiceForMocks = createFlagEnvironmentsService({

@@ -20,12 +20,12 @@ const member = {
   email: 'ada.lovelace@contoso.com',
 };
 
-function renderMembersTable(memberships: 'local' | 'external') {
+function renderMembersTable(teams: 'local' | 'external') {
   vi.spyOn(global, 'fetch').mockResolvedValue(
     resolvePromiseWithData({ data: [member], metadata: { totalRecords: 1 } }),
   );
   render(
-    <TestProviders identityModes={{ teams: 'external', memberships }}>
+    <TestProviders identityModes={{ teams }}>
       <MembersTable teamId="b7Rt3Wz8YcD1" />
     </TestProviders>,
   );

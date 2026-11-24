@@ -11,7 +11,6 @@ import useGetApiConfigQuery from '../../api/queries/useGetApiConfigQuery';
 export const localModes: IdentityModes = {
   users: 'local',
   teams: 'local',
-  memberships: 'local',
   applications: 'local',
 };
 

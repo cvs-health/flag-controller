@@ -47,7 +47,7 @@ export function MembersTable({ teamId }: MembersTableProps) {
   const [removeMemberId, setRemoveMemberId] = useState('');
   const [showAddMembersModal, setShowAddMembersModal] = useState(false);
   const getTeamMembersQuery = useGetTeamMembersQuery(teamId, tableParams.pagination);
-  const membershipsManaged = useIsIdentityManaged('memberships');
+  const membershipsManaged = useIsIdentityManaged('teams');
   const members = getTeamMembersQuery.data?.data || [];
   const memberToRemove = members.find((m) => m.id === removeMemberId);
 

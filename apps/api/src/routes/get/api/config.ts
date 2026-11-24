@@ -31,10 +31,9 @@ const schema = {
           properties: {
             users: identityMode,
             teams: identityMode,
-            memberships: identityMode,
             applications: identityMode,
           },
-          required: ['users', 'teams', 'memberships', 'applications'],
+          required: ['users', 'teams', 'applications'],
         },
       },
       required: ['authProviders', 'features', 'modes'],

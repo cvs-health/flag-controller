@@ -244,7 +244,7 @@ export const auth = betterAuth({
     ...(ssoConfig ? [createSsoPlugin(ssoConfig)] : []),
   ],
   // Leaving the organization deletes the caller's team memberships, and Better Auth runs no hook for it.
-  disabledPaths: authConfig.identity.modes.memberships === 'external' ? ['/organization/leave'] : [],
+  disabledPaths: authConfig.identity.modes.teams === 'external' ? ['/organization/leave'] : [],
   // Trusting the issuer lets the plugin reach an IdP on a private network.
   trustedOrigins: [...getCorsOrigins(), ...(ssoConfig ? [ssoConfig.issuerOrigin] : [])],
   ...(process.env.AUTH_COOKIE_DOMAIN

@@ -12,8 +12,8 @@ export type IdentityMode = 'local' | 'external';
 
 export interface IdentityModes {
   users: IdentityMode;
+  /** Covers team memberships too: an IdP that owns teams also owns who is in them. */
   teams: IdentityMode;
-  memberships: IdentityMode;
   applications: IdentityMode;
 }
 

@@ -28,7 +28,7 @@ describe('IdentityModesProvider', () => {
       resolvePromiseWithData({
         authProviders: [{ id: 'corp', kind: 'oidc' }],
         features: {},
-        modes: { users: 'external', teams: 'external', memberships: 'external', applications: 'local' },
+        modes: { users: 'external', teams: 'external', applications: 'local' },
       }),
     );
     renderWithProvider();

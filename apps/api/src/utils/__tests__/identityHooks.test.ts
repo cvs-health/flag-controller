@@ -50,14 +50,14 @@ describe('createIdentityHooks', () => {
     'beforeRemoveMember',
     'beforeCreateInvitation',
   ] as const)('%s', (hook) => {
-    it('allows the write when IDENTITY_MEMBERSHIPS_MODE=local', async () => {
-      const hooks = hooksFor({ teams: 'external', memberships: 'local' });
+    it('allows the write when IDENTITY_TEAMS_MODE=local', async () => {
+      const hooks = hooksFor({ teams: 'local' });
 
       await expect(hooks.organizationHooks[hook]()).resolves.toBeUndefined();
     });
 
-    it('refuses when IDENTITY_MEMBERSHIPS_MODE=external', async () => {
-      const hooks = hooksFor({ teams: 'external', memberships: 'external' });
+    it('refuses when IDENTITY_TEAMS_MODE=external', async () => {
+      const hooks = hooksFor({ teams: 'external' });
 
       await expect(hooks.organizationHooks[hook]()).rejects.toMatchObject(
         refusedWith('Team memberships are managed by your identity provider.'),

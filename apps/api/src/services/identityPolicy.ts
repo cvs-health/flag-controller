@@ -30,9 +30,11 @@ export function createIdentityPolicy(modes: IdentityModes) {
 
     /** Refuses any create, change or delete of an entity the identity provider owns. */
     assertLocallyManaged: (entity: Entity) => {
-      if (modes[entity] === 'external') {
+      const mode = entity === 'memberships' ? 'teams' : entity;
+
+      if (modes[mode] === 'external') {
         throw new IdentityManagedError({
-          message: `Cannot write ${entity}: IDENTITY_${entity.toUpperCase()}_MODE is external`,
+          message: `Cannot write ${entity}: IDENTITY_${mode.toUpperCase()}_MODE is external`,
           detail: `${NOUNS[entity]} are managed by your identity provider.`,
           context: { entity },
         });
