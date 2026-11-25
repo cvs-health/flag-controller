@@ -29,7 +29,7 @@ export function readBoolean(name: string, fallback: boolean) {
   return value === 'true';
 }
 
-export function readChoice<const T extends string>(name: string, choices: readonly T[], fallback: T) {
+export function readChoice<T extends string>(name: string, choices: readonly T[], fallback: T) {
   const value = readEnv(name) ?? fallback;
 
   if (!choices.includes(value as T)) {
