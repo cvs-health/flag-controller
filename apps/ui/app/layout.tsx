@@ -14,7 +14,7 @@ import styles from './layout.module.css';
 import { Header } from '../components/Header/Header';
 
 export const metadata: Metadata = {
-  title: 'Feature Flag UI',
+  title: 'Flag Controller',
   description: 'Feature flags management UI',
   icons: {
     icon: [
