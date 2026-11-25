@@ -4,7 +4,7 @@
 import {
   type Clause,
   type ContextRuleCondition,
-  Operator,
+  type Operator,
   type RuleCondition,
   RuleConditionType,
   type RuleConditionValueType,
@@ -12,9 +12,10 @@ import {
   type TimeRuleCondition,
   type TimeZone,
 } from 'shared-types';
+import { ARRAY_VALUE_OPERATORS } from 'shared-constants';
 import { castValuesByType } from 'shared-utils';
-import { isValid, parse } from 'date-fns';
 import { fromZonedTime } from 'date-fns-tz';
+import { isValid, parse } from 'date-fns';
 
 import type { RuleConditionWithId } from '../typings/rules';
 
@@ -76,7 +77,7 @@ export function getRuleConditionFromFormData(formData: FormData, conditionId: st
 
   const values = formData.get(`${conditionId}-values`) as string;
   const valuesType = formData.get(`${conditionId}-valuesType`) as RuleConditionValueType;
-  const isListOperator = [Operator.InList, Operator.NotInList].includes(operator);
+  const isListOperator = ARRAY_VALUE_OPERATORS.includes(operator);
   const parsedValues = isListOperator ? values.split(/\r\n|\n|\r/).filter((value) => value.trim() !== '') : values;
   const castedValues = castValuesByType(parsedValues, valuesType);
 

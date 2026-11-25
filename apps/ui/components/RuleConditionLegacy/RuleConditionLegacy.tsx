@@ -4,8 +4,9 @@
 'use client';
 
 import classNames from 'classnames';
-import { Operator } from 'shared-types';
+import type { Operator } from 'shared-types';
 import { Button, Select, SelectItem, Stack, TextInput } from '@carbon/react';
+import { ARRAY_VALUE_OPERATORS } from 'shared-constants';
 import { SubtractAlt } from '@carbon/icons-react';
 
 import styles from './RuleConditionLegacy.module.scss';
@@ -36,7 +37,7 @@ export function RuleConditionLegacy({
   values,
 }: RuleConditionLegacyProps) {
   const operators = Object.entries(operatorTranslation).filter(
-    ([value]) => value !== Operator.InList && value !== Operator.NotInList,
+    ([value]) => !ARRAY_VALUE_OPERATORS.includes(value as Operator),
   );
   return (
     <div className={classNames(styles.root, className)}>
