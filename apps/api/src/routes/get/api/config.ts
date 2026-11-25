@@ -4,8 +4,9 @@
 import type { FastifyInstance } from 'fastify';
 
 import { getPublicConfig } from '../../../utils/getAuthConfig.js';
+import { MODES } from '../../../utils/readIdentityConfig.js';
 
-const identityMode = { type: 'string', enum: ['local', 'external'] } as const;
+const identityMode = { type: 'string', enum: MODES } as const;
 
 const schema = {
   description: 'Public configuration the UI needs before anyone is signed in',

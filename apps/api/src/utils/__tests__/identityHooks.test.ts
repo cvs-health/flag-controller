@@ -49,6 +49,7 @@ describe('createIdentityHooks', () => {
     'beforeRemoveTeamMember',
     'beforeRemoveMember',
     'beforeCreateInvitation',
+    'beforeAcceptInvitation',
   ] as const)('%s', (hook) => {
     it('allows the write when IDENTITY_TEAMS_MODE=local', async () => {
       const hooks = hooksFor({ teams: 'local' });

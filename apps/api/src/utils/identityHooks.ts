@@ -37,6 +37,8 @@ export function createIdentityHooks(policy: IdentityPolicy) {
       beforeRemoveMember: refuseMemberships,
       // Accepting an invitation with a teamId adds team members without beforeAddTeamMember.
       beforeCreateInvitation: refuseMemberships,
+      // Refuses invitations created before teams became external.
+      beforeAcceptInvitation: refuseMemberships,
     },
   };
 }

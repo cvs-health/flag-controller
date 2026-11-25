@@ -5,7 +5,7 @@ import type { IdentityModes } from 'shared-types';
 
 import { fail, readBoolean, readChoice } from './authEnv.js';
 
-const MODES = ['local', 'external'] as const;
+export const MODES = ['local', 'external'] as const;
 
 /** `provisioned` lists the entities a configured source supplies, such as users from SCIM. */
 export function readIdentityConfig(provisioned: readonly (keyof IdentityModes)[] = []) {
