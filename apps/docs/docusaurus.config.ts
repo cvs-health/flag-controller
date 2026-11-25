@@ -10,7 +10,24 @@ import remarkFeatureFlaggedHeadings from './plugins/remark-feature-flagged-headi
 const config: Config = {
   title: 'Flag Controller',
   tagline: 'Controlled innovation at your fingertips',
-  favicon: 'img/favicon.svg',
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'icon',
+        href: '/img/favicon-light.svg',
+        media: '(prefers-color-scheme: light)',
+      },
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'icon',
+        href: '/img/favicon-dark.svg',
+        media: '(prefers-color-scheme: dark)',
+      },
+    },
+  ],
 
   // Set the production url of your site here
   url: process.env.DOCS_URL || 'https://flagcontroller-docs.DOMAIN-HERE.com/',
