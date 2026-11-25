@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Scope } from 'shared-types';
 
 import type { ColumnSorting, Pagination, QueryOptions } from '../../typings/api';
 import getSegments from '../requests/getSegments';
@@ -12,13 +13,14 @@ function useGetSegmentsQuery(
   search: string,
   pagination: Pagination,
   sort: ColumnSorting = 'updatedAt:desc',
+  scope: Scope = Scope.All,
   options: QueryOptions<typeof getSegments> = {},
 ) {
   return useQuery({
     ...options,
     placeholderData: keepPreviousData,
-    queryKey: [getSegmentsKey, search, pagination, sort],
-    queryFn: () => getSegments(pagination, search, sort),
+    queryKey: [getSegmentsKey, search, pagination, sort, scope],
+    queryFn: () => getSegments(pagination, search, sort, scope),
   });
 }
 

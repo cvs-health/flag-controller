@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import userEvent from '@testing-library/user-event';
+import { Scope } from 'shared-types';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 
 import TestProviders from '../../../test/TestProviders';
 import resolvePromiseWithData from '../../../test/resolvePromiseWithData';
+import { getSegmentsUrl } from '../../../api/requests/getSegments';
 import { SegmentsTable } from '../SegmentsTable';
 
 const mocks = vi.hoisted(() => ({
@@ -22,6 +24,7 @@ vi.mock('next/navigation', () => ({
 describe('SegmentsTable', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    mocks.searchParams = new URLSearchParams();
   });
 
   const segment = {
@@ -68,6 +71,39 @@ describe('SegmentsTable', () => {
     expect(await screen.findByRole('link', { name: segment.key })).toHaveAttribute(
       'href',
       `/applications/${segment.applicationName}/segments/${segment.key}`,
+    );
+    expect(fetch).toHaveBeenCalledWith(
+      `${process.env.API_BASE_URL}${getSegmentsUrl({ page: 1, rows: 10 }, '', 'updatedAt:desc', Scope.Me)}`,
+      expect.any(Object),
+    );
+  });
+
+  it('should pass the selected scope to the segments query', async () => {
+    const responsePayload = {
+      data: [segment],
+      metadata: {
+        page: 1,
+        records: 1,
+        rows: 10,
+        search: '',
+        sort: 'updatedAt:desc',
+        totalPages: 1,
+        totalRecords: 1,
+      },
+    };
+    mocks.searchParams = new URLSearchParams({ scope: Scope.All });
+    vi.spyOn(global, 'fetch').mockResolvedValueOnce(resolvePromiseWithData(responsePayload));
+
+    render(
+      <TestProviders>
+        <SegmentsTable />
+      </TestProviders>,
+    );
+
+    expect(await screen.findByRole('link', { name: segment.key })).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(
+      `${process.env.API_BASE_URL}${getSegmentsUrl({ page: 1, rows: 10 }, '', 'updatedAt:desc', Scope.All)}`,
+      expect.any(Object),
     );
   });
 
@@ -155,7 +191,7 @@ describe('SegmentsTable', () => {
     expect(mocks.replace).toHaveBeenCalledWith('/segments?page=2&rows=10', { scroll: false });
   });
 
-  it('should show empty state when no search results exist when fetching the segments', async () => {
+  it('should offer to search all segments when no results exist in my segments', async () => {
     const responsePayload = {
       data: [],
       metadata: {
@@ -168,7 +204,7 @@ describe('SegmentsTable', () => {
         totalRecords: 0,
       },
     };
-    mocks.searchParams.set('search', 'test');
+    mocks.searchParams = new URLSearchParams({ search: 'test', scope: Scope.Me });
     vi.spyOn(global, 'fetch').mockResolvedValue(resolvePromiseWithData(responsePayload));
 
     render(
@@ -177,6 +213,40 @@ describe('SegmentsTable', () => {
       </TestProviders>,
     );
 
-    expect(await screen.findByText('No results found')).toBeInTheDocument();
+    expect(await screen.findByText('No segments found')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'All segments' })).toHaveAttribute(
+      'href',
+      `/segments?search=test&scope=${Scope.All}`,
+    );
+    expect(screen.queryByText('Start by adding a segment')).not.toBeInTheDocument();
+  });
+
+  it('should show search guidance when no results exist in all segments', async () => {
+    mocks.searchParams = new URLSearchParams({ search: 'test', scope: Scope.All });
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      resolvePromiseWithData({
+        data: [],
+        metadata: {
+          page: 1,
+          records: 0,
+          rows: 10,
+          search: 'test',
+          sort: 'updatedAt:desc',
+          totalPages: 0,
+          totalRecords: 0,
+        },
+      }),
+    );
+
+    render(
+      <TestProviders>
+        <SegmentsTable />
+      </TestProviders>,
+    );
+
+    expect(await screen.findByText('No segments found')).toBeInTheDocument();
+    expect(screen.getByText("Try adjusting your search to find what you're looking for.")).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'All segments' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Start by adding a segment')).not.toBeInTheDocument();
   });
 });
