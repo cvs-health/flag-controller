@@ -31,6 +31,17 @@ export const FieldErrorCode = {
 
 export type FieldErrorCode = (typeof FieldErrorCode)[keyof typeof FieldErrorCode];
 
+/** Why the API rejected an SSO sign-in. Better Auth adds it to the login redirect as `?error=`. */
+export const SignInErrorCode = {
+  EmailNotVerified: 'sso_email_not_verified',
+  EmailDomainNotAllowed: 'sso_email_domain_not_allowed',
+  ClaimNotAllowed: 'sso_claim_not_allowed',
+  ExternalIdMissing: 'sso_external_id_missing',
+  ProtocolNotSupported: 'sso_protocol_not_supported',
+} as const;
+
+export type SignInErrorCode = (typeof SignInErrorCode)[keyof typeof SignInErrorCode];
+
 export interface ProblemFieldError {
   /** Dotted path to the offending input, e.g. `key` or `variations.0.value`. */
   field: string;

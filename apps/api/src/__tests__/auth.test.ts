@@ -90,6 +90,36 @@ describe('auth database hooks', () => {
     });
   });
 
+  describe('session create after hook', () => {
+    function hookContext(organization: { id: string } | null) {
+      return {
+        context: {
+          adapter: { findOne: vi.fn().mockResolvedValue(organization) },
+          internalAdapter: { updateSession: vi.fn() },
+        },
+      };
+    }
+
+    it("sets the default organization on the first user's session once it exists", async () => {
+      const ctx = hookContext({ id: 'org-1' });
+
+      await hooks.session.create.after({ ...session, token: 'token-1' }, ctx as never);
+
+      expect(ctx.context.internalAdapter.updateSession).toHaveBeenCalledExactlyOnceWith('token-1', {
+        activeOrganizationId: 'org-1',
+      });
+    });
+
+    it('leaves a session that already has an active organization alone', async () => {
+      const ctx = hookContext({ id: 'org-1' });
+
+      await hooks.session.create.after({ ...session, activeOrganizationId: 'org-1' }, ctx as never);
+
+      expect(ctx.context.adapter.findOne).not.toHaveBeenCalled();
+      expect(ctx.context.internalAdapter.updateSession).not.toHaveBeenCalled();
+    });
+  });
+
   describe('user create after hook', () => {
     it('adds the user to the default organization when it exists', async () => {
       mocks.getBySlug.mockResolvedValue({ id: 'org-1' });

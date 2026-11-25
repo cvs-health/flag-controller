@@ -10,6 +10,7 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   image: text('image'),
+  externalId: text('external_id').unique(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()
@@ -77,6 +78,17 @@ export const verifications = pgTable(
   },
   (table) => [index('verifications_identifier_idx').on(table.identifier)],
 );
+
+export const ssoProviders = pgTable('sso_providers', {
+  id: text('id').primaryKey(),
+  issuer: text('issuer').notNull(),
+  oidcConfig: text('oidc_config'),
+  samlConfig: text('saml_config'),
+  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  providerId: text('provider_id').notNull().unique(),
+  organizationId: text('organization_id'),
+  domain: text('domain').notNull(),
+});
 
 export const organizations = pgTable('organizations', {
   id: text('id').primaryKey(),

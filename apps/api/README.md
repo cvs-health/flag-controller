@@ -54,6 +54,7 @@ This is the one list of what the API needs to start. Everything else has a worki
 | `DATABASE_URL` | Always, unless you set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` and `DB_NAME` instead. |
 | `BETTER_AUTH_SECRET` | When `NODE_ENV=production`. Generate one with `openssl rand -base64 32`. |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | When `AUTH_PROVIDER=github`, which is the default. |
+| `SSO_ISSUER`, `SSO_CLIENT_ID`, `SSO_CLIENT_SECRET` | When `AUTH_PROVIDER=sso`. See [Setting up OpenID Connect (SSO)](#setting-up-openid-connect-sso). |
 
 Each sign-in provider adds its own row here as it is added.
 
@@ -188,10 +189,10 @@ The implementation is split across several files:
 
 In `src/auth.ts`, a `betterAuth` instance is created using the `better-auth/minimal` import with:
 
-- **Database**: A Drizzle adapter backed by a PostgreSQL connection pool, using a dedicated auth schema defined in `src/db/schema/auth.ts`. The option `usePlural: true` maps to plural table names (`users`, `sessions`, `accounts`, etc.).
-- **Plugins**: The `organization` plugin (with teams enabled) adds multi-tenancy support (organizations, teams, members, invitations).
-- **Social Providers**: The provider comes from `AUTH_PROVIDER` (default `github`), read once at startup by `src/utils/getAuthConfig.ts`. The variables each provider needs are listed under [Required variables](#required-variables). An unknown `AUTH_PROVIDER`, or a missing variable the provider needs, stops startup with a message naming the variable.
-- **Trusted Origins**: The UI origin (`http://localhost:3000`) is explicitly trusted.
+- **Database**: A Drizzle adapter backed by a PostgreSQL connection pool, using a dedicated auth schema defined in `src/db/schema/auth.ts`. The option `usePlural: true` maps to plural table names (`users`, `sessions`, `accounts`, etc.). Native transactions are on, which the SSO plugin requires. Database `after` hooks still run once the transaction commits.
+- **Plugins**: The `organization` plugin (with teams enabled) adds multi-tenancy support (organizations, teams, members, invitations). With `AUTH_PROVIDER=sso`, the `sso` plugin is added as well.
+- **Sign-in provider**: The provider comes from `AUTH_PROVIDER` (default `github`), read once at startup by `src/utils/getAuthConfig.ts`. The variables each provider needs are listed under [Required variables](#required-variables). OpenID Connect is described in [Setting up OpenID Connect (SSO)](#setting-up-openid-connect-sso). An unknown `AUTH_PROVIDER`, or a missing variable the provider needs, stops startup with a message naming the variable.
+- **Trusted Origins**: The UI origin (`http://localhost:3000`) is explicitly trusted. With SSO, the issuer's origin is trusted too, so the API can reach an IdP on a private network.
 
 #### Public configuration endpoint
 
@@ -205,7 +206,7 @@ In `src/auth.ts`, a `betterAuth` instance is created using the `better-auth/mini
 }
 ```
 
-The response never includes client ids or secrets.
+`kind` is `social` for GitHub and `oidc` for SSO, where `id` is `sso`. The response never includes client ids, secrets or the issuer.
 
 #### Setting up the GitHub OAuth App
 
@@ -216,6 +217,37 @@ The response never includes client ids or secrets.
 - [Scopes for OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps)
 - [Best practices for creating an OAuth app](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/best-practices-for-creating-an-oauth-app)
 - [better-auth GitHub provider](https://www.better-auth.com/docs/authentication/github)
+
+#### Setting up OpenID Connect (SSO)
+
+`AUTH_PROVIDER=sso` signs users in with any OpenID Connect identity provider, so no IdP needs its own code. Register a confidential web client in the IdP, then set:
+
+```bash
+AUTH_PROVIDER=sso
+SSO_ISSUER=https://login.microsoftonline.com/<tenant>/v2.0
+SSO_CLIENT_ID=...
+SSO_CLIENT_SECRET=...
+```
+
+The client's redirect URI is `<BETTER_AUTH_URL>/api/auth/sso/callback/sso`, for example `http://localhost:8080/api/auth/sso/callback/sso`. The optional variables are described in `.env.example`.
+
+At startup the API fetches `<SSO_ISSUER>/.well-known/openid-configuration`. If that fails, startup stops with the IdP's error.
+
+| IdP | `SSO_ISSUER` |
+| --- | --- |
+| Entra ID | `https://login.microsoftonline.com/<tenant>/v2.0` |
+| Okta | `https://<org>.okta.com` |
+| Google | `https://accounts.google.com` |
+| Keycloak | `https://<host>/realms/<realm>` |
+
+**How users are identified.** A user is matched by the IdP's stable subject, stored in `users.external_id`, and never by email. The subject is the `oid` claim, falling back to `sub` when the IdP sends no `oid`. Set `SSO_CLAIM_EXTERNAL_ID` to use a different claim. If an email address already belongs to another user, sign-in fails instead of merging the two. Name, email and picture are refreshed from the IdP at every sign-in.
+
+**Restricting sign-in.** `SSO_ALLOWED_EMAIL_DOMAINS` limits sign-in to exact email domains, and rejects an email the IdP marks as unverified. `SSO_ALLOWED_CLAIM` with `SSO_ALLOWED_CLAIM_VALUES` requires an ID token claim to hold one of the values, for example `hd` for a Google Workspace domain or `tid` for an Entra ID tenant. A rejected user is sent back to the login page with an error.
+
+The logic lives in `src/utils/getAuthConfig.ts` (configuration and discovery) and `src/utils/ssoUser.ts` (subject resolution and restrictions). Providers come only from the environment, and registering one through the API is disabled.
+
+- [better-auth SSO plugin](https://www.better-auth.com/docs/plugins/sso)
+- [OpenID Connect Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html)
 
 #### Auth route handler (passthrough to better-auth)
 
