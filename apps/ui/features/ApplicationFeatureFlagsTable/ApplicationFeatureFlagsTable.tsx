@@ -44,7 +44,6 @@ export function ApplicationFeatureFlagsTable({ applicationId }: ApplicationFeatu
     !getApplicationFeatureFlagsQuery.data?.data.length &&
     tableParams.search
   );
-  console.log('getApplicationFeatureFlagsQuery', getApplicationFeatureFlagsQuery.data);
   const reducedFlagsByIdentifier = featureFlagsTableData(getApplicationFeatureFlagsQuery.data?.data);
   const sortableHeaders = ['key', 'createdAt', 'updatedAt', 'type'];
   const rows = getApplicationFeatureFlagsQuery.isError ? [] : Object.values(reducedFlagsByIdentifier);
