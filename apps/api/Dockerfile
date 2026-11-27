@@ -27,7 +27,7 @@ COPY turbo.json turbo.json
 
 RUN pnpm turbo build --filter=flag-controller-api
 
-FROM gcr.io/distroless/nodejs24-debian13:latest AS runner
+FROM gcr.io/distroless/nodejs24-debian13:nonroot AS runner
 WORKDIR /app
 
 COPY --from=installer --chown="nonroot:nonroot" /app .

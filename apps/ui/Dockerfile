@@ -35,7 +35,7 @@ COPY --from=pruner /app/out/full/ .
 
 RUN pnpm turbo build --filter=flag-controller-ui...
 
-FROM gcr.io/distroless/nodejs24-debian13:latest AS runner
+FROM gcr.io/distroless/nodejs24-debian13:nonroot AS runner
 WORKDIR /app
 
 COPY --from=installer --chown="nonroot:nonroot" /app/apps/ui/next.config.js .
